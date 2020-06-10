@@ -81,6 +81,20 @@ function App({data}) {
           <Select options={cityOptions}/>
           <br/>
           <h4>Plant Types</h4>
+          <table className="table table-bordered table-sm">
+            <thead>
+              <th>Plant Type</th>
+              <th>Abbreviation</th>
+            </thead>
+            <tbody>
+              {data.plantTypes.map(pt => (
+                <tr key={pt.code}>
+                  <td>{pt.name}</td>
+                  <td>{pt.code}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
           {data.plantTypes.map(pt => (
             <div className="form-check" key={pt.code}>
               <input 
@@ -98,12 +112,30 @@ function App({data}) {
         <div className="col-md-6">
           <h4>Your Location</h4>
           <div>{lat + ", " + lng} {error}</div>
+
           <h4>Plant Names</h4>
           <div className="mb-1">Synchronous (slow)</div>
           <Select options={plantNameOptions}/>
           <div className="mb-1">Asynchronous (fast)</div>
           <AsyncSelect formatOptionLabel={formatPlantLabel} cacheOptions placeholder="Search plant names" loadOptions={plantNamePromiseOptions} noOptionsMessage={() => "No plant matches your search"}/>
+
           <h4>Water Use</h4>
+          <table className="table table-bordered table-sm">
+            <thead>
+              <th>Category</th>
+              <th>Abbreviation</th>
+              <th>Percentage of ET<sub>0</sub></th>
+            </thead>
+            <tbody>
+              {data.waterUseClassifications.map(pt => (
+                <tr key={pt.code}>
+                  <td>{pt.name}</td>
+                  <td>{pt.code}</td>
+                  <td>{pt.percentageET0}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
           {data.waterUseClassifications.map(pt => (
             <div className="form-check" key={pt.code}>
               <input 

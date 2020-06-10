@@ -4,6 +4,7 @@ import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
 import SimpleMap from './SimpleMap';
 import {useGeolocation} from '../src/useGeolocation';
+import { CSVLink, CSVDownload } from "react-csv";
 
 const groupBy = (xs, key) =>
   xs.reduce((rv, x) => {
@@ -24,6 +25,15 @@ function App({data}) {
     value: c.name,
     region: c.region
   }));
+
+  console.log(data.plants.slice(0,10))
+
+  const sampleCsvData = 
+    [
+      ["plant id", "common name", "botanical name"],
+      ...data.plants.slice(0,10)
+      .map(p => [p.id, p.commonName, p.botanicalName])
+    ];
 
   const plantTypeNameByCode = 
     data.plantTypes.reduce((dict,t) => { dict[t.code] = t.name;
@@ -75,6 +85,12 @@ function App({data}) {
       <h1>WUCOLS Database</h1>
       <strong>{data.plants.length} species and counting</strong>
       <hr/>
+      <CSVLink data={sampleCsvData}>Download spreadshet</CSVLink>
+      {/*
+      <CSVDownload data={sampleCsvData} target="_blank">Download spreadshet</CSVLink>
+      */}
+
+      <hr/>
       <div className="row">
         <div className="col-md-6">
           <h4>City</h4>
@@ -83,8 +99,10 @@ function App({data}) {
           <h4>Plant Types</h4>
           <table className="table table-bordered table-sm">
             <thead>
-              <th>Plant Type</th>
-              <th>Abbreviation</th>
+              <tr>
+                <th>Plant Type</th>
+                <th>Abbreviation</th>
+              </tr>
             </thead>
             <tbody>
               {data.plantTypes.map(pt => (
@@ -122,9 +140,11 @@ function App({data}) {
           <h4>Water Use</h4>
           <table className="table table-bordered table-sm">
             <thead>
-              <th>Category</th>
-              <th>Abbreviation</th>
-              <th>Percentage of ET<sub>0</sub></th>
+              <tr>
+                <th>Category</th>
+                <th>Abbreviation</th>
+                <th>Percentage of ET<sub>0</sub></th>
+              </tr>
             </thead>
             <tbody>
               {data.waterUseClassifications.map(pt => (

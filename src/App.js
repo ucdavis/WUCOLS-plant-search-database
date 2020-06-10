@@ -4,7 +4,10 @@ import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
 import SimpleMap from './SimpleMap';
 import {useGeolocation} from '../src/useGeolocation';
-import { CSVLink, CSVDownload } from "react-csv";
+import { CSVLink } from "react-csv";
+/*
+import { CSVDownload } from "react-csv";
+*/
 
 const groupBy = (xs, key) =>
   xs.reduce((rv, x) => {
@@ -28,17 +31,32 @@ function App({data}) {
 
   console.log(data.plants.slice(0,10))
 
-  const sampleCsvData = 
-    [
-      ["plant id", "common name", "botanical name"],
-      ...data.plants.slice(0,10)
-      .map(p => [p.id, p.commonName, p.botanicalName])
-    ];
-
   const plantTypeNameByCode = 
     data.plantTypes.reduce((dict,t) => { dict[t.code] = t.name;
       return dict;
     },{});
+
+  const waterUseByCode = 
+    data.waterUseClassifications.reduce((dict,t) => { 
+      dict[t.code] = t;
+      return dict;
+    },{});
+
+  const sampleRegion = 1;
+  const sampleCsvData = 
+    [
+      ["ID", "Type(s)", "Botanical Name", "Common Name","Water Use", "Percentage of ET0"],
+      ...data.plants.slice(0,10)
+      .map(p => [
+        p.id
+        ,p.types.map(t => plantTypeNameByCode[t]).join(', ')
+        ,p.botanicalName
+        ,p.commonName
+        ,waterUseByCode[p.waterUseByRegion[sampleRegion]].name
+        ,waterUseByCode[p.waterUseByRegion[sampleRegion]].percentageET0
+      ])
+    ];
+
 
   cityOptions = groupBy(cityOptions, c => "Region " + c.region)
   .map(g => ({label: g.key, options: g.values}))
@@ -85,11 +103,10 @@ function App({data}) {
       <h1>WUCOLS Database</h1>
       <strong>{data.plants.length} species and counting</strong>
       <hr/>
-      <CSVLink data={sampleCsvData}>Download spreadshet</CSVLink>
+      <CSVLink data={sampleCsvData} filename={`WUCOLS_Region_${sampleRegion}.csv`}>Download spreadshet</CSVLink>
       {/*
-      <CSVDownload data={sampleCsvData} target="_blank">Download spreadshet</CSVLink>
+      <CSVDownload data={sampleCsvData} target="_blank">Download spreadshet</CSVDownload>
       */}
-
       <hr/>
       <div className="row">
         <div className="col-md-6">

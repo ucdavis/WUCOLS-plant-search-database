@@ -3,6 +3,7 @@ import './App.css';
 import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
 import SimpleMap from './SimpleMap';
+import {useGeolocation} from '../src/useGeolocation';
 
 const groupBy = (xs, key) =>
   xs.reduce((rv, x) => {
@@ -17,6 +18,7 @@ const groupBy = (xs, key) =>
   }, []);
 
 function App({data}) {
+  const {lat,lng,error} = useGeolocation(false,{enableHighAccuracy: true});
   let cityOptions = data.cities.map(c => ({
     label: c.name,
     value: c.name,
@@ -94,6 +96,8 @@ function App({data}) {
           ))}
         </div>
         <div className="col-md-6">
+          <h4>Your Location</h4>
+          <div>{lat + ", " + lng} {error}</div>
           <h4>Plant Names</h4>
           <div className="mb-1">Synchronous (slow)</div>
           <Select options={plantNameOptions}/>

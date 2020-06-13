@@ -4,6 +4,7 @@ import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
 import SimpleMap from './SimpleMap';
 import {useGeolocation} from '../src/useGeolocation';
+import useLocalStorage from './useLocalStorage';
 import { CSVLink } from "react-csv";
 import PlantList from './PlantList';
 //import groupBy from './groupBy';
@@ -31,12 +32,8 @@ function App({data}) {
   */
   cityOptions = cityOptions.sort((a,b) => a.label > b.label ? 1 : a.label < b.label ? -1 : 0);
 
-  const [isFavoriteByPlantId, updateIsFavoriteByPlantId] = React.useState(JSON.parse(localStorage.getItem('isFavoriteByPlantId') || '{}'));
+  const [isFavoriteByPlantId, updateIsFavoriteByPlantId] = useLocalStorage('isFavoriteByPlantId', {});
   const favoritePlants = data.plants.filter(p => !!isFavoriteByPlantId[p.id]);
-
-  React.useEffect(() => {
-    localStorage.setItem('isFavoriteByPlantId',JSON.stringify(isFavoriteByPlantId));
-  }, [isFavoriteByPlantId]);
 
   const togglePlantFavorite = p => {
     updateIsFavoriteByPlantId({...isFavoriteByPlantId, [p.id]: !isFavoriteByPlantId[p.id]})
@@ -186,7 +183,25 @@ function App({data}) {
 
   return (
     <div className="App">
-      <h1>WUCOLS Database</h1>
+      <div className="row">
+        <div className="col-md-4">
+          <h1>WUCOLS Database</h1>
+        </div>
+        <div className="col-md-1">
+          <label className="form-control-label">
+            Your City:
+          </label>
+        </div>
+        <div className="col-md-4">
+          <Select 
+            options={cityOptions}
+            placeholder="Select a city"
+            autoFocus={true}
+            value={searchCriteria.city}
+            onChange={onCityChange}
+            noOptionsMessage={() => "No cities found by that name"}/>
+        </div>
+      </div>
       <div className="row">
         <div className="col-md-4">
           <strong>{data.plants.length} species and counting</strong>
@@ -204,16 +219,6 @@ function App({data}) {
       <hr/>
       <div className="row">
         <div className="col-md-3">
-          <h4>City</h4>
-          <Select 
-            options={cityOptions}
-            placeholder="Select a city"
-            autoFocus={true}
-            value={searchCriteria.city}
-            onChange={onCityChange}
-            noOptionsMessage={() => "No cities found by that name"}/>
-
-          <br/>
 
           <h4>Plant Name</h4>
           <input 

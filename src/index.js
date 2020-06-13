@@ -6,11 +6,14 @@ import * as serviceWorker from './serviceWorker';
 fetch("WUCOLS.json")
 .then(r => r.json())
 .then(d => {
+  d.plants.forEach(p => {
+    p.searchName = (p.commonName + ' ' + p.botanicalName).toLowerCase();
+  });
   console.log(d.plantTypes);
   console.log(d.waterUseClassifications);
   console.log(d.photos);
   ReactDOM.render(
-    <div className="container">
+    <div className="container-fluid">
       <App data={d} />
     </div>,
     document.getElementById('root')

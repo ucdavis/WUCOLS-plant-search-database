@@ -5,42 +5,111 @@ import AsyncSelect from 'react-select/async';
 import SimpleMap from './SimpleMap';
 import {useGeolocation} from '../src/useGeolocation';
 import { CSVLink } from "react-csv";
+import PlantList from './PlantList';
+//import groupBy from './groupBy';
 /*
 import { CSVDownload } from "react-csv";
 */
 
-const groupBy = (xs, key) =>
-  xs.reduce((rv, x) => {
-    let v = key instanceof Function ? key(x) : x[key];
-    let el = rv.find((r) => r && r.key === v);
-    if (el) {
-      el.values.push(x);
-    } else {
-      rv.push({ key: v, values: [x] });
-    }
-    return rv; 
-  }, []);
 
 function App({data}) {
   const {lat,lng,error} = useGeolocation(false,{enableHighAccuracy: true});
   let cityOptions = data.cities.map(c => ({
-    label: c.name,
+    id: c.id,
+    name: c.name,
+    label: "Region " + c.region + ": " + c.name,
     value: c.name,
     region: c.region
   }));
 
-  console.log(data.plants.slice(0,10))
+  data.plantTypes = data.plantTypes.sort((a,b) => 
+    a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
 
+  /*
+  cityOptions = groupBy(cityOptions, c => "Region " + c.region)
+  .map(g => ({label: g.key, options: g.values}));
+  */
+  cityOptions = cityOptions.sort((a,b) => a.label > b.label ? 1 : a.label < b.label ? -1 : 0);
+
+  const [isFavoriteByPlantId, updateIsFavoriteByPlantId] = React.useState(JSON.parse(localStorage.getItem('isFavoriteByPlantId') || '{}'));
+  const favoritePlants = data.plants.filter(p => !!isFavoriteByPlantId[p.id]);
+
+  React.useEffect(() => {
+    localStorage.setItem('isFavoriteByPlantId',JSON.stringify(isFavoriteByPlantId));
+  }, [isFavoriteByPlantId]);
+
+  const togglePlantFavorite = p => {
+    updateIsFavoriteByPlantId({...isFavoriteByPlantId, [p.id]: !isFavoriteByPlantId[p.id]})
+  };
+
+  const isPlantFavorite = p => !!isFavoriteByPlantId[p.id];
+
+  const [searchCriteria, updateSearchCriteria] = React.useState({
+    city: cityOptions[0],
+    name: '',
+    waterUseClassifications: {
+      'VL':true,
+      'LO': true,
+      'M': true,
+      'H': true,
+      '?': true,
+      '/': true
+    },
+    plantTypes: data.plantTypes.reduce((dict, pt) => {
+      dict[pt.code] = pt.code === 'A';
+      return dict;
+    },{})
+  });
+
+  //console.log(searchCriteria);
   const plantTypeNameByCode = 
-    data.plantTypes.reduce((dict,t) => { dict[t.code] = t.name;
+    data.plantTypes.reduce((dict,t) => { 
+      dict[t.code] = t.name;
       return dict;
     },{});
 
   const waterUseByCode = 
-    data.waterUseClassifications.reduce((dict,t) => { 
-      dict[t.code] = t;
+    data.waterUseClassifications.reduce((dict,wu) => { 
+      dict[wu.code] = wu;
       return dict;
     },{});
+
+  const sortValueByWaterUseCode = {
+    'VL': 1,
+    'LO': 2,
+    'M': 3,
+    'H': 4,
+    '?': 5,
+    '/': 6
+  };
+
+
+  const getWaterUseSortValue = code => {
+    return sortValueByWaterUseCode[code] || 99;
+  };
+
+  const matchingPlants = React.useMemo(
+    () => data.plants.filter(p => {
+      let typeOk = p.types.some(t => searchCriteria.plantTypes[t]);
+      let wu = p.waterUseByRegion[searchCriteria.city.region - 1];
+      let wuOk = searchCriteria.waterUseClassifications[wu];
+      let nameOk = !searchCriteria.name || p.searchName.indexOf(searchCriteria.name) > -1;
+      return wuOk && typeOk && nameOk;
+    })
+    .sort((plantA,plantB) => {
+      let a = getWaterUseSortValue(plantA.waterUseByRegion[searchCriteria.city.region - 1]);
+      let b = getWaterUseSortValue(plantB.waterUseByRegion[searchCriteria.city.region - 1]);
+      return a < b ? -1 : a > b ? 1 : 0;
+    })
+    .slice(0,10),
+    [data, searchCriteria]);
+
+
+  const onCityChange = (o) => {
+    //console.log('onCityChange',o);
+    updateSearchCriteria({...searchCriteria, city: o});
+  }
+
 
   const sampleRegion = 1;
   const sampleCsvData = 
@@ -56,11 +125,6 @@ function App({data}) {
         ,waterUseByCode[p.waterUseByRegion[sampleRegion]].percentageET0
       ])
     ];
-
-
-  cityOptions = groupBy(cityOptions, c => "Region " + c.region)
-  .map(g => ({label: g.key, options: g.values}))
-  .sort((a,b) => a.label > b.label ? 1 : a.label < b.label ? -1 : 0);
 
   let plantNameOptions = data.plants.map(p => ({
     ...p,
@@ -86,7 +150,9 @@ function App({data}) {
           <br/>
           {types.map(t =>
             <>
-              <span key={t} className="badge badge-secondary">{plantTypeNameByCode[t]}</span>
+              <span key={t} className="badge badge-secondary">
+                {plantTypeNameByCode[t]}
+              </span>
               {' '}
             </>
           )}
@@ -98,10 +164,118 @@ function App({data}) {
       
     </div>;
 
+  const plantTypeOptions = data.plantTypes.map(t => ({label: t.name, value: t.code, key: t.code}));
+
+  const isOptionSelected = o => {
+    //console.log(o,searchCriteria.plantTypes[o.value]);
+    return !!searchCriteria.plantTypes[o.value];
+  }
+
+  const setPlantType = (code,checked) => 
+    updateSearchCriteria({...searchCriteria, plantTypes: {...searchCriteria.plantTypes, [code]: checked}});
+
+  const selectAllPlantTypes = () => {
+    updateSearchCriteria({
+      ...searchCriteria,
+      plantTypes: data.plantTypes.reduce((dict, pt) => {
+        dict[pt.code] = true;
+        return dict;
+      },{})
+    });
+  };
+
   return (
     <div className="App">
       <h1>WUCOLS Database</h1>
-      <strong>{data.plants.length} species and counting</strong>
+      <div className="row">
+        <div className="col-md-4">
+          <strong>{data.plants.length} species and counting</strong>
+        </div>
+        <div className="col-md-4">
+          {
+            favoritePlants.length === 0 
+            ? "You don't have any favorites yet"
+            : favoritePlants.length === 1
+            ? "You have 1 favorite so far"
+            : `You have ${favoritePlants.length} favorites so far`
+          }
+        </div>
+      </div>
+      <hr/>
+      <div className="row">
+        <div className="col-md-3">
+          <h4>City</h4>
+          <Select 
+            options={cityOptions}
+            placeholder="Select a city"
+            autoFocus={true}
+            value={searchCriteria.city}
+            onChange={onCityChange}
+            noOptionsMessage={() => "No cities found by that name"}/>
+
+          <br/>
+
+          <h4>Plant Name</h4>
+          <input 
+            type="search"
+            className="form-control"
+            value={searchCriteria.name}
+            placeholder="botanical name or common name"
+            onChange={e => updateSearchCriteria({...searchCriteria, name: e.target.value.toLowerCase()}) }
+            />
+
+          <br/>
+
+          <h4>Water Use</h4>
+          {data.waterUseClassifications.map(wu => (
+            <div className="form-check" key={wu.code}>
+              <input 
+                className="form-check-input"
+                type="checkbox"
+                checked={searchCriteria.waterUseClassifications[wu.code]}
+                onChange={e => updateSearchCriteria({...searchCriteria, waterUseClassifications: {...searchCriteria.waterUseClassifications, [wu.code]: e.target.checked}}) }
+                id={wu.code + '_checkbox'}/>
+              <label
+                className="form-check-label"
+                htmlFor={wu.code + '_checkbox'}>
+                  {wu.name}
+              </label>
+            </div>
+          ))}
+
+          <br/>
+
+          <h4>Plant Types</h4> 
+          <button class="btn btn-sm btn-link" onClick={() => selectAllPlantTypes()}>Select all</button>
+          {data.plantTypes.map(pt => (
+            <div className="form-check" key={pt.code}>
+              <input 
+                className="form-check-input"
+                type="checkbox"
+                checked={searchCriteria.plantTypes[pt.code]}
+                onChange={e => setPlantType(pt.code,e.target.checked)}
+                id={pt.code + '_checkbox'}/>
+              <label
+                className="form-check-label"
+                htmlFor={pt.code + '_checkbox'}>
+                  {pt.name}
+              </label>
+            </div>
+          ))}
+
+        </div>
+        <div className="col-md-9">
+          <PlantList 
+            isPlantFavorite={isPlantFavorite}
+            togglePlantFavorite={togglePlantFavorite}
+            plants={matchingPlants} 
+            plantTypeNameByCode={plantTypeNameByCode} 
+            region={searchCriteria.city.region}
+            waterUseByCode={waterUseByCode}/>
+        </div>
+      </div>
+
+
       <hr/>
       <CSVLink data={sampleCsvData} filename={`WUCOLS_Region_${sampleRegion}.csv`}>Download spreadshet</CSVLink>
       {/*
@@ -130,11 +304,14 @@ function App({data}) {
               ))}
             </tbody>
           </table>
+          
           {data.plantTypes.map(pt => (
             <div className="form-check" key={pt.code}>
               <input 
                 className="form-check-input"
                 type="checkbox"
+                checked={searchCriteria.plantTypes[pt.code]}
+                onChange={e => updateSearchCriteria({...searchCriteria, plantTypes: {...searchCriteria.plantTypes, [pt.code]: e.target.checked}}) }
                 id={pt.code + '_checkbox'}/>
               <label
                 className="form-check-label"
@@ -173,56 +350,29 @@ function App({data}) {
               ))}
             </tbody>
           </table>
-          {data.waterUseClassifications.map(pt => (
-            <div className="form-check" key={pt.code}>
-              <input 
-                className="form-check-input"
-                type="checkbox"
-                id={pt.code + '_checkbox'}/>
-              <label
-                className="form-check-label"
-                htmlFor={pt.code + '_checkbox'}>
-                  {pt.name}
-              </label>
-            </div>
-          ))}
         </div>
       </div>
       <hr/>
-      <div className="row row-cols-1 row-cols-md-2">
-        {Object.keys(data.photos).map(pn => {
-          let p = data.photos[pn];
-          return (
-            <div className="col mb-4" key={pn}>
-              <div className="card">
-                <img className="card-img-top"
-                  src={p.large.url}
-                  alt={pn}/>
-                <div className="card-body">
-                  <h5 className="card-title">{pn}</h5>
+      {/*
+        <div className="row row-cols-1 row-cols-md-2">
+          {Object.keys(data.photos).map(pn => {
+            let p = data.photos[pn];
+            return (
+              <div className="col mb-4" key={pn}>
+                <div className="card">
+                  <img className="card-img-top"
+                    src={p.large.url}
+                    alt={pn}/>
+                  <div className="card-body">
+                    <h5 className="card-title">{pn}</h5>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
-      <ul className="list-unstyled">
-        {Object.keys(data.photos).map(pn => {
-          let p = data.photos[pn];
-          return (
-            <li className="media" key={pn}>
-              <img className="mr-3"
-                src={p.small.url}
-                height={p.small.height}
-                width={p.small.width} 
-                alt={pn}/>
-              <div className="media-body">
-                <h5 className="mt-0 mb-1">{pn}</h5>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+            );
+          })}
+        </div>
+      */}
+
       <hr/>
       <SimpleMap />
     </div>

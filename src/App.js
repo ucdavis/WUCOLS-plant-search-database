@@ -1,20 +1,22 @@
 import React from 'react';
 import './App.css';
 import Select from 'react-select';
-import AsyncSelect from 'react-select/async';
-import SimpleMap from './SimpleMap';
-import {useGeolocation} from '../src/useGeolocation';
+//import {useGeolocation} from '../src/useGeolocation';
 import useLocalStorage from './useLocalStorage';
-import { CSVLink } from "react-csv";
+import { CSVLink, CSVDownload } from "react-csv";
 import PlantList from './PlantList';
 //import groupBy from './groupBy';
-/*
-import { CSVDownload } from "react-csv";
-*/
 
+const getWaterUseSortValue = (() => {
+  const sortValueByWaterUseCode = { 'VL': 1, 'LO': 2, 'M': 3, 'H': 4, '?': 5, '/': 6 };
+  return code => {
+    return sortValueByWaterUseCode[code] || 99;
+  };
+})();
 
 function App({data}) {
-  const {lat,lng,error} = useGeolocation(false,{enableHighAccuracy: true});
+  //const {lat,lng,error} = useGeolocation(false,{enableHighAccuracy: true});
+  
   let cityOptions = data.cities.map(c => ({
     id: c.id,
     name: c.name,
@@ -22,6 +24,14 @@ function App({data}) {
     value: c.name,
     region: c.region
   }));
+  
+  const sortPlants = plants => {
+    return plants.sort((plantA,plantB) => {
+      let a = getWaterUseSortValue(plantA.waterUseByRegion[searchCriteria.city.region - 1]);
+      let b = getWaterUseSortValue(plantB.waterUseByRegion[searchCriteria.city.region - 1]);
+      return a < b ? -1 : a > b ? 1 : 0;
+    })
+  }
 
   data.plantTypes = data.plantTypes.sort((a,b) => 
     a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
@@ -31,15 +41,6 @@ function App({data}) {
   .map(g => ({label: g.key, options: g.values}));
   */
   cityOptions = cityOptions.sort((a,b) => a.label > b.label ? 1 : a.label < b.label ? -1 : 0);
-
-  const [isFavoriteByPlantId, updateIsFavoriteByPlantId] = useLocalStorage('isFavoriteByPlantId', {});
-  const favoritePlants = data.plants.filter(p => !!isFavoriteByPlantId[p.id]);
-
-  const togglePlantFavorite = p => {
-    updateIsFavoriteByPlantId({...isFavoriteByPlantId, [p.id]: !isFavoriteByPlantId[p.id]})
-  };
-
-  const isPlantFavorite = p => !!isFavoriteByPlantId[p.id];
 
   const [searchCriteria, updateSearchCriteria] = React.useState({
     city: cityOptions[0],
@@ -58,6 +59,16 @@ function App({data}) {
     },{})
   });
 
+  const [isFavoriteByPlantId, updateIsFavoriteByPlantId] = useLocalStorage('isFavoriteByPlantId', {});
+  const favoritePlants = sortPlants(data.plants.filter(p => !!isFavoriteByPlantId[p.id]));
+
+  const togglePlantFavorite = p => {
+    updateIsFavoriteByPlantId({...isFavoriteByPlantId, [p.id]: !isFavoriteByPlantId[p.id]})
+  };
+
+  const isPlantFavorite = p => !!isFavoriteByPlantId[p.id];
+
+
   //console.log(searchCriteria);
   const plantTypeNameByCode = 
     data.plantTypes.reduce((dict,t) => { 
@@ -71,33 +82,15 @@ function App({data}) {
       return dict;
     },{});
 
-  const sortValueByWaterUseCode = {
-    'VL': 1,
-    'LO': 2,
-    'M': 3,
-    'H': 4,
-    '?': 5,
-    '/': 6
-  };
-
-
-  const getWaterUseSortValue = code => {
-    return sortValueByWaterUseCode[code] || 99;
-  };
 
   const matchingPlants = React.useMemo(
-    () => data.plants.filter(p => {
+    () => sortPlants(data.plants.filter(p => {
       let typeOk = p.types.some(t => searchCriteria.plantTypes[t]);
       let wu = p.waterUseByRegion[searchCriteria.city.region - 1];
       let wuOk = searchCriteria.waterUseClassifications[wu];
       let nameOk = !searchCriteria.name || p.searchName.indexOf(searchCriteria.name) > -1;
       return wuOk && typeOk && nameOk;
-    })
-    .sort((plantA,plantB) => {
-      let a = getWaterUseSortValue(plantA.waterUseByRegion[searchCriteria.city.region - 1]);
-      let b = getWaterUseSortValue(plantB.waterUseByRegion[searchCriteria.city.region - 1]);
-      return a < b ? -1 : a > b ? 1 : 0;
-    })
+    }))
     .slice(0,10),
     [data, searchCriteria]);
 
@@ -108,21 +101,21 @@ function App({data}) {
   }
 
 
-  const sampleRegion = 1;
-  const sampleCsvData = 
+  const favoritesCsvData = 
     [
       ["ID", "Type(s)", "Botanical Name", "Common Name","Water Use", "Percentage of ET0"],
-      ...data.plants.slice(0,10)
+      ...favoritePlants
       .map(p => [
         p.id
         ,p.types.map(t => plantTypeNameByCode[t]).join(', ')
         ,p.botanicalName
         ,p.commonName
-        ,waterUseByCode[p.waterUseByRegion[sampleRegion]].name
-        ,waterUseByCode[p.waterUseByRegion[sampleRegion]].percentageET0
+        ,waterUseByCode[p.waterUseByRegion[searchCriteria.city.region]].name
+        ,waterUseByCode[p.waterUseByRegion[searchCriteria.city.region]].percentageET0
       ])
     ];
 
+  /*
   let plantNameOptions = data.plants.map(p => ({
     ...p,
     label: p.botanicalName + ' / ' + p.commonName,
@@ -137,7 +130,6 @@ function App({data}) {
       let matchingPlants = plantNameOptions.filter(p => p.label.toLowerCase().indexOf(term) > -1);
       resolve(matchingPlants);
     });
-    
   const formatPlantLabel = ({commonName, botanicalName, waterUseByRegion, types}, context) => 
     <div key={commonName}>
       {commonName} {' '} <i>({botanicalName})</i>
@@ -155,21 +147,22 @@ function App({data}) {
           )}
         </>
       }
-      {/*
       {types.map(t => <><span className="badge badge-secondary">{t}</span>{' '}</>)}
-      */}
-      
     </div>;
-
-  const plantTypeOptions = data.plantTypes.map(t => ({label: t.name, value: t.code, key: t.code}));
-
-  const isOptionSelected = o => {
-    //console.log(o,searchCriteria.plantTypes[o.value]);
-    return !!searchCriteria.plantTypes[o.value];
-  }
+  */
 
   const setPlantType = (code,checked) => 
     updateSearchCriteria({...searchCriteria, plantTypes: {...searchCriteria.plantTypes, [code]: checked}});
+
+  const selectAllWaterUseClassifications = () => {
+    updateSearchCriteria({
+      ...searchCriteria,
+      waterUseClassifications: data.waterUseClassifications.reduce((dict, wu) => {
+        dict[wu.code] = true;
+        return dict;
+      },{})
+    });
+  };
 
   const selectAllPlantTypes = () => {
     updateSearchCriteria({
@@ -183,203 +176,131 @@ function App({data}) {
 
   return (
     <div className="App">
-      <div className="row">
-        <div className="col-md-4">
-          <h1>WUCOLS Database</h1>
-        </div>
-        <div className="col-md-1">
-          <label className="form-control-label">
-            Your City:
-          </label>
-        </div>
-        <div className="col-md-4">
-          <Select 
-            options={cityOptions}
-            placeholder="Select a city"
-            autoFocus={true}
-            value={searchCriteria.city}
-            onChange={onCityChange}
-            noOptionsMessage={() => "No cities found by that name"}/>
-        </div>
-      </div>
-      <div className="row">
-        <div className="col-md-4">
-          <strong>{data.plants.length} species and counting</strong>
-        </div>
-        <div className="col-md-4">
-          {
-            favoritePlants.length === 0 
-            ? "You don't have any favorites yet"
-            : favoritePlants.length === 1
-            ? "You have 1 favorite so far"
-            : `You have ${favoritePlants.length} favorites so far`
-          }
-        </div>
-      </div>
-      <hr/>
-      <div className="row">
-        <div className="col-md-3">
+      <nav class="navbar navbar-dark bg-dark sticky-top navbar-light bg-light">
+        <a class="navbar-brand" href="https://ucanr.edu/sites/wucols">WUCOLS Plant Search Database</a>
 
-          <h4>Plant Name</h4>
-          <input 
-            type="search"
-            className="form-control"
-            value={searchCriteria.name}
-            placeholder="botanical name or common name"
-            onChange={e => updateSearchCriteria({...searchCriteria, name: e.target.value.toLowerCase()}) }
-            />
+        <form className="form-inline">
+          <div className="form-group">
+            <span className="navbar-text mr-3">
+              {
+                favoritePlants.length === 0 
+                ? "You don't have any favorites yet."
+                : favoritePlants.length === 1
+                ? "You have 1 favorite so far."
+                : `You have ${favoritePlants.length} favorites so far.`
+              }
+              {' '}
+            </span>
+            {
+              !!favoritePlants.length
+              &&
+              <CSVLink
+                data={favoritesCsvData}
+                filename={`WUCOLS_Region_${searchCriteria.city.name}.csv`}>
+                  Download as a spreadshet
+              </CSVLink>
+            }
+          </div>
+        </form>
 
-          <br/>
-
-          <h4>Water Use</h4>
-          {data.waterUseClassifications.map(wu => (
-            <div className="form-check" key={wu.code}>
+        <form className="form-inline">
+          <div className="form-group" style={{width:'350px'}}>
+            <label className="navbar-text mr-2">Your City: </label>
+            <Select 
+              styles={{
+                container: base => ({
+                  ...base,
+                  flex: 1
+                })
+              }}
+              options={cityOptions}
+              placeholder="Select a city"
+              autoFocus={true}
+              value={searchCriteria.city}
+              onChange={onCityChange}
+              noOptionsMessage={() => "No cities found by that name"}/>
+          </div>
+        </form>
+      </nav>
+      <div className="container-fluid">
+        <div className="row">
+          <nav className="col-md-3 sidebar bg-light">
+            <div className="sidebar-sticky p-3"  >
+              <p>{data.plants.length} species and counting</p>
+              <h4>Plant Name</h4>
               <input 
-                className="form-check-input"
-                type="checkbox"
-                checked={searchCriteria.waterUseClassifications[wu.code]}
-                onChange={e => updateSearchCriteria({...searchCriteria, waterUseClassifications: {...searchCriteria.waterUseClassifications, [wu.code]: e.target.checked}}) }
-                id={wu.code + '_checkbox'}/>
-              <label
-                className="form-check-label"
-                htmlFor={wu.code + '_checkbox'}>
-                  {wu.name}
-              </label>
-            </div>
-          ))}
+                type="search"
+                className="form-control"
+                value={searchCriteria.name}
+                placeholder="botanical name or common name"
+                onChange={e => updateSearchCriteria({...searchCriteria, name: e.target.value.toLowerCase()}) }
+                />
 
-          <br/>
+              <br/>
 
-          <h4>Plant Types</h4> 
-          <button class="btn btn-sm btn-link" onClick={() => selectAllPlantTypes()}>Select all</button>
-          {data.plantTypes.map(pt => (
-            <div className="form-check" key={pt.code}>
-              <input 
-                className="form-check-input"
-                type="checkbox"
-                checked={searchCriteria.plantTypes[pt.code]}
-                onChange={e => setPlantType(pt.code,e.target.checked)}
-                id={pt.code + '_checkbox'}/>
-              <label
-                className="form-check-label"
-                htmlFor={pt.code + '_checkbox'}>
-                  {pt.name}
-              </label>
-            </div>
-          ))}
-
-        </div>
-        <div className="col-md-9">
-          <PlantList 
-            isPlantFavorite={isPlantFavorite}
-            togglePlantFavorite={togglePlantFavorite}
-            plants={matchingPlants} 
-            plantTypeNameByCode={plantTypeNameByCode} 
-            region={searchCriteria.city.region}
-            waterUseByCode={waterUseByCode}/>
-        </div>
-      </div>
-
-
-      <hr/>
-      <CSVLink data={sampleCsvData} filename={`WUCOLS_Region_${sampleRegion}.csv`}>Download spreadshet</CSVLink>
-      {/*
-      <CSVDownload data={sampleCsvData} target="_blank">Download spreadshet</CSVDownload>
-      */}
-      <hr/>
-      <div className="row">
-        <div className="col-md-6">
-          <h4>City</h4>
-          <Select options={cityOptions}/>
-          <br/>
-          <h4>Plant Types</h4>
-          <table className="table table-bordered table-sm">
-            <thead>
-              <tr>
-                <th>Plant Type</th>
-                <th>Abbreviation</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.plantTypes.map(pt => (
-                <tr key={pt.code}>
-                  <td>{pt.name}</td>
-                  <td>{pt.code}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          
-          {data.plantTypes.map(pt => (
-            <div className="form-check" key={pt.code}>
-              <input 
-                className="form-check-input"
-                type="checkbox"
-                checked={searchCriteria.plantTypes[pt.code]}
-                onChange={e => updateSearchCriteria({...searchCriteria, plantTypes: {...searchCriteria.plantTypes, [pt.code]: e.target.checked}}) }
-                id={pt.code + '_checkbox'}/>
-              <label
-                className="form-check-label"
-                htmlFor={pt.code + '_checkbox'}>
-                  {pt.name}
-              </label>
-            </div>
-          ))}
-        </div>
-        <div className="col-md-6">
-          <h4>Your Location</h4>
-          <div>{lat + ", " + lng} {error}</div>
-
-          <h4>Plant Names</h4>
-          <div className="mb-1">Synchronous (slow)</div>
-          <Select options={plantNameOptions}/>
-          <div className="mb-1">Asynchronous (fast)</div>
-          <AsyncSelect formatOptionLabel={formatPlantLabel} cacheOptions placeholder="Search plant names" loadOptions={plantNamePromiseOptions} noOptionsMessage={() => "No plant matches your search"}/>
-
-          <h4>Water Use</h4>
-          <table className="table table-bordered table-sm">
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th>Abbreviation</th>
-                <th>Percentage of ET<sub>0</sub></th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.waterUseClassifications.map(pt => (
-                <tr key={pt.code}>
-                  <td>{pt.name}</td>
-                  <td>{pt.code}</td>
-                  <td>{pt.percentageET0}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <hr/>
-      {/*
-        <div className="row row-cols-1 row-cols-md-2">
-          {Object.keys(data.photos).map(pn => {
-            let p = data.photos[pn];
-            return (
-              <div className="col mb-4" key={pn}>
-                <div className="card">
-                  <img className="card-img-top"
-                    src={p.large.url}
-                    alt={pn}/>
-                  <div className="card-body">
-                    <h5 className="card-title">{pn}</h5>
-                  </div>
+              <button
+                className="btn btn-sm btn-link float-right"
+                onClick={() => selectAllWaterUseClassifications()}>
+                  Select all
+              </button>
+              <h4>Water Use</h4>
+              {data.waterUseClassifications.map(wu => (
+                <div className="form-check" key={wu.code}>
+                  <input 
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={searchCriteria.waterUseClassifications[wu.code]}
+                    onChange={e => updateSearchCriteria({...searchCriteria, waterUseClassifications: {...searchCriteria.waterUseClassifications, [wu.code]: e.target.checked}}) }
+                    id={wu.code + '_checkbox'}/>
+                  <label
+                    className="form-check-label"
+                    htmlFor={wu.code + '_checkbox'}>
+                      {wu.name}
+                  </label>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      */}
+              ))}
 
-      <hr/>
-      <SimpleMap />
+              <br/>
+
+              <button
+                className="btn btn-sm btn-link float-right"
+                onClick={() => selectAllPlantTypes()}>
+                  Select all
+              </button>
+              <h4>Plant Types</h4> 
+              {data.plantTypes.map(pt => (
+                <div className="form-check" key={pt.code}>
+                  <input 
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={searchCriteria.plantTypes[pt.code]}
+                    onChange={e => setPlantType(pt.code,e.target.checked)}
+                    id={pt.code + '_checkbox'}/>
+                  <label
+                    className="form-check-label"
+                    htmlFor={pt.code + '_checkbox'}>
+                      {pt.name}
+                  </label>
+                </div>
+              ))}
+            </div>
+
+          </nav>
+
+          <main className="col-md-9 ml-sm-auto" role="main">
+              <p>
+                Matching Plants: {matchingPlants.length}
+              </p>
+            <PlantList 
+              isPlantFavorite={isPlantFavorite}
+              togglePlantFavorite={togglePlantFavorite}
+              plants={matchingPlants} 
+              plantTypeNameByCode={plantTypeNameByCode} 
+              region={searchCriteria.city.region}
+              waterUseByCode={waterUseByCode}/>
+          </main>
+        </div>
+      </div>
     </div>
   );
 }

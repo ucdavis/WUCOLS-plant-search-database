@@ -13,9 +13,7 @@ fetch("WUCOLS.json")
   console.log(d.waterUseClassifications);
   console.log(d.photos);
   ReactDOM.render(
-    <div className="container-fluid">
-      <App data={d} />
-    </div>,
+    <App data={d} />,
     document.getElementById('root')
   );
 });

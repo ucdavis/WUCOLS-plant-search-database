@@ -111,8 +111,8 @@ function App({data}) {
         ,p.types.map(t => plantTypeNameByCode[t]).join(', ')
         ,p.botanicalName
         ,p.commonName
-        ,waterUseByCode[p.waterUseByRegion[searchCriteria.city.region]].name
-        ,waterUseByCode[p.waterUseByRegion[searchCriteria.city.region]].percentageET0 + '%'
+        ,waterUseByCode[p.waterUseByRegion[searchCriteria.city.region-1]].name
+        ,waterUseByCode[p.waterUseByRegion[searchCriteria.city.region-1]].percentageET0 + '%'
       ])
     ];
 
@@ -208,7 +208,7 @@ function App({data}) {
       </nav>
       <div className="container-fluid">
         <div className="row">
-          <nav className="col-md-3 sidebar bg-light">
+          <nav className="col-sm-4 col-lg-3 col-xl-2 sidebar bg-light">
             <div className="sidebar-sticky p-3"  >
               <p>{data.plants.length} species and counting</p>
 
@@ -295,7 +295,7 @@ function App({data}) {
 
           </nav>
 
-          <main className="col-md-9 ml-sm-auto" role="main">
+          <main className="col-sm-8 col-lg-9 col-xl-10 ml-sm-auto" role="main">
               <p>
                 Matching Plants: {matchingPlants.length}
               </p>

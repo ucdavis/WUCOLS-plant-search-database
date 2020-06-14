@@ -29,7 +29,7 @@ const PlantList = ({plants,plantTypeNameByCode,waterUseByCode,region,isPlantFavo
       let wuCode = p.waterUseByRegion[region-1];
       let wu = waterUseByCode[wuCode];
       return (
-        <div className="col-md-6" key={p.id}>
+        <div className="col-sm-12 col-lg-6 col-xl-4" key={p.id}>
           <div className="card mr-2 mb-2">
             <div className="row no-gutters">
               <div className="col-md-4">
@@ -37,7 +37,13 @@ const PlantList = ({plants,plantTypeNameByCode,waterUseByCode,region,isPlantFavo
                     title={isPlantFavorite(p) 
                       ? "This plant is in your favorites.  Click to remove it."
                       : "Click to add this plant to your favorites."}
-                    style={{position:'absolute',top:'5px',right:'5px',color:'unset'}}
+                    style={{
+                      position:'absolute',
+                      top:'10px',
+                      right:'10px',
+                      color:'unset',
+                      borderRadius:'100%'
+                    }}
                     className={"float-left btn " + (isPlantFavorite(p) ? " btn-light" : "btn-link active")} 
                     onClick={() => togglePlantFavorite(p)}>
                     {isPlantFavorite(p)
@@ -67,7 +73,7 @@ const PlantList = ({plants,plantTypeNameByCode,waterUseByCode,region,isPlantFavo
                     </div>
                     */}
                   </div>
-                  <h5 className="mt-0 mb-1"><em>{p.botanicalName}</em></h5>
+                  <h6 className="mt-0 mb-1"><em>{p.botanicalName}</em></h6>
                   <div>
                     {p.commonName}
                   </div>

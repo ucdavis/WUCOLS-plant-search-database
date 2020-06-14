@@ -3,8 +3,10 @@ import './App.css';
 import Select from 'react-select';
 //import {useGeolocation} from '../src/useGeolocation';
 import useLocalStorage from './useLocalStorage';
-import { CSVLink, CSVDownload } from "react-csv";
+import { CSVLink } from "react-csv";
 import PlantList from './PlantList';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faFileExcel } from '@fortawesome/free-solid-svg-icons'
 //import groupBy from './groupBy';
 
 const getWaterUseSortValue = (() => {
@@ -68,7 +70,6 @@ function App({data}) {
 
   const isPlantFavorite = p => !!isFavoriteByPlantId[p.id];
 
-
   //console.log(searchCriteria);
   const plantTypeNameByCode = 
     data.plantTypes.reduce((dict,t) => { 
@@ -111,7 +112,7 @@ function App({data}) {
         ,p.botanicalName
         ,p.commonName
         ,waterUseByCode[p.waterUseByRegion[searchCriteria.city.region]].name
-        ,waterUseByCode[p.waterUseByRegion[searchCriteria.city.region]].percentageET0
+        ,waterUseByCode[p.waterUseByRegion[searchCriteria.city.region]].percentageET0 + '%'
       ])
     ];
 
@@ -176,12 +177,12 @@ function App({data}) {
 
   return (
     <div className="App">
-      <nav class="navbar navbar-dark bg-dark sticky-top navbar-light bg-light">
-        <a class="navbar-brand" href="https://ucanr.edu/sites/wucols">WUCOLS Plant Search Database</a>
+      <nav className="navbar navbar-dark bg-dark sticky-top navbar-light bg-light">
+        <a className="navbar-brand" href="https://ucanr.edu/sites/wucols">WUCOLS Plant Search Database</a>
 
         <form className="form-inline">
           <div className="form-group">
-            <span className="navbar-text mr-3">
+            <span className="text-light mr-3">
               {
                 favoritePlants.length === 0 
                 ? "You don't have any favorites yet."
@@ -195,30 +196,13 @@ function App({data}) {
               !!favoritePlants.length
               &&
               <CSVLink
+                className="btn btn-success"
                 data={favoritesCsvData}
-                filename={`WUCOLS_Region_${searchCriteria.city.name}.csv`}>
-                  Download as a spreadshet
+                filename={`WUCOLS_${searchCriteria.city.name}.csv`}>
+                  <FontAwesomeIcon icon={faFileExcel} className="mr-2"/>
+                  Download as a spreadsheet
               </CSVLink>
             }
-          </div>
-        </form>
-
-        <form className="form-inline">
-          <div className="form-group" style={{width:'350px'}}>
-            <label className="navbar-text mr-2">Your City: </label>
-            <Select 
-              styles={{
-                container: base => ({
-                  ...base,
-                  flex: 1
-                })
-              }}
-              options={cityOptions}
-              placeholder="Select a city"
-              autoFocus={true}
-              value={searchCriteria.city}
-              onChange={onCityChange}
-              noOptionsMessage={() => "No cities found by that name"}/>
           </div>
         </form>
       </nav>
@@ -227,62 +211,86 @@ function App({data}) {
           <nav className="col-md-3 sidebar bg-light">
             <div className="sidebar-sticky p-3"  >
               <p>{data.plants.length} species and counting</p>
-              <h4>Plant Name</h4>
-              <input 
-                type="search"
-                className="form-control"
-                value={searchCriteria.name}
-                placeholder="botanical name or common name"
-                onChange={e => updateSearchCriteria({...searchCriteria, name: e.target.value.toLowerCase()}) }
-                />
 
-              <br/>
+              <div className="form-group">
+                <label>City/Region</label>
+                <Select 
+                  styles={{
+                    container: base => ({
+                      ...base,
+                      flex: 1
+                    })
+                  }}
+                  options={cityOptions}
+                  placeholder="Select a city"
+                  autoFocus={true}
+                  value={searchCriteria.city}
+                  onChange={onCityChange}
+                  noOptionsMessage={() => "No cities found by that name"}/>
+              </div>
 
-              <button
-                className="btn btn-sm btn-link float-right"
-                onClick={() => selectAllWaterUseClassifications()}>
-                  Select all
-              </button>
-              <h4>Water Use</h4>
-              {data.waterUseClassifications.map(wu => (
-                <div className="form-check" key={wu.code}>
-                  <input 
-                    className="form-check-input"
-                    type="checkbox"
-                    checked={searchCriteria.waterUseClassifications[wu.code]}
-                    onChange={e => updateSearchCriteria({...searchCriteria, waterUseClassifications: {...searchCriteria.waterUseClassifications, [wu.code]: e.target.checked}}) }
-                    id={wu.code + '_checkbox'}/>
-                  <label
-                    className="form-check-label"
-                    htmlFor={wu.code + '_checkbox'}>
-                      {wu.name}
-                  </label>
-                </div>
-              ))}
+              <div className="form-group">
+                <label>Plant Name</label>
+                <input 
+                  type="search"
+                  className="form-control"
+                  value={searchCriteria.name}
+                  placeholder="botanical name or common name"
+                  onChange={e => updateSearchCriteria({...searchCriteria, name: e.target.value.toLowerCase()}) }
+                  />
+              </div>
 
-              <br/>
+              <div className="form-group">
+                <button
+                  className="btn btn-sm btn-link float-right"
+                  onClick={() => selectAllWaterUseClassifications()}>
+                    Select all
+                </button>
 
-              <button
-                className="btn btn-sm btn-link float-right"
-                onClick={() => selectAllPlantTypes()}>
-                  Select all
-              </button>
-              <h4>Plant Types</h4> 
-              {data.plantTypes.map(pt => (
-                <div className="form-check" key={pt.code}>
-                  <input 
-                    className="form-check-input"
-                    type="checkbox"
-                    checked={searchCriteria.plantTypes[pt.code]}
-                    onChange={e => setPlantType(pt.code,e.target.checked)}
-                    id={pt.code + '_checkbox'}/>
-                  <label
-                    className="form-check-label"
-                    htmlFor={pt.code + '_checkbox'}>
-                      {pt.name}
-                  </label>
-                </div>
-              ))}
+                <label>Water Use</label>
+
+                {data.waterUseClassifications.map(wu => (
+                  <div className="form-check" key={wu.code}>
+                    <input 
+                      className="form-check-input"
+                      type="checkbox"
+                      checked={searchCriteria.waterUseClassifications[wu.code]}
+                      onChange={e => updateSearchCriteria({...searchCriteria, waterUseClassifications: {...searchCriteria.waterUseClassifications, [wu.code]: e.target.checked}}) }
+                      id={wu.code + '_checkbox'}/>
+                    <label
+                      className="form-check-label"
+                      htmlFor={wu.code + '_checkbox'}>
+                        {wu.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
+
+              <div className="form-group">
+                <button
+                  className="btn btn-sm btn-link float-right"
+                  onClick={() => selectAllPlantTypes()}>
+                    Select all
+                </button>
+
+                <label>Plant Types</label> 
+
+                {data.plantTypes.map(pt => (
+                  <div className="form-check" key={pt.code}>
+                    <input 
+                      className="form-check-input"
+                      type="checkbox"
+                      checked={searchCriteria.plantTypes[pt.code]}
+                      onChange={e => setPlantType(pt.code,e.target.checked)}
+                      id={pt.code + '_checkbox'}/>
+                    <label
+                      className="form-check-label"
+                      htmlFor={pt.code + '_checkbox'}>
+                        {pt.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
 
           </nav>

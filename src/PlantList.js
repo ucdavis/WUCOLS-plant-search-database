@@ -1,108 +1,83 @@
 import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHeart, faTint } from '@fortawesome/free-solid-svg-icons'
+import PlantTypeBadge from './PlantTypeBadge';
+import WaterDropRating from './WaterDropRating';
+import PlantFavoriteButton from './PlantFavoriteButton';
+import {
+  Link
+} from "react-router-dom";
 
-
-const FavoriteIcon = () => <FontAwesomeIcon icon={faHeart} />;
-const DropIcon = ({filled}) => 
-  <span style={{opacity:filled ? 1 : 0.3, color: filled ? '#007bff' : 'grey', padding: '0 2px'}}>
-    <FontAwesomeIcon icon={faTint} />
-  </span>;
-
-const dropRatingByWaterUseCode = (() => {
-  let d = <DropIcon />; 
-  let D = <DropIcon filled={true} />;
-  //let d = <span role="img" aria-label="empty-water-drop" style={{opacity:0.3}}>💧</span>;
-  //let D = <span role="img" aria-label="full-water-drop">💧</span>;
-  return {
-    'VL': <>{D}{d}{d}{d}</>,
-    'LO': <>{D}{D}{d}{d}</>,
-    'M':  <>{D}{D}{D}{d}</>,
-    'H':  <>{D}{D}{D}{D}</>
-  };
-})();
-
-
-const PlantList = ({plants,plantTypeNameByCode,waterUseByCode,region,isPlantFavorite,togglePlantFavorite}) =>
-  <div className="row no-gutters">
-    {plants.map(p => {
-      let wuCode = p.waterUseByRegion[region-1];
-      let wu = waterUseByCode[wuCode];
-      return (
-        <div className="col-sm-12 col-lg-6 col-xl-4" key={p.id}>
-          <div className="card mr-2 mb-2">
-            <div className="row no-gutters">
-              <div className="col-md-4">
-                  <button 
-                    title={isPlantFavorite(p) 
-                      ? "This plant is in your favorites.  Click to remove it."
-                      : "Click to add this plant to your favorites."}
-                    style={{
-                      position:'absolute',
-                      top:'10px',
-                      right:'10px',
-                      color:'unset',
-                      borderRadius:'100%'
-                    }}
-                    className={"float-left btn " + (isPlantFavorite(p) ? " btn-light" : "btn-link active")} 
-                    onClick={() => togglePlantFavorite(p)}>
-                    {isPlantFavorite(p)
-                    ? <span style={{color:'red'}}><FavoriteIcon/></span>
-                    : <span style={{opacity:0.3}}><FavoriteIcon/></span>}
-
-                  </button>
-                  <img className="card-img"
-                    src={"https://via.placeholder.com/200"}
-                    alt={p.botanicalName}/>
-              </div>
-              <div className="col-md-8">
-                <div className="card-body">
-                  <div className="float-right text-right ml-3">
-                    {dropRatingByWaterUseCode[wu.code]}
-                    <br/>
-                    <small>
-                      {wu.name}
-                    </small>
-                    <br/>
-                    <small>
-                    {wu.percentageET0}% ET<sub>0</sub>
-                    </small>
-                    {/*
-                    <div>
-                      <input type="checkbox" checked={isPlantFavorite(p)} onChange={() => togglePlantFavorite(p)}/>
+const PlantList = ({className, plants,photosByPlantName,plantTypeNameByCode,waterUseByCode,region,isPlantFavorite,togglePlantFavorite}) =>
+{
+  return (
+    <div className="row no-gutters">
+      {plants.map(p => {
+        const imageSize = '150px';
+        let wu = waterUseByCode[p.waterUseByRegion[region-1]];
+        let photoUrl = !photosByPlantName[p.botanicalName] ? "https://via.placeholder.com/200" : photosByPlantName[p.botanicalName].large.url;
+        return (
+          <div className={className} key={p.id}>
+            <div className="card mr-2 mb-2">
+              <div className="d-flex">
+                <div className="d-flex-shrink-0">
+                  <div style={{position:'relative'}}>
+                    <div
+                      style={{
+                        position:'absolute',
+                        top:'10px',
+                        right:'10px',
+                        color:'unset'
+                      }}
+                    >
+                      <PlantFavoriteButton {...{plant: p,togglePlantFavorite,isPlantFavorite  }} />
                     </div>
-                    */}
+                    <img className="card-img"
+                      style={{width:imageSize,height:imageSize,background:`url(${photoUrl})`, backgroundSize:'cover'}}
+                      src={photoUrl}
+                      alt={p.botanicalName}/>
                   </div>
-                  <h6 className="mt-0 mb-1"><em>{p.botanicalName}</em></h6>
-                  <div>
-                    {p.commonName}
-                  </div>
-                  <div>
-                    {p.types.map(t =>
-                      <span key={t}>
-                        <span className="badge badge-plantType">
-                          {/*
-                          🌻💮🌺✽✾✿🎕
-                          🌼🌸🌹❁❃❋🌴𐇲
-                          🌷❀⚘𐇵🍀☘🌱🍁
-                          */}
-                         {t === 'A' && <span role="img" aria-label="flower">
-                          🌸
-                          {' '}
-                          </span>}
-                          {plantTypeNameByCode[t]}
-                        </span>
-                        {' '}
-                      </span>
-                    )}
+                </div>
+                <div className="d-flex-grow-1 ml-3 flex-fill">
+                  <div className="card-body">
+                    <div className="float-right text-right ml-3">
+                      <WaterDropRating waterUseCode={wu.code}/>
+                      <br/>
+                      <small>
+                        {wu.name}
+                      </small>
+                      <br/>
+                      <small>
+                      {wu.percentageET0}% ET<sub>0</sub>
+                      </small>
+
+                      {/*
+                      <div>
+                        <input type="checkbox" checked={isPlantFavorite(p)} onChange={() => togglePlantFavorite(p)}/>
+                      </div>
+                      */}
+                    </div>
+                    <Link to={`/plant/${p.id}`}>
+                      <h6 className="mt-0 mb-1"><em>{p.botanicalName}</em></h6>
+                    </Link>
+                    <div>
+                      {p.commonName}
+                    </div>
+                    <div>
+                      {p.types.map(t =>
+                        <PlantTypeBadge
+                          plantTypeNameByCode={plantTypeNameByCode}
+                          type={t}
+                          key={t}/>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div> 
-      );
-    })}
-  </div>;
+          </div> 
+        );
+      })}
+    </div>
+  );
+};
 
-  export default PlantList;
+export default PlantList;

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import { ToastProvider } from 'react-toast-notifications'
 fetch("WUCOLS.json")
 .then(r => r.json())
 .then(d => {
@@ -13,7 +14,13 @@ fetch("WUCOLS.json")
   console.log(d.waterUseClassifications);
   console.log(d.photos);
   ReactDOM.render(
-    <App data={d} />,
+    <ToastProvider
+      autoDismiss
+      placement="bottom-center"
+      autoDismissTimeout={6000}
+    >
+      <App data={d} />
+    </ToastProvider>,
     document.getElementById('root')
   );
 });

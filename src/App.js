@@ -1,13 +1,26 @@
 import React from 'react';
 import './App.css';
-import Select from 'react-select';
 //import {useGeolocation} from '../src/useGeolocation';
 import useLocalStorage from './useLocalStorage';
 import { CSVLink } from "react-csv";
 import PlantList from './PlantList';
+import PlantTable from './PlantTable';
+import PlantDetail from './PlantDetail';
+import SearchForm from './SearchForm';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFileExcel } from '@fortawesome/free-solid-svg-icons'
+import { faFileExcel, faTh, faThLarge, faBars, faSearch, faStar, faLeaf, faQrcode, faIdCard, faIdCardAlt} from '@fortawesome/free-solid-svg-icons'
+import {
+  BrowserRouter,
+  HashRouter as Router,
+  Route,
+  NavLink,
+  Redirect,
+  Switch,
+  useLocation
+} from "react-router-dom";
 //import groupBy from './groupBy';
+import SimpleReactLightbox from 'simple-react-lightbox'
+import { useToasts } from 'react-toast-notifications'
 
 const getWaterUseSortValue = (() => {
   const sortValueByWaterUseCode = { 'VL': 1, 'LO': 2, 'M': 3, 'H': 4, '?': 5, '/': 6 };
@@ -16,8 +29,31 @@ const getWaterUseSortValue = (() => {
   };
 })();
 
+
 function App({data}) {
   //const {lat,lng,error} = useGeolocation(false,{enableHighAccuracy: true});
+  let plantsViewModes = [
+    {
+      id: 'list',
+      label: 'List',
+      component: PlantTable,
+      icon: faBars
+    },
+    {
+      id:'grid',
+      label: 'Grid',
+      component: (props) => PlantList({...props, className: 'col-sm-12 col-lg-6 col-xl-6'}),
+      icon: faThLarge
+    },
+    {
+      id:'dense-grid',
+      label: 'Dense Grid',
+      component: (props) => PlantList({...props, className: 'col-sm-12 col-lg-6 col-xl-4'}),
+      icon: faTh
+    }
+  ];
+  const [plantsViewModeId, setPlantsViewModeId] = React.useState(plantsViewModes[0].id);
+  const plantsViewMode = plantsViewModes.filter(vm => vm.id === plantsViewModeId)[0] || plantsViewModes[0];
   
   let cityOptions = data.cities.map(c => ({
     id: c.id,
@@ -43,30 +79,51 @@ function App({data}) {
   .map(g => ({label: g.key, options: g.values}));
   */
   cityOptions = cityOptions.sort((a,b) => a.label > b.label ? 1 : a.label < b.label ? -1 : 0);
+   
+  const autoSearch = false;
 
   const [searchCriteria, updateSearchCriteria] = React.useState({
     city: cityOptions[0],
     name: '',
-    waterUseClassifications: {
-      'VL':true,
-      'LO': true,
-      'M': true,
-      'H': true,
-      '?': true,
-      '/': true
-    },
+    waterUseClassifications: data.waterUseClassifications.reduce((dict,wu) => {
+      dict[wu.code] = autoSearch ? wu.code === 'VL' : false;
+      return dict;
+    },{}),
     plantTypes: data.plantTypes.reduce((dict, pt) => {
-      dict[pt.code] = pt.code === 'A';
+      dict[pt.code] = autoSearch ? pt.code === 'A' : false;
       return dict;
     },{})
   });
+  const searchPerformed = 
+    Object.values(searchCriteria.waterUseClassifications).some(b => b)
+    || Object.values(searchCriteria.plantTypes).some(b => b);
 
   const [isFavoriteByPlantId, updateIsFavoriteByPlantId] = useLocalStorage('isFavoriteByPlantId', {});
   const favoritePlants = sortPlants(data.plants.filter(p => !!isFavoriteByPlantId[p.id]));
 
-  const togglePlantFavorite = p => {
-    updateIsFavoriteByPlantId({...isFavoriteByPlantId, [p.id]: !isFavoriteByPlantId[p.id]})
-  };
+  const { addToast, removeToast } = useToasts()
+  function togglePlantFavorite(p) {
+    let isFavoriteNow = !isFavoriteByPlantId[p.id];
+    updateIsFavoriteByPlantId({...isFavoriteByPlantId, [p.id]: isFavoriteNow});
+    let thisToastId = undefined;
+    addToast((
+      <div>
+        Plant {isFavoriteNow ? 'added to' : 'removed from'} favorites
+        <button className="btn btn-link" onClick={() => {
+          updateIsFavoriteByPlantId({...isFavoriteByPlantId, [p.id]: !isFavoriteNow});
+          removeToast(thisToastId);
+          //togglePlantFavorite(p);
+        }}>
+          UNDO
+        </button>
+      </div>), {
+      appearance: 'info',
+      transitionState: 'entered',
+      autoDismiss: true
+    }, toastId => {
+      thisToastId = toastId;
+    });
+  }
 
   const isPlantFavorite = p => !!isFavoriteByPlantId[p.id];
 
@@ -83,7 +140,6 @@ function App({data}) {
       return dict;
     },{});
 
-
   const matchingPlants = React.useMemo(
     () => sortPlants(data.plants.filter(p => {
       let typeOk = p.types.some(t => searchCriteria.plantTypes[t]);
@@ -94,13 +150,6 @@ function App({data}) {
     }))
     .slice(0,10),
     [data, searchCriteria]);
-
-
-  const onCityChange = (o) => {
-    //console.log('onCityChange',o);
-    updateSearchCriteria({...searchCriteria, city: o});
-  }
-
 
   const favoritesCsvData = 
     [
@@ -116,200 +165,218 @@ function App({data}) {
       ])
     ];
 
-  /*
-  let plantNameOptions = data.plants.map(p => ({
-    ...p,
-    label: p.botanicalName + ' / ' + p.commonName,
-    value: p.id
-  }));
-  let plantNamePromiseOptions = inputValue =>
-    new Promise(resolve => {
-      if(inputValue.length < 3){
-        resolve([]);
-      }
-      let term = inputValue.toLowerCase();
-      let matchingPlants = plantNameOptions.filter(p => p.label.toLowerCase().indexOf(term) > -1);
-      resolve(matchingPlants);
-    });
-  const formatPlantLabel = ({commonName, botanicalName, waterUseByRegion, types}, context) => 
-    <div key={commonName}>
-      {commonName} {' '} <i>({botanicalName})</i>
-      { context === 'value'
-      ? <></>
-      : <>
-          <br/>
-          {types.map(t =>
-            <>
-              <span key={t} className="badge badge-secondary">
-                {plantTypeNameByCode[t]}
-              </span>
-              {' '}
-            </>
-          )}
-        </>
-      }
-      {types.map(t => <><span className="badge badge-secondary">{t}</span>{' '}</>)}
-    </div>;
-  */
-
-  const setPlantType = (code,checked) => 
-    updateSearchCriteria({...searchCriteria, plantTypes: {...searchCriteria.plantTypes, [code]: checked}});
-
-  const selectAllWaterUseClassifications = () => {
-    updateSearchCriteria({
-      ...searchCriteria,
-      waterUseClassifications: data.waterUseClassifications.reduce((dict, wu) => {
-        dict[wu.code] = true;
-        return dict;
-      },{})
-    });
-  };
-
-  const selectAllPlantTypes = () => {
-    updateSearchCriteria({
-      ...searchCriteria,
-      plantTypes: data.plantTypes.reduce((dict, pt) => {
-        dict[pt.code] = true;
-        return dict;
-      },{})
-    });
-  };
-
   return (
-    <div className="App">
-      <nav className="navbar navbar-dark bg-dark sticky-top navbar-light bg-light">
-        <a className="navbar-brand" href="https://ucanr.edu/sites/wucols">WUCOLS Plant Search Database</a>
+    <Router>
+      <div className="App">
+        <nav className="navbar navbar-dark bg-dark sticky-top navbar-light bg-light d-flex justify-content-between">
+          <a className="navbar-brand" href="https://ucanr.edu/sites/wucols">WUCOLS Plant Search Database</a>
 
-        <form className="form-inline">
-          <div className="form-group">
-            <span className="text-light mr-3">
+          <div className="btn-group">
+            {[
               {
-                favoritePlants.length === 0 
-                ? "You don't have any favorites yet."
-                : favoritePlants.length === 1
-                ? "You have 1 favorite so far."
-                : `You have ${favoritePlants.length} favorites so far.`
+                label: 'Search',
+                icon: faSearch,
+                to: '/search'
+              },
+              {
+                label: `Favorites (${favoritePlants.length})`,
+                icon: faStar,
+                to: '/favorites'
               }
-              {' '}
-            </span>
-            {
-              !!favoritePlants.length
-              &&
-              <CSVLink
-                className="btn btn-success"
-                data={favoritesCsvData}
-                filename={`WUCOLS_${searchCriteria.city.name}.csv`}>
-                  <FontAwesomeIcon icon={faFileExcel} className="mr-2"/>
-                  Download as a spreadsheet
-              </CSVLink>
-            }
+
+            ].map(vm => 
+              <NavLink activeClassName="active" className="btn btn-outline-light" to={vm.to}>
+                <FontAwesomeIcon icon={vm.icon} />
+                <span className="ml-2">
+                  {vm.label}
+                </span>
+              </NavLink>
+            )}
           </div>
-        </form>
-      </nav>
-      <div className="container-fluid">
-        <div className="row">
-          <nav className="col-sm-4 col-lg-3 col-xl-2 sidebar bg-light">
-            <div className="sidebar-sticky p-3"  >
-              <p>{data.plants.length} species and counting</p>
 
-              <div className="form-group">
-                <label>City/Region</label>
-                <Select 
-                  styles={{
-                    container: base => ({
-                      ...base,
-                      flex: 1
-                    })
-                  }}
-                  options={cityOptions}
-                  placeholder="Select a city"
-                  autoFocus={true}
-                  value={searchCriteria.city}
-                  onChange={onCityChange}
-                  noOptionsMessage={() => "No cities found by that name"}/>
-              </div>
-
-              <div className="form-group">
-                <label>Plant Name</label>
-                <input 
-                  type="search"
-                  className="form-control"
-                  value={searchCriteria.name}
-                  placeholder="botanical name or common name"
-                  onChange={e => updateSearchCriteria({...searchCriteria, name: e.target.value.toLowerCase()}) }
-                  />
-              </div>
-
-              <div className="form-group">
-                <button
-                  className="btn btn-sm btn-link float-right"
-                  onClick={() => selectAllWaterUseClassifications()}>
-                    Select all
+          <div>
+            <span className="mr-3 text-light">
+              View plants in a
+            </span>
+            <div className="btn-group">
+              {plantsViewModes.map(vm => 
+                <button className={'btn btn-outline-light' + (vm.id === plantsViewModeId ? ' active' : '')} onClick={() => {
+                  setPlantsViewModeId(vm.id);
+                }}>
+                  <FontAwesomeIcon icon={vm.icon} />
+                  <span className="ml-2">
+                    {vm.label}
+                  </span>
                 </button>
-
-                <label>Water Use</label>
-
-                {data.waterUseClassifications.map(wu => (
-                  <div className="form-check" key={wu.code}>
-                    <input 
-                      className="form-check-input"
-                      type="checkbox"
-                      checked={searchCriteria.waterUseClassifications[wu.code]}
-                      onChange={e => updateSearchCriteria({...searchCriteria, waterUseClassifications: {...searchCriteria.waterUseClassifications, [wu.code]: e.target.checked}}) }
-                      id={wu.code + '_checkbox'}/>
-                    <label
-                      className="form-check-label"
-                      htmlFor={wu.code + '_checkbox'}>
-                        {wu.name}
-                    </label>
-                  </div>
-                ))}
-              </div>
-
-              <div className="form-group">
-                <button
-                  className="btn btn-sm btn-link float-right"
-                  onClick={() => selectAllPlantTypes()}>
-                    Select all
-                </button>
-
-                <label>Plant Types</label> 
-
-                {data.plantTypes.map(pt => (
-                  <div className="form-check" key={pt.code}>
-                    <input 
-                      className="form-check-input"
-                      type="checkbox"
-                      checked={searchCriteria.plantTypes[pt.code]}
-                      onChange={e => setPlantType(pt.code,e.target.checked)}
-                      id={pt.code + '_checkbox'}/>
-                    <label
-                      className="form-check-label"
-                      htmlFor={pt.code + '_checkbox'}>
-                        {pt.name}
-                    </label>
-                  </div>
-                ))}
-              </div>
+              )}
             </div>
+          </div>
+        </nav>
+        <Route exact={true} path="/">
+          <Redirect to="/search" />
+        </Route>
+        <Route path="/plant/:plantId" render={({match}) => {
+          let plant = data.plants.filter(p => p.id == match.params.plantId || p.url_keyword == match.params.plantId)[0];
+          return !plant 
+            ? <div>No plant found by that ID</div>
+            : <div className="container-fluid">
+                <SimpleReactLightbox>
+                  <PlantDetail {...{
+                    plant,
+                    photos: data.photos[plant.botanicalName] || [],
+                    plantTypeNameByCode,
+                    waterUseByCode,
+                    waterUseClassifications: data.waterUseClassifications,
+                    region: searchCriteria.city.region,
+                    togglePlantFavorite,
+                    isPlantFavorite,
+                    regions: data.regions
+                  }} />
+                </SimpleReactLightbox>
+              </div>;
+        }}/>
+        <Route exact={true} path="/favorites">
+          <div className="container-fluid">
+            {!favoritePlants.length 
+            ? <div className="py-5">
+                <div className="text-center mb-5">
+                  <div className="h3">You do not have any favorite species yet</div>
+                  <p>
+                    After you have added some favorites, you can download them in various formats.
+                  </p>
+                </div>
+                <div className="d-flex justify-content-around">
+                  {[
+                    {
+                      icon: faFileExcel,
+                      label: 'Spreadsheet'
+                    },
+                    {
+                      icon: faQrcode,
+                      label:'QR Codes'
+                    },
+                    {
+                      icon: faIdCard,
+                      label:'Bench Cards'
+                    }
+                  ].map(f => 
+                    <div className="">
+                    <div className="card">
+                      <div className="card-body text-center">
+                        <FontAwesomeIcon icon={f.icon} className="mt-2 h1"/>
+                        <div className="h5">
+                          {f.label}
+                        </div>
+                      </div>
+                    </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            : 
+            <div className="row">
+              <nav className="col-sm-4 col-lg-3 col-xl-2 sidebar bg-light">
+                <div className="sidebar-sticky p-3"  >
+                  {
+                    !!favoritePlants.length
+                    && (
+                      <div className="mb-3 d-flex flex-column justify-content-around">
+                        {[
+                          <CSVLink
+                            className="btn btn-success btn-block"
+                            data={favoritesCsvData}
+                            filename={`WUCOLS_${searchCriteria.city.name}.csv`}>
+                              <FontAwesomeIcon icon={faFileExcel} className="mr-2"/>
+                              Download as a spreadsheet
+                          </CSVLink>,
+                          <button className="btn btn-success btn-block" onClick={() => alert('Not yet available')}>
+                            <FontAwesomeIcon icon={faQrcode} className="mr-2"/>
+                            Download QR codes
+                          </button>,
+                          <button className="btn btn-success btn-block" onClick={() => alert('Not yet available')}>
+                            <FontAwesomeIcon icon={faIdCard} className="mr-2"/>
+                            Download Bench Cards
+                          </button>
+                        ].map(c => <div className="my-2">{c}</div>)}
+                      </div>
+                    )
+                  }
+                </div>
+              </nav>
+              <div className="col-sm-8 col-lg-9 col-xl-10 ml-sm-auto">
+                  <div className="my-3">
+                    {
+                      favoritePlants.length === 0 
+                      ? "You don't have any favorites yet."
+                      : favoritePlants.length === 1
+                      ? "You have 1 favorite so far."
+                      : (<div>You have <strong>{favoritePlants.length}</strong> favorites so far.</div>)
+                    }
+                  </div>
+                <plantsViewMode.component 
+                  isPlantFavorite={isPlantFavorite}
+                  togglePlantFavorite={togglePlantFavorite}
+                  plants={favoritePlants} 
+                  photosByPlantName={data.photos}
+                  plantTypeNameByCode={plantTypeNameByCode} 
+                  region={searchCriteria.city.region}
+                  waterUseByCode={waterUseByCode}/>
+              </div>
+            </div>}
+          </div>
+        </Route>
+        <Route exact={true} path="/search">
+          <div className="container-fluid">
+            <div className="row">
+              <nav className="col-sm-4 col-lg-3 col-xl-2 sidebar bg-light">
+                <div className="sidebar-sticky p-3"  >
+                  <p>{data.plants.length} species and counting</p>
 
-          </nav>
+                  <SearchForm
+                    waterUseClassifications={data.waterUseClassifications}
+                    plantTypes={data.plantTypes}
+                    cityOptions={cityOptions}
+                    searchCriteria={searchCriteria}
+                    updateSearchCriteria={updateSearchCriteria}/>
+                </div>
 
-          <main className="col-sm-8 col-lg-9 col-xl-10 ml-sm-auto" role="main">
-              <p>
-                Matching Plants: {matchingPlants.length}
-              </p>
-            <PlantList 
-              isPlantFavorite={isPlantFavorite}
-              togglePlantFavorite={togglePlantFavorite}
-              plants={matchingPlants} 
-              plantTypeNameByCode={plantTypeNameByCode} 
-              region={searchCriteria.city.region}
-              waterUseByCode={waterUseByCode}/>
-          </main>
-        </div>
+              </nav>
+
+              <main className="col-sm-8 col-lg-9 col-xl-10 ml-sm-auto" role="main">
+                {!searchPerformed 
+                ? 
+                  <div className="text-center my-5">
+                    <div className="display-4">Welcome</div>
+                    <p className="lead my-4">
+                      To begin, select a city and perform a search.
+                    </p>
+                    <FontAwesomeIcon icon={faLeaf} className="display-4 text-success mr-3"/>
+                    <FontAwesomeIcon icon={faSearch} className="display-4"/>
+                    <br/>
+                  </div>
+
+                : <>
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                      <div>
+                        Matching Plants: {matchingPlants.length}
+                      </div>
+                    </div>
+                    <plantsViewMode.component 
+                      isPlantFavorite={isPlantFavorite}
+                      togglePlantFavorite={togglePlantFavorite}
+                      plants={matchingPlants} 
+                      photosByPlantName={data.photos}
+                      plantTypeNameByCode={plantTypeNameByCode} 
+                      region={searchCriteria.city.region}
+                      waterUseByCode={waterUseByCode}/>
+                  </>
+                }
+              </main>
+            </div>
+          </div>
+        </Route>
       </div>
-    </div>
+    </Router>
   );
 }
 

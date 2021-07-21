@@ -17,11 +17,11 @@ const SearchForm = ({
     const setPlantType = (code,checked) => 
       updateSearchCriteria({...searchCriteria, plantTypes: {...searchCriteria.plantTypes, [code]: checked}});
 
-    const selectAllWaterUseClassifications = () => {
+    const selectAllWaterUseClassifications = (selected) => {
       updateSearchCriteria({
         ...searchCriteria,
         waterUseClassifications: waterUseClassifications.reduce((dict, wu) => {
-          dict[wu.code] = true;
+          dict[wu.code] = selected;
           return dict;
         },{})
       });
@@ -30,11 +30,11 @@ const SearchForm = ({
       //console.log('onCityChange',o);
       updateSearchCriteria({...searchCriteria, city: o});
     }
-    const selectAllPlantTypes = () => {
+    const selectAllPlantTypes = (selected) => {
       updateSearchCriteria({
         ...searchCriteria,
         plantTypes: plantTypes.reduce((dict, pt) => {
-          dict[pt.code] = true;
+          dict[pt.code] = selected;
           return dict;
         },{})
       });
@@ -42,7 +42,7 @@ const SearchForm = ({
     return (
       <div>
         <div className="form-group">
-          <label>City/Region</label>
+          <label><strong>City/Region</strong></label>
           <Select 
             styles={{
               container: base => ({
@@ -59,7 +59,7 @@ const SearchForm = ({
         </div>
 
         <div className="form-group">
-          <label>Plant Name</label>
+          <label><strong>Plant Name</strong></label>
           <input 
             type="search"
             className="form-control"
@@ -70,13 +70,20 @@ const SearchForm = ({
         </div>
 
         <div className="form-group">
-          <button
-            className="btn btn-sm btn-link float-right"
-            onClick={() => selectAllWaterUseClassifications()}>
-              Select all
-          </button>
+          <label className="form-label"><strong>Water Use</strong></label>
+          <div>
+            <button
+              className="btn btn-sm btn-link"
+              onClick={() => selectAllWaterUseClassifications(true)}>
+                Select all
+            </button>
+            / <button
+              className="btn btn-sm btn-link"
+              onClick={() => selectAllWaterUseClassifications(false)}>
+                Deselect all
+            </button>
 
-          <label>Water Use</label>
+          </div>
 
           {waterUseClassifications.map(wu => (
             <div className="form-check" key={wu.code}>
@@ -96,13 +103,21 @@ const SearchForm = ({
         </div>
 
         <div className="form-group">
-          <button
-            className="btn btn-sm btn-link float-right"
-            onClick={() => selectAllPlantTypes()}>
-              Select all
-          </button>
+          <label className="form-label"><strong>Plant Types</strong></label> 
+          <div>
+            <button
+              className="btn btn-sm btn-link"
+              onClick={() => selectAllPlantTypes(true)}>
+                Select all
+            </button>
+            /
+            <button
+              className="btn btn-sm btn-link"
+              onClick={() => selectAllPlantTypes(false)}>
+                Deselect all
+            </button>
+          </div>
 
-          <label>Plant Types</label> 
 
           {plantTypes.map(pt => (
             <div className="form-check" key={pt.code}>

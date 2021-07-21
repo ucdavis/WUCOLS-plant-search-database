@@ -21,7 +21,8 @@
     "react-scripts": "3.4.1",
     "react-select": "^3.1.0",
     "react-toast-notifications": "^2.4.4",
-    "simple-react-lightbox": "^3.6.6"
+    "simple-react-lightbox": "^3.6.6",
+    "ultimate-pagination": "^1.0.0"
   },
   "scripts": {
     "start": "react-scripts start",

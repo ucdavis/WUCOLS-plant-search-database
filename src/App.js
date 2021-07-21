@@ -10,8 +10,9 @@ import PlantDetail from './PlantDetail';
 import SearchForm from './SearchForm';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFileExcel, faTh, faThLarge, faBars, faSearch, faStar, faLeaf, faQrcode, faIdCard, faIdCardAlt, faCaretDown} from '@fortawesome/free-solid-svg-icons'
+import ultimatePagination from 'ultimate-pagination';
 
-import { DropdownButton,Dropdown } from 'react-bootstrap';
+import { DropdownButton,Dropdown,Pagination } from 'react-bootstrap';
 
 import ReactExport from 'react-export-excel';
 import {
@@ -27,6 +28,8 @@ import {
 import SimpleReactLightbox from 'simple-react-lightbox'
 import { useToasts } from 'react-toast-notifications'
 
+const performancePlantLimit = 50000;
+
 const getWaterUseSortValue = (() => {
   const sortValueByWaterUseCode = { 'VL': 1, 'LO': 2, 'M': 3, 'H': 4, '?': 5, '/': 6 };
   return code => {
@@ -36,6 +39,7 @@ const getWaterUseSortValue = (() => {
 
 function App({data}) {
   //const {lat,lng,error} = useGeolocation(false,{enableHighAccuracy: true});
+
   let plantsViewModes = [
     {
       id: 'list',
@@ -143,9 +147,43 @@ function App({data}) {
         let nameOk = !searchCriteria.name || p.searchName.indexOf(searchCriteria.name) > -1;
         return wuOk && typeOk && nameOk;
       }))
-      .slice(0,50);
+      .slice(0,performancePlantLimit);
     },
     [data, searchCriteria]);
+
+const [currentPageNumber,setCurrentPageNumber] = React.useState(1);
+const pageSize = 50;
+const pageCount = Math.floor(matchingPlants.length/pageSize);
+var paginationModel = ultimatePagination.getPaginationModel({
+  // Required
+  currentPage: currentPageNumber,
+  totalPages: pageCount,
+ 
+  // Optional
+  boundaryPagesRange: 1,
+  siblingPagesRange: 1,
+  hideEllipsis: false,
+  hidePreviousAndNextPageLinks: false,
+  hideFirstAndLastPageLinks: false
+});
+console.log('pagination',paginationModel);
+
+const actualPagination = 
+  <Pagination>
+    {paginationModel.map(p => {
+      const props = {
+        key: p.key,
+        active: p.isActive,
+        onClick: () => setCurrentPageNumber(p.value)
+      };
+      switch(p.type){
+        //case 'PREVIOUS_PAGE_LINK': return <Pagination.Prev {...props}/>
+        //case 'NEXT_PAGE_LINK'    : return <Pagination.Next {...props}/>
+        case 'PAGE'              : return <Pagination.Item {...props}>{p.value}</Pagination.Item>
+        case 'ELLIPSIS'          : return <Pagination.Ellipsis {...props}/>
+      }
+    })}
+  </Pagination>;
 
 const favoriteAsSpreadsheets = (data,searchCriteria,favoritePlants) => {
   const csv = 
@@ -460,14 +498,16 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
                         Matching Plants: {matchingPlants.length}
                       </div>
                     </div>
+                    {actualPagination}
                     <plantsViewMode.component 
                       isPlantFavorite={isPlantFavorite}
                       togglePlantFavorite={togglePlantFavorite}
-                      plants={matchingPlants} 
+                      plants={matchingPlants.slice(currentPageNumber*pageSize, (currentPageNumber+1)*pageSize)} 
                       photosByPlantName={data.photos}
                       plantTypeNameByCode={data.plantTypeNameByCode} 
                       region={searchCriteria.city.region}
                       waterUseByCode={data.waterUseByCode}/>
+                    {actualPagination}
                   </>
                 }
               </main>

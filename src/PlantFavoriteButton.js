@@ -13,7 +13,7 @@ const PlantFavoriteButton = ({plant,togglePlantFavorite,isPlantFavorite}) => {
       className={"btn " + (isPlantFavorite(plant) ? " btn-warning" : "btn-light")} 
       onClick={() => togglePlantFavorite(plant)}>
       {isPlantFavorite(plant)
-      ? <span style={{color:'hsl(60deg 100% 45%)','-webkit-filter':dropShadowCss, filter: dropShadowCss}}><FavoriteIcon/></span>
+      ? <span style={{color:'hsl(60deg 100% 45%)',WebkitFilter:dropShadowCss, filter: dropShadowCss}}><FavoriteIcon/></span>
       : <span style={{opacity:0.2}}><FavoriteIcon/></span>}
     </button>
   );

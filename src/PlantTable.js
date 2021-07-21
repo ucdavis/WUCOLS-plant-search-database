@@ -10,7 +10,7 @@ import {
 const PlantTable = ({plants,photosByPlantName,plantTypeNameByCode,waterUseByCode,region,isPlantFavorite,togglePlantFavorite}) =>
 {
   return (
-		<table class="table table-sm ">
+		<table className="table table-sm ">
 			<thead>
 				<tr>
 					<th>
@@ -61,13 +61,10 @@ const PlantTable = ({plants,photosByPlantName,plantTypeNameByCode,waterUseByCode
 							</td>
 							<td>
 								{p.types.map(t =>
-									<>
 									<PlantTypeBadge
 										plantTypeNameByCode={plantTypeNameByCode}
 										type={t}
-										key={t}/>
-										{/*<br/>*/}
-									</>
+										key={t} />
 								)}
 							</td>
 							<td>

@@ -8,7 +8,11 @@ import PlantTable from './PlantTable';
 import PlantDetail from './PlantDetail';
 import SearchForm from './SearchForm';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFileExcel, faTh, faThLarge, faBars, faSearch, faStar, faLeaf, faQrcode, faIdCard, faIdCardAlt} from '@fortawesome/free-solid-svg-icons'
+import { faFileExcel, faTh, faThLarge, faBars, faSearch, faStar, faLeaf, faQrcode, faIdCard, faIdCardAlt, faCaretDown} from '@fortawesome/free-solid-svg-icons'
+
+import { DropdownButton,Dropdown } from 'react-bootstrap';
+
+import ReactExport from 'react-export-excel';
 import {
   BrowserRouter,
   HashRouter as Router,
@@ -28,7 +32,6 @@ const getWaterUseSortValue = (() => {
     return sortValueByWaterUseCode[code] || 99;
   };
 })();
-
 
 function App({data}) {
   //const {lat,lng,error} = useGeolocation(false,{enableHighAccuracy: true});
@@ -96,7 +99,8 @@ function App({data}) {
   });
   const searchPerformed = 
     Object.values(searchCriteria.waterUseClassifications).some(b => b)
-    || Object.values(searchCriteria.plantTypes).some(b => b);
+    || Object.values(searchCriteria.plantTypes).some(b => b)
+    || searchCriteria.name.length > 0;
 
   const [isFavoriteByPlantId, updateIsFavoriteByPlantId] = useLocalStorage('isFavoriteByPlantId', {});
   const favoritePlants = sortPlants(data.plants.filter(p => !!isFavoriteByPlantId[p.id]));
@@ -127,49 +131,89 @@ function App({data}) {
 
   const isPlantFavorite = p => !!isFavoriteByPlantId[p.id];
 
-  //console.log(searchCriteria);
-  const plantTypeNameByCode = 
-    data.plantTypes.reduce((dict,t) => { 
-      dict[t.code] = t.name;
-      return dict;
-    },{});
-
-  const waterUseByCode = 
-    data.waterUseClassifications.reduce((dict,wu) => { 
-      dict[wu.code] = wu;
-      return dict;
-    },{});
-
   const matchingPlants = React.useMemo(
-    () => sortPlants(data.plants.filter(p => {
-      let typeOk = p.types.some(t => searchCriteria.plantTypes[t]);
-      let wu = p.waterUseByRegion[searchCriteria.city.region - 1];
-      let wuOk = searchCriteria.waterUseClassifications[wu];
-      let nameOk = !searchCriteria.name || p.searchName.indexOf(searchCriteria.name) > -1;
-      return wuOk && typeOk && nameOk;
-    }))
-    .slice(0,10),
+    () => {
+      let noType = Object.values(searchCriteria.plantTypes).every(b => !b);
+      let noWu = Object.values(searchCriteria.waterUseClassifications).every(b => !b);
+      return sortPlants(data.plants.filter(p => {
+        let typeOk = p.types.some(t => searchCriteria.plantTypes[t]) || noType;
+        let wu = p.waterUseByRegion[searchCriteria.city.region - 1];
+        let wuOk = searchCriteria.waterUseClassifications[wu] || noWu;
+        let nameOk = !searchCriteria.name || p.searchName.indexOf(searchCriteria.name) > -1;
+        return wuOk && typeOk && nameOk;
+      }))
+      .slice(0,50);
+    },
     [data, searchCriteria]);
 
+const downloadButtons = (className,searchCriteria,favoritePlants) => {
   const favoritesCsvData = 
     [
-      ["ID", "Type(s)", "Botanical Name", "Common Name","Water Use", "Percentage of ET0"],
+      ["Type(s)", "Botanical Name", "Common Name","Water Use", "Percentage of ET0"],
       ...favoritePlants
       .map(p => [
-        p.id
-        ,p.types.map(t => plantTypeNameByCode[t]).join(', ')
+        ,p.types.map(t => data.plantTypeNameByCode[t]).join(', ')
         ,p.botanicalName
         ,p.commonName
-        ,waterUseByCode[p.waterUseByRegion[searchCriteria.city.region-1]].name
-        ,waterUseByCode[p.waterUseByRegion[searchCriteria.city.region-1]].percentageET0 + '%'
+        ,data.waterUseByCode[p.waterUseByRegion[searchCriteria.city.region-1]].name
+        ,data.waterUseByCode[p.waterUseByRegion[searchCriteria.city.region-1]].percentageET0 + '%'
       ])
     ];
+
+  const favoritesExcelData2 = 
+    [
+      {
+        columns: ["Type(s)", "Botanical Name", "Common Name","Water Use", "Percentage of ET0"].map(c => ({
+          value: c
+        })).map(c => c.value)
+        ,data: favoritePlants.map(p => [
+          p.types.map(t => data.plantTypeNameByCode[t]).join(', ')
+          ,p.botanicalName
+          ,p.commonName
+          ,data.waterUseByCode[p.waterUseByRegion[searchCriteria.city.region-1]].name
+          ,data.waterUseByCode[p.waterUseByRegion[searchCriteria.city.region-1]].percentageET0 + '%'
+        ])
+      }
+    ];
+  return [
+    <CSVLink
+      className={className}
+      data={favoritesCsvData}
+      filename={`WUCOLS_${searchCriteria.city.name}.csv`}>
+        <FontAwesomeIcon icon={faFileExcel} className="mr-2"/>
+        Download in CSV format
+    </CSVLink>
+    ,<ExcelFile 
+      filename={`WUCOLS_${searchCriteria.city.name}`}
+      element={
+        <div className={className}>
+          <FontAwesomeIcon icon={faFileExcel} className="mr-2"/>
+          Download in Excel format
+        </div>
+    }>
+      <ExcelSheet dataSet={favoritesExcelData2} name={`WUCOLS_${searchCriteria.city.name}`}/>
+    </ExcelFile>
+    ,<button className={className} onClick={() => alert('Not yet available')}>
+      <FontAwesomeIcon icon={faQrcode} className="mr-2"/>
+      Download QR codes
+    </button>
+    ,<button className={className} onClick={() => alert('Not yet available')}>
+      <FontAwesomeIcon icon={faIdCard} className="mr-2"/>
+      Download Bench Cards
+    </button>
+  ];
+}
+
+
+const ExcelFile = ReactExport.ExcelFile;
+const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
+
 
   return (
     <Router>
       <div className="App">
         <nav className="navbar navbar-dark bg-dark sticky-top navbar-light bg-light d-flex justify-content-between">
-          <a className="navbar-brand" href="https://ucanr.edu/sites/wucols">WUCOLS Plant Search Database</a>
+          <a className="navbar-brand" href="#">WUCOLS Plant Search Database</a>
 
           <div className="btn-group">
             {[
@@ -191,9 +235,24 @@ function App({data}) {
                   {vm.label}
                 </span>
               </NavLink>
-            )}
+    
+    )}
           </div>
 
+          <DropdownButton id="dropdown-basic-button" title="Dropdown button" variant="outline-light">
+            <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
+            <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
+            <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
+          </DropdownButton>
+
+          <div>
+            <button className="btn btn-outline-light">
+              Download 
+              <FontAwesomeIcon icon={faCaretDown} className="ml-2"/>
+            </button>
+          </div>
+
+          {/*
           <div>
             <span className="mr-3 text-light">
               View plants in a
@@ -211,6 +270,7 @@ function App({data}) {
               )}
             </div>
           </div>
+          */}
         </nav>
         <Route exact={true} path="/">
           <Redirect to="/search" />
@@ -224,8 +284,8 @@ function App({data}) {
                   <PlantDetail {...{
                     plant,
                     photos: data.photos[plant.botanicalName] || [],
-                    plantTypeNameByCode,
-                    waterUseByCode,
+                    plantTypeNameByCode: data.plantTypeNameByCode,
+                    waterUseByCode: data.waterUseByCode,
                     waterUseClassifications: data.waterUseClassifications,
                     region: searchCriteria.city.region,
                     togglePlantFavorite,
@@ -281,23 +341,7 @@ function App({data}) {
                     !!favoritePlants.length
                     && (
                       <div className="mb-3 d-flex flex-column justify-content-around">
-                        {[
-                          <CSVLink
-                            className="btn btn-success btn-block"
-                            data={favoritesCsvData}
-                            filename={`WUCOLS_${searchCriteria.city.name}.csv`}>
-                              <FontAwesomeIcon icon={faFileExcel} className="mr-2"/>
-                              Download as a spreadsheet
-                          </CSVLink>,
-                          <button className="btn btn-success btn-block" onClick={() => alert('Not yet available')}>
-                            <FontAwesomeIcon icon={faQrcode} className="mr-2"/>
-                            Download QR codes
-                          </button>,
-                          <button className="btn btn-success btn-block" onClick={() => alert('Not yet available')}>
-                            <FontAwesomeIcon icon={faIdCard} className="mr-2"/>
-                            Download Bench Cards
-                          </button>
-                        ].map(c => <div className="my-2">{c}</div>)}
+                        {downloadButtons("btn btn-success btn-block",searchCriteria,favoritePlants).map(c => <div className="my-2">{c}</div>)}
                       </div>
                     )
                   }
@@ -318,9 +362,9 @@ function App({data}) {
                   togglePlantFavorite={togglePlantFavorite}
                   plants={favoritePlants} 
                   photosByPlantName={data.photos}
-                  plantTypeNameByCode={plantTypeNameByCode} 
+                  plantTypeNameByCode={data.plantTypeNameByCode} 
                   region={searchCriteria.city.region}
-                  waterUseByCode={waterUseByCode}/>
+                  waterUseByCode={data.waterUseByCode}/>
               </div>
             </div>}
           </div>
@@ -348,10 +392,27 @@ function App({data}) {
                   <div className="text-center my-5">
                     <div className="display-4">Welcome</div>
                     <p className="lead my-4">
-                      To begin, select a city and perform a search.
+                      WUCOLS helps you create a landscape based plant water use within your city/region. 
                     </p>
+                    <div className="row">
+                      <div className="col-md-6 offset-md-3 text-left">
+                        <ol>
+                          <li>Select a <strong>City/Region</strong></li>
+                          <li>Search for plants with any combination of
+                            <ul style={{fontWeight:"bold"}}>
+                              <li>Plant Name</li>
+                              <li>Water Use</li>
+                              <li>Plant Type</li>
+                            </ul>
+                          </li>
+                          <li>Assemble a list of favorite plants that meet your needs</li>
+                          <li>Download your list in a variety of formats</li>
+                        </ol>
+                      </div>
+                    </div>
+                    <div>
+                    </div>
                     <FontAwesomeIcon icon={faLeaf} className="display-4 text-success mr-3"/>
-                    <FontAwesomeIcon icon={faSearch} className="display-4"/>
                     <br/>
                   </div>
 
@@ -366,9 +427,9 @@ function App({data}) {
                       togglePlantFavorite={togglePlantFavorite}
                       plants={matchingPlants} 
                       photosByPlantName={data.photos}
-                      plantTypeNameByCode={plantTypeNameByCode} 
+                      plantTypeNameByCode={data.plantTypeNameByCode} 
                       region={searchCriteria.city.region}
-                      waterUseByCode={waterUseByCode}/>
+                      waterUseByCode={data.waterUseByCode}/>
                   </>
                 }
               </main>

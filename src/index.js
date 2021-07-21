@@ -10,9 +10,19 @@ fetch("WUCOLS.json")
   d.plants.forEach(p => {
     p.searchName = (p.commonName + ' ' + p.botanicalName).toLowerCase();
   });
-  console.log(d.plantTypes);
-  console.log(d.waterUseClassifications);
-  console.log(d.photos);
+
+  d.plantTypeNameByCode = 
+    d.plantTypes.reduce((dict,t) => { 
+      dict[t.code] = t.name;
+      return dict;
+    },{});
+
+  d.waterUseByCode = 
+    d.waterUseClassifications.reduce((dict,wu) => { 
+      dict[wu.code] = wu;
+      return dict;
+    },{});
+
   ReactDOM.render(
     <ToastProvider
       autoDismiss

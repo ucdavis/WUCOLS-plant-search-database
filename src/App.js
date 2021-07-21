@@ -1,8 +1,9 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import './App.css';
 //import {useGeolocation} from '../src/useGeolocation';
 import useLocalStorage from './useLocalStorage';
-import { CSVLink } from "react-csv";
+import { CSVDownload, CSVLink } from "react-csv";
 import PlantList from './PlantList';
 import PlantTable from './PlantTable';
 import PlantDetail from './PlantDetail';
@@ -146,8 +147,8 @@ function App({data}) {
     },
     [data, searchCriteria]);
 
-const downloadButtons = (className,searchCriteria,favoritePlants) => {
-  const favoritesCsvData = 
+const favoriteAsSpreadsheets = (data,searchCriteria,favoritePlants) => {
+  const csv = 
     [
       ["Type(s)", "Botanical Name", "Common Name","Water Use", "Percentage of ET0"],
       ...favoritePlants
@@ -160,7 +161,7 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
       ])
     ];
 
-  const favoritesExcelData2 = 
+  const xl = 
     [
       {
         columns: ["Type(s)", "Botanical Name", "Common Name","Water Use", "Percentage of ET0"].map(c => ({
@@ -175,39 +176,81 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
         ])
       }
     ];
-  return [
-    <CSVLink
-      className={className}
-      data={favoritesCsvData}
-      filename={`WUCOLS_${searchCriteria.city.name}.csv`}>
-        <FontAwesomeIcon icon={faFileExcel} className="mr-2"/>
-        Download in CSV format
-    </CSVLink>
-    ,<ExcelFile 
-      filename={`WUCOLS_${searchCriteria.city.name}`}
-      element={
-        <div className={className}>
-          <FontAwesomeIcon icon={faFileExcel} className="mr-2"/>
-          Download in Excel format
-        </div>
-    }>
-      <ExcelSheet dataSet={favoritesExcelData2} name={`WUCOLS_${searchCriteria.city.name}`}/>
-    </ExcelFile>
-    ,<button className={className} onClick={() => alert('Not yet available')}>
-      <FontAwesomeIcon icon={faQrcode} className="mr-2"/>
-      Download QR codes
-    </button>
-    ,<button className={className} onClick={() => alert('Not yet available')}>
-      <FontAwesomeIcon icon={faIdCard} className="mr-2"/>
-      Download Bench Cards
-    </button>
-  ];
+
+  return [csv, xl];
 }
 
+const downloadActions = (data,searchCriteria,favoritePlants) => {
+  const ExcelFile = ReactExport.ExcelFile;
+  const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
+  let [csvData,excelData] = favoriteAsSpreadsheets(data,searchCriteria,favoritePlants);
+  const sideRender = el => {
+    ReactDOM.render(el, document.getElementById('download-outlet'));
+  };
+  return [
+  /*
+    {
+      method: () => {
+        sideRender(
+          <CSVDownload
+            target="_blank"
+            data={csvData}
+            filename={`WUCOLS_${searchCriteria.city.name}.csv`}
+          />
+        );
+      },
+      label: 
+        <>
+          <FontAwesomeIcon icon={faFileExcel} className="mr-2"/>
+          Download in CSV format
+        </>
+    }
+    ,
+    */
+    {
+      method: () => {
+        sideRender(
+          <ExcelFile filename={`WUCOLS_${searchCriteria.city.name}`} hideElement={true}>
+            <ExcelSheet dataSet={excelData} name={`WUCOLS_${searchCriteria.city.name}`}/>
+          </ExcelFile>
+        );
+      },
+      label: 
+        <>
+          <FontAwesomeIcon icon={faFileExcel} className="mr-2"/>
+          Download in Excel format
+        </>
+    },
+    {
+      method: () => {
+        alert('Not implemented yet');
+      },
+      label: 
+        <>
+          <FontAwesomeIcon icon={faQrcode} className="mr-2"/>
+          Download QR codes
+        </>
+    },
+    {
+      method: () => {
+        alert('Not implemented yet');
+      },
+      label: 
+        <>
+          <FontAwesomeIcon icon={faIdCard} className="mr-2"/>
+          Download Bench Cards
+        </>
+    }
+  ];
+};
 
-const ExcelFile = ReactExport.ExcelFile;
-const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
-
+const downloadButtons = (className,searchCriteria,favoritePlants) => {
+  return downloadActions(data,searchCriteria,favoritePlants).map(a =>
+    <button className={className} onClick={a.method}>
+      {a.label}
+    </button>
+  );
+}
 
   return (
     <Router>
@@ -239,18 +282,13 @@ const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     )}
           </div>
 
-          <DropdownButton id="dropdown-basic-button" title="Dropdown button" variant="outline-light">
-            <Dropdown.Item href="#/action-1">Action</Dropdown.Item>
-            <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
-            <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
+          <DropdownButton title="Download" variant="outline-light">
+            {downloadActions(data,searchCriteria,favoritePlants).map(a => 
+              <Dropdown.Item onClick={a.method}>
+                {a.label}
+              </Dropdown.Item>
+            )}
           </DropdownButton>
-
-          <div>
-            <button className="btn btn-outline-light">
-              Download 
-              <FontAwesomeIcon icon={faCaretDown} className="ml-2"/>
-            </button>
-          </div>
 
           {/*
           <div>

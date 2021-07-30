@@ -9,7 +9,7 @@ import PlantTable from './PlantTable';
 import PlantDetail from './PlantDetail';
 import SearchForm from './SearchForm';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFileExcel, faTh, faThLarge, faBars, faSearch, faStar, faLeaf, faQrcode, faIdCard, faIdCardAlt, faCaretDown} from '@fortawesome/free-solid-svg-icons'
+import { faSearchLocation, faMapMarkerAlt, faMap,faFileExcel, faTh, faThLarge, faBars, faSearch, faStar, faLeaf, faQrcode, faIdCard, faIdCardAlt, faCaretDown, faCartArrowDown, faDownload} from '@fortawesome/free-solid-svg-icons'
 import ultimatePagination from 'ultimate-pagination';
 
 import { DropdownButton,Dropdown,Pagination } from 'react-bootstrap';
@@ -467,29 +467,52 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
                 ? 
                   <div className="text-center my-5">
                     <div className="display-4">Welcome</div>
+                    <FontAwesomeIcon icon={faLeaf} className="display-4 text-success my-3"/>
                     <p className="lead my-4">
                       WUCOLS helps you create a landscape based plant water use within your city/region. 
                     </p>
-                    <div className="row">
-                      <div className="col-md-6 offset-md-3 text-left">
-                        <ol>
-                          <li>Select a <strong>City/Region</strong></li>
-                          <li>Search for plants with any combination of
-                            <ul style={{fontWeight:"bold"}}>
-                              <li>Plant Name</li>
-                              <li>Water Use</li>
-                              <li>Plant Type</li>
-                            </ul>
-                          </li>
-                          <li>Assemble a list of favorite plants that meet your needs</li>
-                          <li>Download your list in a variety of formats</li>
-                        </ol>
-                      </div>
+
+                    <div className="card-group">
+                      {[
+                        {
+                          icon: faMapMarkerAlt,
+                          label: 'Select a City/Region',
+                          description: 'This will determine the appropriate water use rating for each plant.'
+                        },
+                        {
+                          icon: faSearch,
+                          label:'Search',
+                          description:  <>
+                            Enter any combination of 
+                              {["Plant Name", "Water Use", "Plant Types"].map(txt => <div><strong>{txt}</strong></div>)}
+                            to find plants of interest.
+                          </>
+                        },
+                        {
+                          icon: faStar,
+                          label:'Favorite',
+                          description: 'Assemble a list of your plants that meet your needs.'
+                        },
+                        {
+                          icon: faDownload,
+                          label:'Download',
+                          description: 'Download your list in a variety of formats'
+                        }
+                      ].map((f,i) => 
+                        <div className="card">
+                          <div className="card-body">
+                            <FontAwesomeIcon icon={f.icon} className="mt-2 h1"/>
+                            <div className="h4">
+                              {i+1+'. '} 
+                              {f.label}
+                            </div>
+                            <div className="card-text mt-5">
+                              {f.description}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                    </div>
-                    <FontAwesomeIcon icon={faLeaf} className="display-4 text-success mr-3"/>
-                    <br/>
                   </div>
 
                 : <>

@@ -5,8 +5,26 @@ import { faStar, faTint } from '@fortawesome/free-solid-svg-icons'
 import {
   Link
 } from "react-router-dom";
-
-const SearchForm = ({
+const plantTypeCombinatorOptions = [
+  {
+    label:'Match plants with ANY of',
+    value: 'ANY',
+    fn: (a,b) => a || b
+  },
+  {
+    label:'Match plants with ALL of',
+    value: 'ALL',
+    fn: (a,b) => a && b
+  }
+];
+export const plantTypeCombinators = {
+  array: plantTypeCombinatorOptions,
+  byId: plantTypeCombinatorOptions.reduce((dict,c) => { 
+    dict[c.value] = c;
+    return dict;
+  }, {})
+};
+export const SearchForm = ({
     cityOptions,
     updateSearchCriteria,
     searchCriteria,
@@ -16,7 +34,6 @@ const SearchForm = ({
     //const {cityOptions,searchCriteria,updateSearchCriteria} = React.useContext(SearchCriteriaContext);
     const setPlantType = (code,checked) => 
       updateSearchCriteria({...searchCriteria, plantTypes: {...searchCriteria.plantTypes, [code]: checked}});
-
     const selectAllWaterUseClassifications = (selected) => {
       updateSearchCriteria({
         ...searchCriteria,
@@ -30,6 +47,9 @@ const SearchForm = ({
       //console.log('onCityChange',o);
       updateSearchCriteria({...searchCriteria, city: o});
     }
+    const onPlantTypeCombinatorChange = (ptc) => {
+      updateSearchCriteria({...searchCriteria, plantTypeCombinator: ptc});
+    };
     const selectAllPlantTypes = (selected) => {
       updateSearchCriteria({
         ...searchCriteria,
@@ -57,7 +77,6 @@ const SearchForm = ({
             onChange={onCityChange}
             noOptionsMessage={() => "No cities found by that name"}/>
         </div>
-
         <div className="form-group">
           <label><strong>Plant Name</strong></label>
           <input 
@@ -68,7 +87,6 @@ const SearchForm = ({
             onChange={e => updateSearchCriteria({...searchCriteria, name: e.target.value.toLowerCase()}) }
             />
         </div>
-
         <div className="form-group">
           <label className="form-label"><strong>Water Use</strong></label>
           <div>
@@ -82,9 +100,7 @@ const SearchForm = ({
               onClick={() => selectAllWaterUseClassifications(false)}>
                 Deselect all
             </button>
-
           </div>
-
           {waterUseClassifications.map(wu => (
             <div className="form-check" key={wu.code}>
               <input 
@@ -101,7 +117,6 @@ const SearchForm = ({
             </div>
           ))}
         </div>
-
         <div className="form-group">
           <label className="form-label"><strong>Plant Types</strong></label> 
           <div>
@@ -117,8 +132,20 @@ const SearchForm = ({
                 Deselect all
             </button>
           </div>
-
-
+          <div>
+            <Select 
+              styles={{
+                container: base => ({
+                  ...base,
+                  flex: 1
+                })
+              }}
+              options={plantTypeCombinatorOptions}
+              autoFocus={true}
+              value={searchCriteria.plantTypeCombinator}
+              onChange={onPlantTypeCombinatorChange}
+              noOptionsMessage={() => "No result"}/>
+          </div>
           {plantTypes.map(pt => (
             <div className="form-check" key={pt.code}>
               <input 
@@ -138,5 +165,3 @@ const SearchForm = ({
       </div>
     );
   }
-
-export default SearchForm;

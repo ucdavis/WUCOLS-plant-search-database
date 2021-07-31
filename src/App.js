@@ -7,7 +7,7 @@ import { CSVDownload, CSVLink } from "react-csv";
 import PlantList from './PlantList';
 import PlantTable from './PlantTable';
 import PlantDetail from './PlantDetail';
-import SearchForm from './SearchForm';
+import {SearchForm,plantTypeCombinators} from './SearchForm';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSearchLocation, faMapMarkerAlt, faMap,faFileExcel, faTh, faThLarge, faBars, faSearch, faStar, faLeaf, faQrcode, faIdCard, faIdCardAlt, faCaretDown, faCartArrowDown, faDownload} from '@fortawesome/free-solid-svg-icons'
 import ultimatePagination from 'ultimate-pagination';
@@ -100,7 +100,8 @@ function App({data}) {
     plantTypes: data.plantTypes.reduce((dict, pt) => {
       dict[pt.code] = autoSearch ? pt.code === 'A' : false;
       return dict;
-    },{})
+    },{}),
+    plantTypeCombinator: plantTypeCombinators.byId['ANY']
   });
   const searchPerformed = 
     Object.values(searchCriteria.waterUseClassifications).some(b => b)
@@ -140,8 +141,13 @@ function App({data}) {
     () => {
       let noType = Object.values(searchCriteria.plantTypes).every(b => !b);
       let noWu = Object.values(searchCriteria.waterUseClassifications).every(b => !b);
+      let types = Object.entries(searchCriteria.plantTypes).filter(([k,v]) => !!v).map(([k,v]) => k);
+      let typeFn = searchCriteria.plantTypeCombinator === plantTypeCombinators.byId['ANY']
+          ? types.some.bind(types)
+          : types.every.bind(types);
+      console.log(types);
       return sortPlants(data.plants.filter(p => {
-        let typeOk = p.types.some(t => searchCriteria.plantTypes[t]) || noType;
+        let typeOk = noType || typeFn(t => p.types.indexOf(t) > -1);
         let wu = p.waterUseByRegion[searchCriteria.city.region - 1];
         let wuOk = searchCriteria.waterUseClassifications[wu] || noWu;
         let nameOk = !searchCriteria.name || p.searchName.indexOf(searchCriteria.name) > -1;
@@ -159,10 +165,10 @@ React.useEffect(() => {
 }, [searchCriteria]);
 
 const pageSize = 50;
-const pageCount = Math.floor(matchingPlants.length/pageSize);
+const pageCount = Math.max(1,Math.ceil(matchingPlants.length/pageSize));
 var paginationModel = ultimatePagination.getPaginationModel({
   // Required
-  currentPage: pageCount > 0 ? currentPageNumber : 0,
+  currentPage: pageCount > 0 ? currentPageNumber : 1,
   totalPages: pageCount,
  
   // Optional
@@ -175,7 +181,7 @@ var paginationModel = ultimatePagination.getPaginationModel({
 console.log('pagination',paginationModel);
 
 const actualPagination = 
-  <Pagination>
+  pageCount > 1 && <Pagination>
     {paginationModel.map(p => {
       const props = {
         key: p.key,
@@ -451,8 +457,17 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
             </div>}
           </div>
         </Route>
-        <Route exact={true} path="/search">
+        {/*
+        <Route exact="true" path="/search/(types)?/:types?" render={match => 
+        */}
+        <Route exact="true" path="/search" render={match => 
+          <>
           <div className="container-fluid">
+            {/*
+            <div>
+              <pre>{JSON.stringify(match,null,2)}</pre>
+            </div>
+            */}
             <div className="row">
               <nav className="col-sm-4 col-lg-3 col-xl-2 sidebar bg-light">
                 <div className="sidebar-sticky p-3"  >
@@ -526,12 +541,17 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
                       <div>
                         Matching Plants: {matchingPlants.length}
                       </div>
+                    {
+                    /*
+                      <pre>{JSON.stringify({paginationModel,currentPageNumber,pageCount}, null, 2)}</pre>
+                    */
+                    }
                     </div>
                     {actualPagination}
                     <plantsViewMode.component 
                       isPlantFavorite={isPlantFavorite}
                       togglePlantFavorite={togglePlantFavorite}
-                      plants={matchingPlants.slice(currentPageNumber*pageSize, (currentPageNumber+1)*pageSize)} 
+                      plants={matchingPlants.slice((currentPageNumber-1)*pageSize, (currentPageNumber+1)*pageSize)} 
                       photosByPlantName={data.photos}
                       plantTypeNameByCode={data.plantTypeNameByCode} 
                       region={searchCriteria.city.region}
@@ -542,7 +562,8 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
               </main>
             </div>
           </div>
-        </Route>
+        </>
+        }/>
       </div>
     </Router>
   );

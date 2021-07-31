@@ -57,6 +57,13 @@ const PlantDetail = ({plant,plantTypeNameByCode,waterUseByCode,region,regions,is
         </tbody>
       </table>
 
+      {!!plant.culturalInformation && 
+        <div>
+          <h4 className="mb-4">Cultural Information</h4>
+          <div dangerouslySetInnerHTML={{__html: plant.culturalInformation}} />
+        </div>
+      }
+
       <div className="row mt-4">
         {!!plant.photos.length &&
           <div className="col">

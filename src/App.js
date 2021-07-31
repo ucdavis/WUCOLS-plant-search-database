@@ -152,11 +152,17 @@ function App({data}) {
     [data, searchCriteria]);
 
 const [currentPageNumber,setCurrentPageNumber] = React.useState(1);
+
+React.useEffect(() => {
+  //Optimally, paging resets when a user changes their search.  This offers the best user experience.
+  setCurrentPageNumber(1);
+}, [searchCriteria]);
+
 const pageSize = 50;
 const pageCount = Math.floor(matchingPlants.length/pageSize);
 var paginationModel = ultimatePagination.getPaginationModel({
   // Required
-  currentPage: currentPageNumber,
+  currentPage: pageCount > 0 ? currentPageNumber : 0,
   totalPages: pageCount,
  
   // Optional

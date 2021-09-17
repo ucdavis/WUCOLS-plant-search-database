@@ -62,7 +62,7 @@ export const SearchForm = ({
     return (
       <div>
         <div className="form-group">
-          <label><strong>City/Region</strong></label>
+          <label><strong>City/Region</strong><br/>Start typing to search</label>
           <Select 
             styles={{
               container: base => ({
@@ -83,7 +83,7 @@ export const SearchForm = ({
             type="search"
             className="form-control"
             value={searchCriteria.name}
-            placeholder="botanical name or common name"
+            placeholder="botanical or common name"
             onChange={e => updateSearchCriteria({...searchCriteria, name: e.target.value.toLowerCase()}) }
             />
         </div>

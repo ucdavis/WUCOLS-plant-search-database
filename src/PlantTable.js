@@ -57,6 +57,7 @@ const PlantTable = ({plants,photosByPlantName,plantTypeNameByCode,waterUseByCode
 								<br/>
 								<small>
 								{wu.percentageET0}% ET<sub>0</sub>
+								<br/>Plant Factor: {wu.plantFactor}
 								</small>
 							</td>
 							<td>

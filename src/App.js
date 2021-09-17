@@ -89,8 +89,7 @@ function App({data}) {
   cityOptions = cityOptions.sort((a,b) => a.label > b.label ? 1 : a.label < b.label ? -1 : 0);
    
   const autoSearch = false;
-
-  const [searchCriteria, updateSearchCriteria] = React.useState({
+  const getDefaultSearchCriteria = () => ({
     city: cityOptions[0],
     name: '',
     waterUseClassifications: data.waterUseClassifications.reduce((dict,wu) => {
@@ -103,6 +102,11 @@ function App({data}) {
     },{}),
     plantTypeCombinator: plantTypeCombinators.byId['ANY']
   });
+
+  const [searchCriteria, updateSearchCriteria] = React.useState(getDefaultSearchCriteria());
+
+  const resetSearchCriteria = () => updateSearchCriteria(getDefaultSearchCriteria());
+
   const searchPerformed = 
     Object.values(searchCriteria.waterUseClassifications).some(b => b)
     || Object.values(searchCriteria.plantTypes).some(b => b)
@@ -306,7 +310,9 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
     <Router>
       <div className="App">
         <nav className="navbar navbar-dark bg-dark sticky-top navbar-light bg-light d-flex justify-content-between">
-          <a className="navbar-brand" href="#">WUCOLS Plant Search Database</a>
+          <a className="navbar-brand" href="#">
+            WUCOLS Plant Search Database
+          </a>
 
           <div className="btn-group">
             {[
@@ -318,13 +324,14 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
               {
                 label: `Favorites (${favoritePlants.length})`,
                 icon: faStar,
-                to: '/favorites'
+                to: '/favorites',
+                tooltip: 'Download options available'
               }
 
             ].map(vm => 
               <NavLink activeClassName="active" className="btn btn-outline-light" to={vm.to}>
                 <FontAwesomeIcon icon={vm.icon} />
-                <span className="ml-2">
+                <span className="ml-2" title={vm.tooltip}>
                   {vm.label}
                 </span>
               </NavLink>
@@ -471,7 +478,6 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
             <div className="row">
               <nav className="col-sm-4 col-lg-3 col-xl-2 sidebar bg-light">
                 <div className="sidebar-sticky p-3"  >
-                  <p>{data.plants.length} species and counting</p>
 
                   <SearchForm
                     waterUseClassifications={data.waterUseClassifications}
@@ -487,11 +493,24 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
                 {!searchPerformed 
                 ? 
                   <div className="text-center my-5">
-                    <div className="display-4">Welcome</div>
                     <FontAwesomeIcon icon={faLeaf} className="display-4 text-success my-3"/>
-                    <p className="lead my-4">
-                      WUCOLS helps you create a landscape based plant water use within your city/region. 
-                    </p>
+                    <div className="display-4">Welcome to WUCOLS</div>
+                    <div className="my-4">
+                      <p className="lead">
+                        <strong>WUCOLS = </strong>
+                        {[
+                          "Water",
+                          "Use",
+                          "Classification",
+                          "Of",
+                          "Landscape",
+                          "Species"
+                        ].map(w => <span><strong className="text-lg">{w[0]}</strong>{w.slice(1)} </span>)}
+                      </p>
+                      <p className="lead">
+                        WUCOLS helps you create a landscape plan based on plant water use within your city/region. 
+                      </p>
+                    </div>
 
                     <div className="card-group">
                       {[
@@ -541,6 +560,12 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
                       <div>
                         Matching Plants: {matchingPlants.length}
                       </div>
+
+                      {searchPerformed && 
+                        <button className="btn btn-link" onClick={() => resetSearchCriteria()}>
+                          Clear Search Form
+                          (Start over)
+                        </button>}
                     {
                     /*
                       <pre>{JSON.stringify({paginationModel,currentPageNumber,pageCount}, null, 2)}</pre>

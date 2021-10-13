@@ -1,6 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './App.css';
+import GoogleMapReact from 'google-map-react';
+import LocationPin from 'google-map-react';
+import './map.css'
 //import {useGeolocation} from '../src/useGeolocation';
 import useLocalStorage from './useLocalStorage';
 import { CSVDownload, CSVLink } from "react-csv";
@@ -370,6 +373,30 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
         <Route exact={true} path="/">
           <Redirect to="/search" />
         </Route>
+        <Route path="/map" render={({match}) => {
+          const location = {
+            address: '1600 Amphitheatre Parkway, Mountain View, california.',
+            lat: 37.42216,
+            lng: -122.08427,
+          };
+          const zoomLevel = 16;
+          const dev = true;
+          const apiKey = dev ? "AIzaSyBCZkKqXgoURncqEtUCs4ErDb7qeaHt80I" : "AIzaSyCKJG-QM3eR7YESp5E7xXcAGrB2Pjo21ZM";
+          return (
+            <div className="google-map">
+              <GoogleMapReact
+                bootstrapURLKeys={{ key: apiKey }}
+                defaultCenter={location}
+                defaultZoom={zoomLevel}
+              >
+                <LocationPin
+                  lat={location.lat}
+                  lng={location.lng}
+                  text={location.address}
+                />
+              </GoogleMapReact>
+            </div>);
+        }}/>
         <Route path="/plant/:plantId" render={({match}) => {
           let plant = data.plants.filter(p => p.id == match.params.plantId || p.url_keyword == match.params.plantId)[0];
           return !plant 

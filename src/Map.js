@@ -1,14 +1,9 @@
 import React from 'react';
-import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
 
 const containerStyle = {
   width: '100%',
   height: '70vh'
-};
-
-const center = {
-  lat: 38.678516,
-  lng: -121.773300
 };
 
 const CityMarker = ({city,onClick}) => {
@@ -49,7 +44,7 @@ function MyComponent({cities,onSelect}) {
     googleMapsApiKey: apiKey
   })
 
-  const [map, setMap] = React.useState(null)
+  const [, setMap] = React.useState(null)
 
   const onLoad = React.useCallback(function callback(map) {
     const bounds = new window.google.maps.LatLngBounds();
@@ -58,7 +53,7 @@ function MyComponent({cities,onSelect}) {
     });
     map.fitBounds(bounds);
     setMap(map)
-  }, [])
+  }, [cities])
 
   const onUnmount = React.useCallback(function callback(map) {
     setMap(null)
@@ -67,7 +62,6 @@ function MyComponent({cities,onSelect}) {
   return isLoaded ? (
       <GoogleMap
         mapContainerStyle={containerStyle}
-        center={center}
         onLoad={onLoad}
         onUnmount={onUnmount}
       >

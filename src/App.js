@@ -17,7 +17,7 @@ import { DropdownButton,Dropdown,Pagination } from 'react-bootstrap';
 
 import ReactExport from 'react-export-excel';
 import {
-  //BrowserRouter,
+  //BrowserRouter as Router,
   HashRouter as Router,
   Route,
   NavLink,
@@ -375,12 +375,6 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
           <Redirect to="/search" />
         </Route>
         <Route path="/map" render={({match}) => {
-          const location = {
-            address: '1600 Amphitheatre Parkway, Mountain View, california.',
-            lat: 37.42216,
-            lng: -122.08427,
-          };
-          const zoomLevel = 16;
           return (
             <div>
               <Map cities={data.cities} onSelect={city => {alert(city.name)}} />

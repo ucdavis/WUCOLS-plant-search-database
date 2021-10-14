@@ -2,7 +2,7 @@ import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMapMarkerAlt, faSearch, faStar, faLeaf, faDownload} from '@fortawesome/free-solid-svg-icons'
 
-const Welcome = ({}) => 
+const Welcome = () => 
     <div className="text-center my-5">
         <FontAwesomeIcon icon={faLeaf} className="display-4 text-success my-3"/>
         <div className="display-4">Welcome to WUCOLS</div>
@@ -16,7 +16,7 @@ const Welcome = ({}) =>
                 "Of",
                 "Landscape",
                 "Species"
-            ].map(w => <span><strong className="text-lg">{w[0]}</strong>{w.slice(1)} </span>)}
+            ].map((w,i) => <span key={i}><strong className="text-lg">{w[0]}</strong>{w.slice(1)} </span>)}
             </p>
             <p className="lead">
             WUCOLS helps you create a landscape plan based on plant water use within your city/region. 

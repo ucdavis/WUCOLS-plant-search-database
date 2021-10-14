@@ -117,19 +117,19 @@ const SearchForm = ({
             </button>
             </div>
             {waterUseClassifications.map(wu => (
-            <div className="form-check" key={wu.code}>
-                <input 
-                className="form-check-input"
-                type="checkbox"
-                checked={searchCriteria.waterUseClassifications[wu.code]}
-                onChange={e => updateSearchCriteria({...searchCriteria, waterUseClassifications: {...searchCriteria.waterUseClassifications, [wu.code]: e.target.checked}}) }
-                id={wu.code + '_checkbox'}/>
-                <label
-                className="form-check-label"
-                htmlFor={wu.code + '_checkbox'}>
-                    {wu.name}
-                </label>
-            </div>
+                <div className="form-check" key={wu.code}>
+                    <input 
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={searchCriteria.waterUseClassifications[wu.code]}
+                    onChange={e => updateSearchCriteria({...searchCriteria, waterUseClassifications: {...searchCriteria.waterUseClassifications, [wu.code]: e.target.checked}}) }
+                    id={wu.code + '_checkbox'}/>
+                    <label
+                    className="form-check-label"
+                    htmlFor={wu.code + '_checkbox'}>
+                        {wu.name}
+                    </label>
+                </div>
             ))}
         </div>
         <div className="form-group">
@@ -161,19 +161,19 @@ const SearchForm = ({
                 noOptionsMessage={() => "No result"}/>
             </div>
             {plantTypes.map(pt => (
-            <div className="form-check" key={pt.code}>
-                <input 
-                className="form-check-input"
-                type="checkbox"
-                checked={searchCriteria.plantTypes[pt.code]}
-                onChange={e => setPlantType(pt.code,e.target.checked)}
-                id={pt.code + '_checkbox'}/>
-                <label
-                className="form-check-label"
-                htmlFor={pt.code + '_checkbox'}>
-                    {pt.name}
-                </label>
-            </div>
+                <div className="form-check" key={pt.code}>
+                    <input 
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={searchCriteria.plantTypes[pt.code]}
+                    onChange={e => setPlantType(pt.code,e.target.checked)}
+                    id={pt.code + '_checkbox'}/>
+                    <label
+                    className="form-check-label"
+                    htmlFor={pt.code + '_checkbox'}>
+                        {pt.name}
+                    </label>
+                </div>
             ))}
         </div>
         </div>
@@ -242,6 +242,7 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
   
   let cityOptions = data.cities.map(c => ({
     id: c.id,
+    key: c.id,
     name: c.name,
     label: "Region " + c.region + ": " + c.name,
     value: c.name,
@@ -264,7 +265,7 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
 
   const initSearchCriteria = () => {
     let up = SearchCriteriaConverter.fromQuerystring(location.search);
-    console.log(up);
+    //console.log(up);
     let sc = getDefaultSearchCriteria();
     sc.waterUseClassifications = up.waterUseClassifications;
     sc.plantTypes = up.plantTypes;
@@ -289,19 +290,19 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
 
   const updateSearchCriteria = React.useCallback(sc => {
       let qs = SearchCriteriaConverter.toQuerystring(sc);
-    console.log('search altered',qs);
+    //console.log('search altered',qs);
     if(!history){
       //console.log('no history')
       //return;
     }
     setSearchCriteria(sc);
-    console.log(history)
+    //console.log(history)
     history.push({
         path: '/search',
         search: qs
     });
     //console.log(sc);
-  },[history]);
+  },[setSearchCriteria,history]);
 
   const resetSearchCriteria = () => updateSearchCriteria(getDefaultSearchCriteria());
 
@@ -328,7 +329,7 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
       }))
       .slice(0,performancePlantLimit);
     },
-    [data, searchCriteria, sortPlants]);
+    [data, searchCriteria]);
 
   const [currentPageNumber,setCurrentPageNumber] = React.useState(1);
 
@@ -366,9 +367,10 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
           //case 'NEXT_PAGE_LINK'    : return <Pagination.Next {...props}/>
           case 'PAGE'              : return <Pagination.Item {...props}>{p.value}</Pagination.Item>
           case 'ELLIPSIS'          : return <Pagination.Ellipsis {...props}/>
-          default                  : return <></>
+          default                  : return undefined;
         }
-      })}
+      })
+      .filter(f => !!f)}
     </Pagination>;
 
   return <div className="container-fluid">

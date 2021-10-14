@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import './App.css';
 import Map from './Map';
 import PlantTable from './PlantTable';
-import './map.css'
 //import {useGeolocation} from '../src/useGeolocation';
 import useLocalStorage from './useLocalStorage';
 import sortPlants from './sort-plants';
@@ -12,7 +11,7 @@ import PlantDetail from './PlantDetail';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {  faQrcode, faSearch, faFileExcel, faStar, faIdCard} from '@fortawesome/free-solid-svg-icons'
 
-import { DropdownButton,Dropdown,Pagination } from 'react-bootstrap';
+import { DropdownButton,Dropdown } from 'react-bootstrap';
 
 import ReactExport from 'react-export-excel';
 import {
@@ -191,8 +190,8 @@ function App({data}) {
                 tooltip: 'Download options available'
               }
 
-            ].map(vm => 
-              <NavLink activeClassName="active" className="btn btn-outline-light" to={vm.to}>
+            ].map((vm,i) => 
+              <NavLink key={i} activeClassName="active" className="btn btn-outline-light" to={vm.to}>
                 <FontAwesomeIcon icon={vm.icon} />
                 <span className="ml-2" title={vm.tooltip}>
                   {vm.label}
@@ -203,8 +202,8 @@ function App({data}) {
           </div>
 
           <DropdownButton title="Download" variant="outline-light">
-            {downloadActions(data,searchCriteria,favoritePlants).map(a => 
-              <Dropdown.Item onClick={a.method}>
+            {downloadActions(data,searchCriteria,favoritePlants).map((a,i) => 
+              <Dropdown.Item onClick={a.method} key={i}>
                 {a.label}
               </Dropdown.Item>
             )}
@@ -284,16 +283,16 @@ function App({data}) {
                       icon: faIdCard,
                       label:'Bench Cards'
                     }
-                  ].map(f => 
-                    <div className="">
-                    <div className="card">
-                      <div className="card-body text-center">
-                        <FontAwesomeIcon icon={f.icon} className="mt-2 h1"/>
-                        <div className="h5">
-                          {f.label}
+                  ].map((f,i) => 
+                    <div className="" key={i}>
+                      <div className="card">
+                        <div className="card-body text-center">
+                          <FontAwesomeIcon icon={f.icon} className="mt-2 h1"/>
+                          <div className="h5">
+                            {f.label}
+                          </div>
                         </div>
                       </div>
-                    </div>
                     </div>
                   )}
                 </div>
@@ -337,7 +336,7 @@ function App({data}) {
         {/*
         <Route exact="true" path="/search/(types)?/:types?" render={match => 
         */}
-        <Route exact="true" path="/search" render={match => 
+        <Route exact={true} path="/search" render={match => 
           <Search
             isPlantFavorite={isPlantFavorite}
             togglePlantFavorite={togglePlantFavorite}

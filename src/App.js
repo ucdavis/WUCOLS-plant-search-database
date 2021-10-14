@@ -6,26 +6,25 @@ import LocationPin from 'google-map-react';
 import './map.css'
 //import {useGeolocation} from '../src/useGeolocation';
 import useLocalStorage from './useLocalStorage';
-import { CSVDownload, CSVLink } from "react-csv";
 import PlantList from './PlantList';
 import PlantTable from './PlantTable';
 import PlantDetail from './PlantDetail';
 import {SearchForm,plantTypeCombinators} from './SearchForm';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSearchLocation, faMapMarkerAlt, faMap,faFileExcel, faTh, faThLarge, faBars, faSearch, faStar, faLeaf, faQrcode, faIdCard, faIdCardAlt, faCaretDown, faCartArrowDown, faDownload} from '@fortawesome/free-solid-svg-icons'
+import { /*faSearchLocation, faIdCardAlt, faCaretDown, faCartArrowDown, faMap,*/ faMapMarkerAlt,faFileExcel, faTh, faThLarge, faBars, faSearch, faStar, faLeaf, faQrcode, faIdCard, faDownload} from '@fortawesome/free-solid-svg-icons'
 import ultimatePagination from 'ultimate-pagination';
 
 import { DropdownButton,Dropdown,Pagination } from 'react-bootstrap';
 
 import ReactExport from 'react-export-excel';
 import {
-  BrowserRouter,
+  //BrowserRouter,
   HashRouter as Router,
   Route,
   NavLink,
   Redirect,
-  Switch,
-  useLocation
+  //Switch,
+  //useLocation
 } from "react-router-dom";
 //import groupBy from './groupBy';
 import SimpleReactLightbox from 'simple-react-lightbox'
@@ -63,7 +62,7 @@ function App({data}) {
       icon: faTh
     }
   ];
-  const [plantsViewModeId, setPlantsViewModeId] = React.useState(plantsViewModes[0].id);
+  const [plantsViewModeId] = React.useState(plantsViewModes[0].id);
   const plantsViewMode = plantsViewModes.filter(vm => vm.id === plantsViewModeId)[0] || plantsViewModes[0];
   
   let cityOptions = data.cities.map(c => ({
@@ -74,13 +73,7 @@ function App({data}) {
     region: c.region
   }));
   
-  const sortPlants = plants => {
-    return plants.sort((plantA,plantB) => {
-      let a = getWaterUseSortValue(plantA.waterUseByRegion[searchCriteria.city.region - 1]);
-      let b = getWaterUseSortValue(plantB.waterUseByRegion[searchCriteria.city.region - 1]);
-      return a < b ? -1 : a > b ? 1 : 0;
-    })
-  }
+  
 
   data.plantTypes = data.plantTypes.sort((a,b) => 
     a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
@@ -109,6 +102,14 @@ function App({data}) {
   const [searchCriteria, updateSearchCriteria] = React.useState(getDefaultSearchCriteria());
 
   const resetSearchCriteria = () => updateSearchCriteria(getDefaultSearchCriteria());
+
+  const sortPlants = React.useCallback(plants => {
+    return plants.sort((plantA,plantB) => {
+      let a = getWaterUseSortValue(plantA.waterUseByRegion[searchCriteria.city.region - 1]);
+      let b = getWaterUseSortValue(plantB.waterUseByRegion[searchCriteria.city.region - 1]);
+      return a < b ? -1 : a > b ? 1 : 0;
+    })
+  },[searchCriteria.city.region]);
 
   const searchPerformed = 
     Object.values(searchCriteria.waterUseClassifications).some(b => b)
@@ -162,7 +163,7 @@ function App({data}) {
       }))
       .slice(0,performancePlantLimit);
     },
-    [data, searchCriteria]);
+    [data, searchCriteria, sortPlants]);
 
 const [currentPageNumber,setCurrentPageNumber] = React.useState(1);
 
@@ -200,6 +201,7 @@ const actualPagination =
         //case 'NEXT_PAGE_LINK'    : return <Pagination.Next {...props}/>
         case 'PAGE'              : return <Pagination.Item {...props}>{p.value}</Pagination.Item>
         case 'ELLIPSIS'          : return <Pagination.Ellipsis {...props}/>
+        default                  : return <></>
       }
     })}
   </Pagination>;
@@ -210,7 +212,7 @@ const favoriteAsSpreadsheets = (data,searchCriteria,favoritePlants) => {
       ["Type(s)", "Botanical Name", "Common Name","Water Use", "Percentage of ET0"],
       ...favoritePlants
       .map(p => [
-        ,p.types.map(t => data.plantTypeNameByCode[t]).join(', ')
+        p.types.map(t => data.plantTypeNameByCode[t]).join(', ')
         ,p.botanicalName
         ,p.commonName
         ,data.waterUseByCode[p.waterUseByRegion[searchCriteria.city.region-1]].name
@@ -240,7 +242,7 @@ const favoriteAsSpreadsheets = (data,searchCriteria,favoritePlants) => {
 const downloadActions = (data,searchCriteria,favoritePlants) => {
   const ExcelFile = ReactExport.ExcelFile;
   const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
-  let [csvData,excelData] = favoriteAsSpreadsheets(data,searchCriteria,favoritePlants);
+  let [,excelData] = favoriteAsSpreadsheets(data,searchCriteria,favoritePlants);
   const sideRender = el => {
     ReactDOM.render(el, document.getElementById('download-outlet'));
   };
@@ -313,7 +315,7 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
     <Router>
       <div className="App">
         <nav className="navbar navbar-dark bg-dark sticky-top navbar-light bg-light d-flex justify-content-between">
-          <a className="navbar-brand" href="#">
+          <a className="navbar-brand" href="/">
             WUCOLS Plant Search Database
           </a>
 
@@ -398,7 +400,7 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
             </div>);
         }}/>
         <Route path="/plant/:plantId" render={({match}) => {
-          let plant = data.plants.filter(p => p.id == match.params.plantId || p.url_keyword == match.params.plantId)[0];
+          let plant = data.plants.filter(p => p.id === match.params.plantId || p.url_keyword === match.params.plantId)[0];
           return !plant 
             ? <div>No plant found by that ID</div>
             : <div className="container-fluid">

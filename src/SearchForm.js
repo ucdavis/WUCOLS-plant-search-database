@@ -1,10 +1,5 @@
 import React from 'react';
 import Select from 'react-select';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faStar, faTint } from '@fortawesome/free-solid-svg-icons'
-import {
-  Link
-} from "react-router-dom";
 const plantTypeCombinatorOptions = [
   {
     label:'Match plants with ANY of',

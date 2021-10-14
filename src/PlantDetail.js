@@ -13,7 +13,7 @@ const PlantDetail = ({plant,plantTypeNameByCode,waterUseByCode,region,regions,is
   if(!plant){
     return <div>Invalid Plant</div>;
   }
-  let wu = waterUseByCode[plant.waterUseByRegion[region-1]];
+  //let wu = waterUseByCode[plant.waterUseByRegion[region-1]];
   let regionWaterUsePairs = regions.map(r => 
     [ r, waterUseByCode[plant.waterUseByRegion[r.id-1]] ]);
   return (
@@ -103,7 +103,7 @@ const PlantDetail = ({plant,plantTypeNameByCode,waterUseByCode,region,regions,is
                     {wu.name}
                   </td>
                   <td style={{whiteSpace:'nowrap'}}>
-                    {wu.percentageET0 == 'N/A' ? 'N/A' : <>{wu.percentageET0}% ET<sub>0</sub></>}
+                    {wu.percentageET0 === 'N/A' ? 'N/A' : <>{wu.percentageET0}% ET<sub>0</sub></>}
                     
                   </td>
                 </tr>)}

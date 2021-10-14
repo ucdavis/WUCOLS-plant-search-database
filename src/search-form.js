@@ -1,6 +1,36 @@
 import React from 'react';
 import Select from 'react-select';
+import Map from './Map';
 import plantTypeCombinatorOptions from './plant-type-combinator-options';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {faMap} from '@fortawesome/free-solid-svg-icons'
+
+const MapModal = ({cities, visible, setVisible, onCityChange}) =>
+    <>
+    {visible && 
+    <div
+        className={"modal fade" + (visible ? " show" : "")} 
+        style={{display: visible ? 'block' : 'none'}}
+        id="mapModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
+    >
+        <div className="modal-dialog" style={{top:'30px'}}>
+            <div className="modal-content" style={{width:'65vw'}}>
+                <div className="modal-header">
+                    <h5 className="modal-title" id="exampleModalLabel">City Map</h5>
+                    <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={() => setVisible(false)}>
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div className="modal-body">
+                    <Map cities={cities} onSelect={city => {
+                        onCityChange(city);
+                        setVisible(false);
+                    }} />
+                </div>
+            </div>
+        </div>
+    </div>}
+    </>;
 
 const SearchForm = ({
     cityOptions,
@@ -10,6 +40,7 @@ const SearchForm = ({
     updateSearchCriteria
 }) => {
     //const {cityOptions,searchCriteria,updateSearchCriteria} = React.useContext(SearchCriteriaContext);
+    const [mapModalVisible,setMapModalVisible] = React.useState(false);
     const setPlantType = (code,checked) => 
         updateSearchCriteria({...searchCriteria, plantTypes: {...searchCriteria.plantTypes, [code]: checked}});
     const selectAllWaterUseClassifications = (selected) => {
@@ -39,20 +70,31 @@ const SearchForm = ({
     };
     return (
         <div>
+        <MapModal 
+            visible={mapModalVisible} 
+            setVisible={setMapModalVisible} 
+            onCityChange={onCityChange}
+            cities={cityOptions} />
         <div className="form-group">
             <label><strong>City/Region</strong><br/>Start typing to search</label>
             <Select 
-            styles={{
-                container: base => ({
-                ...base,
-                flex: 1
-                })
-            }}
-            options={cityOptions}
-            placeholder="Select a city"
-            value={searchCriteria.city}
-            onChange={onCityChange}
-            noOptionsMessage={() => "No cities found by that name"}/>
+                styles={{
+                    container: base => ({
+                    ...base,
+                    flex: 1
+                    })
+                }}
+                options={cityOptions}
+                placeholder="Select a city"
+                value={searchCriteria.city}
+                onChange={onCityChange}
+                noOptionsMessage={() => "No cities found by that name"}/>
+            {' or '}
+            <button className="btn btn-link btn-sm" onClick={() => setMapModalVisible(true)}>
+                <FontAwesomeIcon icon={faMap} />
+                {' '}
+                Select city from map
+            </button>
         </div>
         <div className="form-group">
             <label><strong>Plant Name</strong></label>

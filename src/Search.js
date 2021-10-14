@@ -83,6 +83,7 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
   
   let cityOptions = data.cities.map(c => ({
     id: c.id,
+    position: c.position,
     key: c.id,
     name: c.name,
     label: "Region " + c.region + ": " + c.name,
@@ -236,6 +237,7 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
         {!searchPerformed 
         ? <Welcome />
         : <>
+
             <div className="d-flex justify-content-between align-items-center mb-3">
               <div>
                 Matching Plants: {matchingPlants.length}

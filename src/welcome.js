@@ -35,7 +35,7 @@ const Welcome = () =>
                 label:'Search',
                 description:  <>
                 Enter any combination of 
-                    {["Plant Name", "Water Use", "Plant Types"].map(txt => <div><strong>{txt}</strong></div>)}
+                    {["Plant Name", "Water Use", "Plant Types"].map((txt,i) => <div key={i}><strong>{txt}</strong></div>)}
                 to find plants of interest.
                 </>
             },
@@ -50,7 +50,7 @@ const Welcome = () =>
                 description: 'Download your list in a variety of formats'
             }
             ].map((f,i) => 
-            <div className="card">
+            <div className="card" key={i}>
                 <div className="card-body">
                 <FontAwesomeIcon icon={f.icon} className="mt-2 h1"/>
                 <div className="h4">

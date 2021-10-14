@@ -1,11 +1,12 @@
 import React from 'react';
-import Select from 'react-select';
 import PlantList from './PlantList';
 import PlantTable from './PlantTable';
 import {  faTh, faThLarge, faBars} from '@fortawesome/free-solid-svg-icons'
 import sortPlants from './sort-plants';
 import ultimatePagination from 'ultimate-pagination';
 import { Pagination } from 'react-bootstrap';
+import plantTypeCombinatorOptions from './plant-type-combinator-options';
+import SearchForm from './search-form';
 import {
   //HashRouter as Router,
   useHistory,
@@ -17,180 +18,17 @@ import Welcome from './welcome';
 const performancePlantLimit = 50000;
 
 
-const plantTypeCombinatorOptions = (() => {
-    const options = [
-        {
-            label:'Match plants with ANY of',
-            value: 'ANY',
-            fn: (a,b) => a || b
-        },
-        {
-            label:'Match plants with ALL of',
-            value: 'ALL',
-            fn: (a,b) => a && b
-        }
-    ];
-    return {
-        default: options[0],
-        array: options,
-        byId: options.reduce((dict,c) => { 
-            dict[c.value] = c;
-            return dict;
-        }, {})
-    };
-})();
-
-const SearchForm = ({
-    cityOptions,
-    searchCriteria,
-    plantTypes,
-    waterUseClassifications,
-    updateSearchCriteria
-}) => {
-    //const {cityOptions,searchCriteria,updateSearchCriteria} = React.useContext(SearchCriteriaContext);
-    const setPlantType = (code,checked) => 
-        updateSearchCriteria({...searchCriteria, plantTypes: {...searchCriteria.plantTypes, [code]: checked}});
-    const selectAllWaterUseClassifications = (selected) => {
-        updateSearchCriteria({
-        ...searchCriteria,
-        waterUseClassifications: waterUseClassifications.reduce((dict, wu) => {
-            dict[wu.code] = selected;
-            return dict;
-        },{})
-        });
-    };
-    const onCityChange = (o) => {
-        //console.log('onCityChange',o);
-        updateSearchCriteria({...searchCriteria, city: o});
-    }
-    const onPlantTypeCombinatorChange = (ptc) => {
-        updateSearchCriteria({...searchCriteria, plantTypeCombinator: ptc});
-    };
-    const selectAllPlantTypes = (selected) => {
-        updateSearchCriteria({
-        ...searchCriteria,
-        plantTypes: plantTypes.reduce((dict, pt) => {
-            dict[pt.code] = selected;
-            return dict;
-        },{})
-        });
-    };
-    return (
-        <div>
-        <div className="form-group">
-            <label><strong>City/Region</strong><br/>Start typing to search</label>
-            <Select 
-            styles={{
-                container: base => ({
-                ...base,
-                flex: 1
-                })
-            }}
-            options={cityOptions}
-            placeholder="Select a city"
-            value={searchCriteria.city}
-            onChange={onCityChange}
-            noOptionsMessage={() => "No cities found by that name"}/>
-        </div>
-        <div className="form-group">
-            <label><strong>Plant Name</strong></label>
-            <input 
-            type="search"
-            className="form-control"
-            value={searchCriteria.name}
-            placeholder="botanical or common name"
-            onChange={e => updateSearchCriteria({...searchCriteria, name: e.target.value.toLowerCase()}) }
-            />
-        </div>
-        <div className="form-group">
-            <label className="form-label"><strong>Water Use</strong></label>
-            <div>
-            <button
-                className="btn btn-sm btn-link"
-                onClick={() => selectAllWaterUseClassifications(true)}>
-                Select all
-            </button>
-            / <button
-                className="btn btn-sm btn-link"
-                onClick={() => selectAllWaterUseClassifications(false)}>
-                Deselect all
-            </button>
-            </div>
-            {waterUseClassifications.map(wu => (
-                <div className="form-check" key={wu.code}>
-                    <input 
-                    className="form-check-input"
-                    type="checkbox"
-                    checked={searchCriteria.waterUseClassifications[wu.code]}
-                    onChange={e => updateSearchCriteria({...searchCriteria, waterUseClassifications: {...searchCriteria.waterUseClassifications, [wu.code]: e.target.checked}}) }
-                    id={wu.code + '_checkbox'}/>
-                    <label
-                    className="form-check-label"
-                    htmlFor={wu.code + '_checkbox'}>
-                        {wu.name}
-                    </label>
-                </div>
-            ))}
-        </div>
-        <div className="form-group">
-            <label className="form-label"><strong>Plant Types</strong></label> 
-            <div>
-            <button
-                className="btn btn-sm btn-link"
-                onClick={() => selectAllPlantTypes(true)}>
-                Select all
-            </button>
-            /
-            <button
-                className="btn btn-sm btn-link"
-                onClick={() => selectAllPlantTypes(false)}>
-                Deselect all
-            </button>
-            </div>
-            <div>
-            <Select 
-                styles={{
-                container: base => ({
-                    ...base,
-                    flex: 1
-                })
-                }}
-                options={plantTypeCombinatorOptions.array}
-                value={searchCriteria.plantTypeCombinator}
-                onChange={onPlantTypeCombinatorChange}
-                noOptionsMessage={() => "No result"}/>
-            </div>
-            {plantTypes.map(pt => (
-                <div className="form-check" key={pt.code}>
-                    <input 
-                    className="form-check-input"
-                    type="checkbox"
-                    checked={searchCriteria.plantTypes[pt.code]}
-                    onChange={e => setPlantType(pt.code,e.target.checked)}
-                    id={pt.code + '_checkbox'}/>
-                    <label
-                    className="form-check-label"
-                    htmlFor={pt.code + '_checkbox'}>
-                        {pt.name}
-                    </label>
-                </div>
-            ))}
-        </div>
-        </div>
-    );
-};
-
 const SearchCriteriaConverter = (() => {
   return {
     fromQuerystring: qs => {
       let ps = new URLSearchParams(qs);
       return {
-        plantTypes: ps.getAll('pt').reduce((dict, pt) => {
+        plantTypes: ps.getAll('t').reduce((dict, pt) => {
           dict[pt] = true;  
           return dict;
         },{}),
         name: (ps.get('n') || "").toLowerCase(),
-        plantTypeCombinatorId: ps.get('ptm'),
+        plantTypeCombinatorId: ps.get('tm'),
         cityId: parseInt(ps.get('c')),
         waterUseClassifications:ps.getAll('wu').reduce((dict, wu) => {
           dict[wu] = true;  
@@ -200,13 +38,16 @@ const SearchCriteriaConverter = (() => {
     },
     toQuerystring: sc => {
       let wu = Object.entries(sc.waterUseClassifications).filter(([,selected]) => selected).map(([code]) => code);
+      let pt = Object.entries(sc.plantTypes).filter(([,selected]) => selected).map(([code]) => code);
       let ps = new URLSearchParams(
         [
-            ['c',sc.city.id],
+            ...(!sc.city ? [] : [ ['c',sc.city.id] ]),
             //exclude default param values for terser URLs
             ...(!sc.name ? [] : [['n',sc.name]]),
-            ...(sc.plantTypeCombinator === plantTypeCombinatorOptions.default ? [] : [['ptm',sc.plantTypeCombinator.value]]),
-            ...wu.map(wu => ['wu',wu])
+            ...(sc.plantTypeCombinator === plantTypeCombinatorOptions.default ? [] : [['tm',sc.plantTypeCombinator.value]]),
+            ...wu.map(wu => ['wu',wu]),
+            ...pt.map(pt => ['t',pt]),
+            ...(sc.p === 1 ? [] : [['p', sc.p]]),
         ]);
       return ps.toString();
     }
@@ -253,13 +94,14 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
     a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
 
   const getDefaultSearchCriteria = () => ({
-    city: cityOptions[0],
+    city: null,
     name: '',
     waterUseClassifications: {},
     plantTypes: data.plantTypes.reduce((dict, pt) => {
       dict[pt.code] = autoSearch ? pt.code === 'A' : false;
       return dict;
     },{}),
+    p: 1,
     plantTypeCombinator: plantTypeCombinatorOptions.default
   });
 
@@ -271,6 +113,7 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
     sc.plantTypes = up.plantTypes;
     sc.name = up.name;
     sc.city = cityOptions.filter(o => o.id === up.cityId)[0] || sc.city;
+    sc.p = 1;
     if(up.plantTypeCombinatorId in plantTypeCombinatorOptions.byId){
         sc.plantTypeCombinator = plantTypeCombinatorOptions.byId[up.plantTypeCombinatorId];
     }
@@ -285,8 +128,8 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
    
   const autoSearch = false;
 
-
   const searchCriteria = initSearchCriteria();
+  const [currentPageNumber,setCurrentPageNumber] = React.useState(1);
 
   const updateSearchCriteria = React.useCallback(sc => {
       let qs = SearchCriteriaConverter.toQuerystring(sc);
@@ -320,6 +163,9 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
           ? types.some.bind(types)
           : types.every.bind(types);
       //console.log(types);
+      if(!searchCriteria.city){
+        return [];
+      }
       return sortPlants(searchCriteria.city.region)(data.plants.filter(p => {
         let typeOk = noType || typeFn(t => p.types.indexOf(t) > -1);
         let wu = p.waterUseByRegion[searchCriteria.city.region - 1];
@@ -330,13 +176,6 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
       .slice(0,performancePlantLimit);
     },
     [data, searchCriteria]);
-
-  const [currentPageNumber,setCurrentPageNumber] = React.useState(1);
-
-  React.useEffect(() => {
-    //Optimally, paging resets when a user changes their search.  This offers the best user experience.
-    setCurrentPageNumber(1);
-  }, [searchCriteria]);
 
   const pageSize = 50;
   const pageCount = Math.max(1,Math.ceil(matchingPlants.length/pageSize));
@@ -355,23 +194,24 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
   //console.log('pagination',paginationModel);
 
   const actualPagination = 
-    pageCount > 1 && <Pagination>
-      {paginationModel.map(p => {
-        const props = {
-          key: p.key,
-          active: p.isActive,
-          onClick: () => setCurrentPageNumber(p.value)
-        };
-        switch(p.type){
-          //case 'PREVIOUS_PAGE_LINK': return <Pagination.Prev {...props}/>
-          //case 'NEXT_PAGE_LINK'    : return <Pagination.Next {...props}/>
-          case 'PAGE'              : return <Pagination.Item {...props}>{p.value}</Pagination.Item>
-          case 'ELLIPSIS'          : return <Pagination.Ellipsis {...props}/>
-          default                  : return undefined;
-        }
-      })
-      .filter(f => !!f)}
-    </Pagination>;
+    pageCount > 1 && 
+        <Pagination>
+            {paginationModel.map(p => {
+                const props = {
+                    key: p.key,
+                    active: p.isActive,
+                    onClick: () => setCurrentPageNumber(p.value)
+                };
+                switch(p.type){
+                    //case 'PREVIOUS_PAGE_LINK': return <Pagination.Prev {...props}/>
+                    //case 'NEXT_PAGE_LINK'    : return <Pagination.Next {...props}/>
+                    case 'PAGE'              : return <Pagination.Item {...props}>{p.value}</Pagination.Item>
+                    case 'ELLIPSIS'          : return <Pagination.Ellipsis {...props}/>
+                    default                  : return undefined;
+                }
+            })
+            .filter(f => !!f)}
+        </Pagination>;
 
   return <div className="container-fluid">
     {/*
@@ -413,14 +253,17 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
             }
             </div>
             {actualPagination}
-            <plantsViewMode.component 
-              isPlantFavorite={isPlantFavorite}
-              togglePlantFavorite={togglePlantFavorite}
-              plants={matchingPlants.slice((currentPageNumber-1)*pageSize, (currentPageNumber+1)*pageSize)} 
-              photosByPlantName={data.photos}
-              plantTypeNameByCode={data.plantTypeNameByCode} 
-              region={searchCriteria.city.region}
-              waterUseByCode={data.waterUseByCode}/>
+            {!searchCriteria.city
+                ? <div>Please select a city</div>
+                : <plantsViewMode.component 
+                    isPlantFavorite={isPlantFavorite}
+                    togglePlantFavorite={togglePlantFavorite}
+                    plants={matchingPlants.slice((currentPageNumber-1)*pageSize, (currentPageNumber+1)*pageSize)} 
+                    photosByPlantName={data.photos}
+                    plantTypeNameByCode={data.plantTypeNameByCode} 
+                    region={searchCriteria.city.region}
+                    waterUseByCode={data.waterUseByCode}/>
+            }
             {actualPagination}
           </>
         }

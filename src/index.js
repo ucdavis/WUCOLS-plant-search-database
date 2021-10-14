@@ -7,6 +7,7 @@ import { ToastProvider } from 'react-toast-notifications'
 fetch("WUCOLS.json")
 .then(r => r.json())
 .then(d => {
+  window.wucols_data = d;
   d.plants.forEach(p => {
     p.searchName = (p.commonName + ' ' + p.botanicalName).toLowerCase();
   });

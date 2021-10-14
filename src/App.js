@@ -1,8 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './App.css';
-import GoogleMapReact from 'google-map-react';
-import LocationPin from 'google-map-react';
+import Map from './Map';
 import './map.css'
 //import {useGeolocation} from '../src/useGeolocation';
 import useLocalStorage from './useLocalStorage';
@@ -382,21 +381,9 @@ const downloadButtons = (className,searchCriteria,favoritePlants) => {
             lng: -122.08427,
           };
           const zoomLevel = 16;
-          const dev = true;
-          const apiKey = dev ? "AIzaSyBCZkKqXgoURncqEtUCs4ErDb7qeaHt80I" : "AIzaSyCKJG-QM3eR7YESp5E7xXcAGrB2Pjo21ZM";
           return (
-            <div className="google-map">
-              <GoogleMapReact
-                bootstrapURLKeys={{ key: apiKey }}
-                defaultCenter={location}
-                defaultZoom={zoomLevel}
-              >
-                <LocationPin
-                  lat={location.lat}
-                  lng={location.lng}
-                  text={location.address}
-                />
-              </GoogleMapReact>
+            <div>
+              <Map cities={data.cities} onSelect={city => {alert(city.name)}} />
             </div>);
         }}/>
         <Route path="/plant/:plantId" render={({match}) => {

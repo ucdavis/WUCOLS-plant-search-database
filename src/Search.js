@@ -17,12 +17,12 @@ import Welcome from './welcome';
 
 const performancePlantLimit = 50000;
 
-
 const SearchCriteriaConverter = (() => {
   return {
     fromQuerystring: qs => {
       let ps = new URLSearchParams(qs);
       return {
+        pageNumber: parseInt(ps.get('p') || "") || 1, 
         plantTypes: ps.getAll('t').reduce((dict, pt) => {
           dict[pt] = true;  
           return dict;
@@ -47,7 +47,7 @@ const SearchCriteriaConverter = (() => {
             ...(sc.plantTypeCombinator === plantTypeCombinatorOptions.default ? [] : [['tm',sc.plantTypeCombinator.value]]),
             ...wu.map(wu => ['wu',wu]),
             ...pt.map(pt => ['t',pt]),
-            ...(sc.p === 1 ? [] : [['p', sc.p]]),
+            ...(sc.pageNumber === 1 ? [] : [['p', sc.pageNumber]]),
         ]);
       return ps.toString();
     }
@@ -102,7 +102,7 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
       dict[pt.code] = autoSearch ? pt.code === 'A' : false;
       return dict;
     },{}),
-    p: 1,
+    pageNumber: 1,
     plantTypeCombinator: plantTypeCombinatorOptions.default
   });
 
@@ -113,8 +113,8 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
     sc.waterUseClassifications = up.waterUseClassifications;
     sc.plantTypes = up.plantTypes;
     sc.name = up.name;
+    sc.pageNumber = up.pageNumber;
     sc.city = cityOptions.filter(o => o.id === up.cityId)[0] || sc.city;
-    sc.p = 1;
     if(up.plantTypeCombinatorId in plantTypeCombinatorOptions.byId){
         sc.plantTypeCombinator = plantTypeCombinatorOptions.byId[up.plantTypeCombinatorId];
     }
@@ -130,10 +130,9 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
   const autoSearch = false;
 
   const searchCriteria = initSearchCriteria();
-  const [currentPageNumber,setCurrentPageNumber] = React.useState(1);
 
   const updateSearchCriteria = React.useCallback(sc => {
-      let qs = SearchCriteriaConverter.toQuerystring(sc);
+    let qs = SearchCriteriaConverter.toQuerystring(sc);
     //console.log('search altered',qs);
     if(!history){
       //console.log('no history')
@@ -180,9 +179,10 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
 
   const pageSize = 50;
   const pageCount = Math.max(1,Math.ceil(matchingPlants.length/pageSize));
+  const currentPage = pageCount > 0 ? searchCriteria.pageNumber : 1;
   var paginationModel = ultimatePagination.getPaginationModel({
     // Required
-    currentPage: pageCount > 0 ? currentPageNumber : 1,
+    currentPage,
     totalPages: pageCount,
   
     // Optional
@@ -194,6 +194,7 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
   });
   //console.log('pagination',paginationModel);
 
+  const setCurrentPageNumber = pn => updateSearchCriteria({ ...searchCriteria,  pageNumber: pn});
   const actualPagination = 
     pageCount > 1 && 
         <Pagination>
@@ -260,7 +261,7 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
                 : <plantsViewMode.component 
                     isPlantFavorite={isPlantFavorite}
                     togglePlantFavorite={togglePlantFavorite}
-                    plants={matchingPlants.slice((currentPageNumber-1)*pageSize, (currentPageNumber+1)*pageSize)} 
+                    plants={matchingPlants.slice((searchCriteria.pageNumber-1)*pageSize, (searchCriteria.pageNumber+1)*pageSize)} 
                     photosByPlantName={data.photos}
                     plantTypeNameByCode={data.plantTypeNameByCode} 
                     region={searchCriteria.city.region}

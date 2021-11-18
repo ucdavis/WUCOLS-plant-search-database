@@ -13,6 +13,7 @@ const Favorites = ({
     searchCriteria
 }) => {
 
+    console.log(JSON.stringify(favoritePlants,null,2))
   const downloadButtons = (className,searchCriteria,favoritePlants) => {
     return downloadActions(data,searchCriteria,favoritePlants).map(a =>
       <button className={className} onClick={a.method}>
@@ -62,6 +63,7 @@ const Favorites = ({
         <div className="row">
             <nav className="col-sm-4 col-lg-3 col-xl-2 sidebar bg-light">
             <div className="sidebar-sticky p-3"  >
+                {/*
                 {
                 !!favoritePlants.length
                 && (
@@ -70,6 +72,8 @@ const Favorites = ({
                     </div>
                 )
                 }
+                */}
+                Manage your favorites and then download
             </div>
             </nav>
             <div className="col-sm-8 col-lg-9 col-xl-10 ml-sm-auto">
@@ -88,6 +92,7 @@ const Favorites = ({
                     showAvailableMedia={true}
                     isPlantFavorite={isPlantFavorite}
                     togglePlantFavorite={togglePlantFavorite}
+                    benchCardTemplates={data.benchCardTemplates}
                     plants={favoritePlants} 
                     photosByPlantName={data.photos}
                     plantTypeNameByCode={data.plantTypeNameByCode} 

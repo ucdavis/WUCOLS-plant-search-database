@@ -42,6 +42,9 @@ fetch("WUCOLS.json")
   d.plantTypes = d.plantTypes.sort((a,b) => 
     a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
 
+  d.benchCardTemplates = d.benchCardTemplates.sort((a,b) => 
+    a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+
   ReactDOM.render(
     <ToastProvider
       autoDismiss

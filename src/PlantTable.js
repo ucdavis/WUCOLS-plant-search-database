@@ -7,31 +7,52 @@ import {
   Link
 } from "react-router-dom";
 
-const PlantTable = ({showAvailableMedia, plants,photosByPlantName,plantTypeNameByCode,waterUseByCode,region,isPlantFavorite,togglePlantFavorite}) =>
-{
+const benchCardForPlantRegionAndTemplateId = (p,region,templateId) => 
+	region in p.benchCards && templateId in p.benchCards[region]
+	? p.benchCards[region][templateId]
+	: undefined;
+
+const PlantTable = ({
+	showAvailableMedia,
+	plants,
+	photosByPlantName,
+	plantTypeNameByCode,
+	waterUseByCode,
+	region,
+	isPlantFavorite,
+	togglePlantFavorite,
+	benchCardTemplates
+}) => {
   return (
 		<table className="table table-sm ">
 			<thead>
 				<tr>
-					<th>
+					<th rowSpan="2">
 						Photo
 					</th>
-					<th>
+					<th rowSpan="2">
 						Name
 					</th>
 					{showAvailableMedia && 
-						<th>
-							Available Media
+						<th colSpan={benchCardTemplates.length}>
+							Available Bench Cards
 						</th>
 					}
-					<th>
+					<th rowSpan="2">
 						Water Use
 					</th>
-					<th>
+					<th rowSpan="2">
 						Type(s)
 					</th>
-					<th>Favorite</th>
+					<th rowSpan="2">Favorite</th>
 				</tr>
+				{showAvailableMedia &&
+					<tr>
+						{benchCardTemplates.map(t => 
+							<th key={t.id}>{t.name}</th>
+						)}
+					</tr>
+				}
 			</thead>
 			<tbody>
 				{plants.map(p => {
@@ -55,10 +76,13 @@ const PlantTable = ({showAvailableMedia, plants,photosByPlantName,plantTypeNameB
 								</div>
 							</td>
 							{showAvailableMedia && 
-								<td>
-									Media
-								</td>
-							}
+								benchCardTemplates.map(t => {
+									var bc = benchCardForPlantRegionAndTemplateId(p,region,t.id);
+									return <td key={t.id}>
+										{!bc ? <>N/A</> : <a href={bc.url} target="_blank">Download</a>}
+									</td>
+								}
+								)}
 							<td>
 								<WaterDropRating waterUseCode={wu.code}/>
 								<small className="ml-2">

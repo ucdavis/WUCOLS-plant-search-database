@@ -171,6 +171,7 @@ function App({data}) {
       },
       {
         method: () => {
+          console.log(favoritePlants);
           alert('Not implemented yet');
         },
         label: 
@@ -215,13 +216,17 @@ function App({data}) {
           )}
         </div>
 
-        <DropdownButton title="Download" variant="outline-light">
+        {!searchCriteria.city
+        ? <div className="text-light">{/*Select a city to enable downloads*/}</div>
+        :
+        <DropdownButton title="Download" variant="outline-light" disabled={!searchCriteria.city}>
           {downloadActions(data,searchCriteria,favoritePlants).map((a,i) => 
             <Dropdown.Item onClick={a.method} key={i}>
               {a.label}
             </Dropdown.Item>
           )}
         </DropdownButton>
+        }
 
         {/*
         <div>

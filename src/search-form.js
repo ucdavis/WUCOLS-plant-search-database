@@ -14,7 +14,7 @@ const MapModal = ({cities, visible, setVisible, onCityChange}) =>
         id="mapModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
     >
         <div className="modal-dialog" style={{top:'30px'}}>
-            <div className="modal-content" style={{width:'65vw'}}>
+            <div className="modal-content" style={{width:'65vw',position:'fixed',left:'17vw'}}>
                 <div className="modal-header">
                     <h5 className="modal-title" id="exampleModalLabel">City Map</h5>
                     <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={() => setVisible(false)}>

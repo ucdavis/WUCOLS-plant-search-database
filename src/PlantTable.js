@@ -34,9 +34,14 @@ const PlantTable = ({
 						Name
 					</th>
 					{showAvailableMedia && 
-						<th colSpan={benchCardTemplates.length}>
-							Available Bench Cards
-						</th>
+						<>
+							<th rowSpan="2">
+								QR Code
+							</th>
+							<th colSpan={benchCardTemplates.length}>
+								Bench Cards
+							</th>
+						</>
 					}
 					<th rowSpan="2">
 						Water Use
@@ -76,10 +81,23 @@ const PlantTable = ({
 								</div>
 							</td>
 							{showAvailableMedia && 
+								<td>
+									<a href={p.qrCodeUrl} target="_blank" rel="noreferrer">
+										<img
+											src={p.qrCodeUrl} 
+											className="img-responsive"
+											style={{width:'100px'}}
+										/>
+									</a>
+								</td>
+							}
+							{showAvailableMedia && 
 								benchCardTemplates.map(t => {
 									var bc = benchCardForPlantRegionAndTemplateId(p,region,t.id);
 									return <td key={t.id}>
-										{!bc ? <>N/A</> : <a href={bc.url} target="_blank">Download</a>}
+										{!bc 
+											? <>N/A</> 
+											: <a href={bc.url} target="_blank" rel="noreferrer">Download</a>}
 									</td>
 								}
 								)}

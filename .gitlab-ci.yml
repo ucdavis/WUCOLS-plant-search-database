@@ -12,8 +12,8 @@ yarn:
     # Replace this with your site URL
     PUBLIC_URL: https://ucanr-it.gitlab.io/wucols-ui/
   script:
-    - yarn install      
-    - yarn build
+    - npm install
+    - npm run-script --openssl-legacy-provider build
   artifacts:
     paths:
       - build/      

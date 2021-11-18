@@ -38,8 +38,8 @@ const CityMarker = ({city,onClick}) => {
     </>;
 };
 
-const dev = true;
-const apiKey = dev ? "AIzaSyBCZkKqXgoURncqEtUCs4ErDb7qeaHt80I" : "AIzaSyCKJG-QM3eR7YESp5E7xXcAGrB2Pjo21ZM";
+const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+console.log(process.env);
 const libraries = ['geometry'];
 
 function MyComponent({cities,onSelect}) {

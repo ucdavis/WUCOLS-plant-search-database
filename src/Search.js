@@ -17,7 +17,8 @@ const Search = ({
   searchCriteria,
   setSearchCriteria,
   isPlantFavorite,
-  togglePlantFavorite
+  togglePlantFavorite,
+  queryString
 }) => {
 
   let plantsViewModes = [
@@ -155,6 +156,7 @@ const Search = ({
             {!searchCriteria.city
                 ? <div>Please select a city</div>
                 : <plantsViewMode.component 
+                    queryString={queryString}
                     isPlantFavorite={isPlantFavorite}
                     togglePlantFavorite={togglePlantFavorite}
                     plants={matchingPlants.slice((searchCriteria.pageNumber-1)*pageSize, (searchCriteria.pageNumber+1)*pageSize)} 

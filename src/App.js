@@ -282,6 +282,7 @@ function App({data}) {
         <Favorites {...
           {
             favoritePlants
+            ,queryString: location.search
             ,downloadActions
             ,isPlantFavorite
             ,togglePlantFavorite
@@ -295,6 +296,7 @@ function App({data}) {
       */}
       <Route exact={true} path="/search" render={match => 
         <Search
+          queryString={location.search}
           searchCriteria={searchCriteria}
           isPlantFavorite={isPlantFavorite}
           togglePlantFavorite={togglePlantFavorite}

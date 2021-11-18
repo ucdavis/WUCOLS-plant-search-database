@@ -5,6 +5,7 @@ import {  faQrcode, faFileExcel, faIdCard} from '@fortawesome/free-solid-svg-ico
 
 
 const Favorites = ({
+    queryString,
     favoritePlants,
     downloadActions,
     data,
@@ -90,6 +91,7 @@ const Favorites = ({
             {!searchCriteria.city
                 ? <div>Select a city to view your favorites</div>
                 : <PlantTable 
+                    queryString={queryString}
                     showAvailableMedia={true}
                     isPlantFavorite={isPlantFavorite}
                     togglePlantFavorite={togglePlantFavorite}

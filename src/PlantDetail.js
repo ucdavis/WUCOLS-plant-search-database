@@ -4,11 +4,16 @@ import WaterDropRating from './WaterDropRating';
 import { SRLWrapper } from "simple-react-lightbox";
 import PlantFavoriteButton from './PlantFavoriteButton';
 
-import {
-  Link
-} from "react-router-dom";
 
-const PlantDetail = ({plant,plantTypeNameByCode,waterUseByCode,region,regions,isPlantFavorite,togglePlantFavorite}) =>
+const PlantDetail = ({
+  plant,
+  plantTypeNameByCode,
+  waterUseByCode,
+  region,
+  regions,
+  isPlantFavorite,
+  togglePlantFavorite
+}) =>
 {
   if(!plant){
     return <div>Invalid Plant</div>;
@@ -18,7 +23,6 @@ const PlantDetail = ({plant,plantTypeNameByCode,waterUseByCode,region,regions,is
     [ r, waterUseByCode[plant.waterUseByRegion[r.id-1]] ]);
   return (
     <>
-    <Link to="/" className="float-right h1">&times;</Link>
     <div className="container p-5">
 
       <div className="float-right h2">

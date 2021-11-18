@@ -14,6 +14,7 @@ const benchCardForPlantRegionAndTemplateId = (p,region,templateId) =>
 	: undefined;
 
 const PlantTable = ({
+	queryString,
 	showAvailableMedia,
 	plants,
 	photosByPlantName,
@@ -75,7 +76,7 @@ const PlantTable = ({
 									alt={p.botanicalName}/>
 							</td>
 							<td>
-								<Link to={`/plant/${p.id}`}>
+								<Link to={`/plant/${p.id}${queryString}`}>
 									<h6 className="mt-0 mb-1"><em>{p.botanicalName}</em></h6>
 								</Link>
 								<div>

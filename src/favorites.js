@@ -13,7 +13,6 @@ const Favorites = ({
     searchCriteria
 }) => {
 
-    console.log(JSON.stringify(favoritePlants,null,2))
   const downloadButtons = (className,searchCriteria,favoritePlants) => {
     return downloadActions(data,searchCriteria,favoritePlants).map(a =>
       <button className={className} onClick={a.method}>

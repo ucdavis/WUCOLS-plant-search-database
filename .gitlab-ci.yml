@@ -21,6 +21,7 @@ aws:
   image: sleavely/node-awscli:12.x
   stage: deploy
   variables:
+    REACT_APP_GOOGLE_MAPS_API_KEY: $REACT_APP_GOOGLE_MAPS_API_KEY
     AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID 
     AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
   script:

@@ -17,9 +17,9 @@ import { DropdownButton,Dropdown } from 'react-bootstrap';
 import ReactExport from 'react-export-excel';
 import {
   //BrowserRouter as Router,
-  HashRouter as Router,
-  Route,
   useLocation,
+  useHistory,
+  Route,
   NavLink,
   Redirect,
 } from "react-router-dom";
@@ -30,16 +30,28 @@ import SearchCriteriaConverter from './SearchCriteriaConverter';
 
 function App({data}) {
   //const {lat,lng,error} = useGeolocation(false,{enableHighAccuracy: true});
-  const qs = (() => {
-    //IMPORTANT: assumed hash routing
-    let qs = window.location.hash.split('?')[1];
-    return !qs ? '' : '?' + qs;
-  })();
-  const [searchCriteria, setSearchCriteria] = React.useState(
+  const location = useLocation();
+  const history = useHistory();
+  const searchCriteria =
    SearchCriteriaConverter.initSearchCriteria(
-    qs,
+    location.search,
     data.cityOptions,
-    data.plantTypes));
+    data.plantTypes);
+
+  const updateSearchCriteria = React.useCallback(sc => {
+    let qs = SearchCriteriaConverter.toQuerystring(sc);
+    //console.log('search altered',qs);
+    if(!history){
+      //console.log('no history')
+      //return;
+    }
+    //console.log(history)
+    history.push({
+        path: '/search',
+        search: qs
+    });
+    //console.log(sc);
+  },[history]);
 
   const [isFavoriteByPlantId, updateIsFavoriteByPlantId] = useLocalStorage('isFavoriteByPlantId', {});
   const favoritePlants = sortPlants(!searchCriteria.city ? 0 : searchCriteria.city.region)(data.plants.filter(p => !!isFavoriteByPlantId[p.id]));
@@ -171,124 +183,121 @@ function App({data}) {
   };
 
   return (
-    <Router /*basename={process.env.PUBLIC_URL}*/>
-      <div className="App">
-        <nav className="navbar navbar-dark bg-dark sticky-top navbar-light bg-light d-flex justify-content-between">
-          <a className="navbar-brand" href="/">
-            WUCOLS Plant Search Database
-          </a>
+    <div className="App">
+      <nav className="navbar navbar-dark bg-dark sticky-top navbar-light bg-light d-flex justify-content-between">
+        <a className="navbar-brand" href="/">
+          WUCOLS Plant Search Database
+        </a>
 
-          <div className="btn-group">
-            {[
-              {
-                label: 'Search',
-                icon: faSearch,
-                to: '/search' + qs
-              },
-              {
-                label: `Favorites (${favoritePlants.length})`,
-                icon: faStar,
-                to: '/favorites' + qs,
-                tooltip: 'Download options available'
-              }
-            ].map((vm,i) => {
-              console.log(vm);
-              return (
-                <NavLink key={i} activeClassName="active" className="btn btn-outline-light" to={vm.to}>
-                  <FontAwesomeIcon icon={vm.icon} />
-                  <span className="ml-2" title={vm.tooltip}>
-                    {vm.label}
-                  </span>
-                </NavLink>
-                );
-              }
-            )}
-          </div>
-
-          <DropdownButton title="Download" variant="outline-light">
-            {downloadActions(data,searchCriteria,favoritePlants).map((a,i) => 
-              <Dropdown.Item onClick={a.method} key={i}>
-                {a.label}
-              </Dropdown.Item>
-            )}
-          </DropdownButton>
-
-          {/*
-          <div>
-            <span className="mr-3 text-light">
-              View plants in a
-            </span>
-            <div className="btn-group">
-              {plantsViewModes.map(vm => 
-                <button className={'btn btn-outline-light' + (vm.id === plantsViewModeId ? ' active' : '')} onClick={() => {
-                  setPlantsViewModeId(vm.id);
-                }}>
-                  <FontAwesomeIcon icon={vm.icon} />
-                  <span className="ml-2">
-                    {vm.label}
-                  </span>
-                </button>
-              )}
-            </div>
-          </div>
-          */}
-        </nav>
-        <Route exact={true} path="/">
-          <Redirect to="/search" />
-        </Route>
-        <Route path="/map" render={({match}) => {
-          return (
-            <div>
-              <Map cities={data.cities} onSelect={city => {alert(city.name)}} />
-            </div>);
-        }}/>
-        <Route path="/plant/:plantId" render={({match}) => {
-          const id = parseInt(match.params.plantId);
-          let plant = data.plants.filter(p => p.id === id || p.url_keyword === match.params.plantId)[0];
-          return !plant 
-            ? <div className="container-fluid my-5">No plant found by that ID</div>
-            : <div className="container-fluid">
-                <SimpleReactLightbox>
-                  <PlantDetail {...{
-                    plant,
-                    photos: data.photos[plant.botanicalName] || [],
-                    plantTypeNameByCode: data.plantTypeNameByCode,
-                    waterUseByCode: data.waterUseByCode,
-                    waterUseClassifications: data.waterUseClassifications,
-                    region: searchCriteria.city.region,
-                    togglePlantFavorite,
-                    isPlantFavorite,
-                    regions: data.regions
-                  }} />
-                </SimpleReactLightbox>
-              </div>;
-        }}/>
-        <Route exact={true} path="/favorites">
-          <Favorites {...
+        <div className="btn-group">
+          {[
             {
-              favoritePlants
-              ,downloadActions
-              ,isPlantFavorite
-              ,togglePlantFavorite
-              ,searchCriteria
-              ,data
-            }}
-            />
-        </Route>
+              label: 'Search',
+              icon: faSearch,
+              to: '/search' + location.search
+            },
+            {
+              label: `Favorites (${favoritePlants.length})`,
+              icon: faStar,
+              to: '/favorites' + location.search,
+              tooltip: 'Download options available'
+            }
+          ].map((vm,i) => {
+            return (
+              <NavLink key={i} activeClassName="active" className="btn btn-outline-light" to={vm.to}>
+                <FontAwesomeIcon icon={vm.icon} />
+                <span className="ml-2" title={vm.tooltip}>
+                  {vm.label}
+                </span>
+              </NavLink>
+              );
+            }
+          )}
+        </div>
+
+        <DropdownButton title="Download" variant="outline-light">
+          {downloadActions(data,searchCriteria,favoritePlants).map((a,i) => 
+            <Dropdown.Item onClick={a.method} key={i}>
+              {a.label}
+            </Dropdown.Item>
+          )}
+        </DropdownButton>
+
         {/*
-        <Route exact="true" path="/search/(types)?/:types?" render={match => 
+        <div>
+          <span className="mr-3 text-light">
+            View plants in a
+          </span>
+          <div className="btn-group">
+            {plantsViewModes.map(vm => 
+              <button className={'btn btn-outline-light' + (vm.id === plantsViewModeId ? ' active' : '')} onClick={() => {
+                setPlantsViewModeId(vm.id);
+              }}>
+                <FontAwesomeIcon icon={vm.icon} />
+                <span className="ml-2">
+                  {vm.label}
+                </span>
+              </button>
+            )}
+          </div>
+        </div>
         */}
-        <Route exact={true} path="/search" render={match => 
-          <Search
-            searchCriteria={searchCriteria}
-            isPlantFavorite={isPlantFavorite}
-            togglePlantFavorite={togglePlantFavorite}
-            setSearchCriteria={setSearchCriteria}
-            data={data}
+      </nav>
+      <Route exact={true} path="/">
+        <Redirect to="/search" />
+      </Route>
+      <Route path="/map" render={({match}) => {
+        return (
+          <div>
+            <Map cities={data.cities} onSelect={city => {alert(city.name)}} />
+          </div>);
+      }}/>
+      <Route path="/plant/:plantId" render={({match}) => {
+        const id = parseInt(match.params.plantId);
+        let plant = data.plants.filter(p => p.id === id || p.url_keyword === match.params.plantId)[0];
+        return !plant 
+          ? <div className="container-fluid my-5">No plant found by that ID</div>
+          : <div className="container-fluid">
+              <SimpleReactLightbox>
+                <PlantDetail {...{
+                  plant,
+                  photos: data.photos[plant.botanicalName] || [],
+                  plantTypeNameByCode: data.plantTypeNameByCode,
+                  waterUseByCode: data.waterUseByCode,
+                  waterUseClassifications: data.waterUseClassifications,
+                  region: searchCriteria.city.region,
+                  togglePlantFavorite,
+                  isPlantFavorite,
+                  regions: data.regions
+                }} />
+              </SimpleReactLightbox>
+            </div>;
+      }}/>
+      <Route exact={true} path="/favorites">
+        <Favorites {...
+          {
+            favoritePlants
+            ,downloadActions
+            ,isPlantFavorite
+            ,togglePlantFavorite
+            ,searchCriteria
+            ,data
+          }}
           />
-        }/>
-      </div>
-    </Router>
+      </Route>
+      {/*
+      <Route exact="true" path="/search/(types)?/:types?" render={match => 
+      */}
+      <Route exact={true} path="/search" render={match => 
+        <Search
+          searchCriteria={searchCriteria}
+          isPlantFavorite={isPlantFavorite}
+          togglePlantFavorite={togglePlantFavorite}
+          setSearchCriteria={updateSearchCriteria}
+          data={data}
+        />
+      }/>
+    </div>
   );
 }
 

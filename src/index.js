@@ -4,6 +4,11 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { ToastProvider } from 'react-toast-notifications'
+import {
+  //BrowserRouter as Router,
+  HashRouter as Router
+} from "react-router-dom";
+
 fetch("WUCOLS.json")
 .then(r => r.json())
 .then(d => {
@@ -43,7 +48,9 @@ fetch("WUCOLS.json")
       placement="bottom-center"
       autoDismissTimeout={6000}
     >
-      <App data={d} />
+      <Router /*basename={process.env.PUBLIC_URL}*/>
+        <App data={d} />
+      </Router>
     </ToastProvider>,
     document.getElementById('root')
   );

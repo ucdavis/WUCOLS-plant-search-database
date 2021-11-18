@@ -8,16 +8,9 @@ import { Pagination } from 'react-bootstrap';
 import plantTypeCombinatorOptions from './plant-type-combinator-options';
 import SearchForm from './search-form';
 import SearchCriteriaConverter from './SearchCriteriaConverter';
-import {
-  //HashRouter as Router,
-  useHistory,
-  useLocation
-} from "react-router-dom";
-
 import Welcome from './welcome';
 
 const performancePlantLimit = 50000;
-
 
 const Search = ({
   data,
@@ -26,8 +19,6 @@ const Search = ({
   isPlantFavorite,
   togglePlantFavorite
 }) => {
-  const history = useHistory();
-  const location = useLocation();
 
   let plantsViewModes = [
     {
@@ -52,23 +43,7 @@ const Search = ({
   const [plantsViewModeId] = React.useState(plantsViewModes[0].id);
   const plantsViewMode = plantsViewModes.filter(vm => vm.id === plantsViewModeId)[0] || plantsViewModes[0];
 
-  const updateSearchCriteria = React.useCallback(sc => {
-    let qs = SearchCriteriaConverter.toQuerystring(sc);
-    //console.log('search altered',qs);
-    if(!history){
-      //console.log('no history')
-      //return;
-    }
-    setSearchCriteria(sc);
-    //console.log(history)
-    history.push({
-        path: '/search',
-        search: qs
-    });
-    //console.log(sc);
-  },[setSearchCriteria,history]);
-
-  const resetSearchCriteria = () => updateSearchCriteria(SearchCriteriaConverter.getDefaultSearchCriteria(data.plantTypes));
+  const resetSearchCriteria = () => setSearchCriteria(SearchCriteriaConverter.getDefaultSearchCriteria(data.plantTypes));
 
   const searchPerformed = 
     Object.values(searchCriteria.waterUseClassifications).some(b => b)
@@ -115,7 +90,7 @@ const Search = ({
   });
   //console.log('pagination',paginationModel);
 
-  const setCurrentPageNumber = pn => updateSearchCriteria({ ...searchCriteria,  pageNumber: pn});
+  const setCurrentPageNumber = pn => setSearchCriteria({ ...searchCriteria,  pageNumber: pn});
   const actualPagination = 
     pageCount > 1 && 
         <Pagination>
@@ -151,7 +126,7 @@ const Search = ({
             plantTypes={data.plantTypes}
             cityOptions={data.cityOptions}
             searchCriteria={searchCriteria}
-            updateSearchCriteria={updateSearchCriteria}/>
+            updateSearchCriteria={setSearchCriteria}/>
         </div>
       </nav>
 

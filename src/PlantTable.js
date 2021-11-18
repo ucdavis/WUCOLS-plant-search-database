@@ -6,7 +6,8 @@ import PlantFavoriteButton from './PlantFavoriteButton';
 import {
   Link
 } from "react-router-dom";
-
+import { faIdCard} from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 const benchCardForPlantRegionAndTemplateId = (p,region,templateId) => 
 	region in p.benchCards && templateId in p.benchCards[region]
 	? p.benchCards[region][templateId]
@@ -40,6 +41,7 @@ const PlantTable = ({
 							</th>
 							<th colSpan={benchCardTemplates.length}>
 								Bench Cards
+								<FontAwesomeIcon icon={faIdCard} className="ml-2"/>
 							</th>
 						</>
 					}
@@ -85,8 +87,9 @@ const PlantTable = ({
 									<a href={p.qrCodeUrl} target="_blank" rel="noreferrer">
 										<img
 											src={p.qrCodeUrl} 
+											alt={"QR Code for " + p.botanicalName}
 											className="img-responsive"
-											style={{width:'100px'}}
+											style={{width:'64px'}}
 										/>
 									</a>
 								</td>
@@ -97,7 +100,7 @@ const PlantTable = ({
 									return <td key={t.id}>
 										{!bc 
 											? <>N/A</> 
-											: <a href={bc.url} target="_blank" rel="noreferrer">Download</a>}
+											: <a href={bc.url} target="_blank" rel="noreferrer" className="btn btn-success btn-sm">Download</a>}
 									</td>
 								}
 								)}

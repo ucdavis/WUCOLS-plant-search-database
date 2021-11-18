@@ -69,8 +69,8 @@ const PlantDetail = ({plant,plantTypeNameByCode,waterUseByCode,region,regions,is
           <div className="col">
             <h4 className="mb-4">Photos ({plant.photos.length})</h4>
             <SRLWrapper key="plant gallery">
-              {plant.photos.map(p => 
-                <div className="card mb-3" key={p.id}>
+              {plant.photos.map((p,i) => 
+                <div className="card mb-3" key={i}>
                   <a href={p.full.url}>
                     <img src={p.large.url} className="card-img-top" alt={p.caption} />
                   </a>

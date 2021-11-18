@@ -8,7 +8,7 @@ import sortPlants from './sort-plants';
 import Search from './Search';
 import PlantDetail from './PlantDetail';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {  faQrcode, faSearch, faFileExcel, faStar, faIdCard} from '@fortawesome/free-solid-svg-icons'
+import {  faSearch, faFileExcel, faStar } from '@fortawesome/free-solid-svg-icons'
 
 import Favorites from './favorites';
 
@@ -144,21 +144,6 @@ function App({data}) {
           </>
       }
       ,
-      */
-      {
-        method: () => {
-          sideRender(
-            <ExcelFile filename={`WUCOLS_${searchCriteria.city.name}`} hideElement={true}>
-              <ExcelSheet dataSet={excelData} name={`WUCOLS_${searchCriteria.city.name}`}/>
-            </ExcelFile>
-          );
-        },
-        label: 
-          <>
-            <FontAwesomeIcon icon={faFileExcel} className="mr-2"/>
-            Download in Excel format
-          </>
-      },
       {
         method: () => {
           alert('Not implemented yet');
@@ -178,6 +163,21 @@ function App({data}) {
           <>
             <FontAwesomeIcon icon={faIdCard} className="mr-2"/>
             Download Bench Cards
+          </>
+      }
+      */
+      {
+        method: () => {
+          sideRender(
+            <ExcelFile filename={`WUCOLS_${searchCriteria.city.name}`} hideElement={true}>
+              <ExcelSheet dataSet={excelData} name={`WUCOLS_${searchCriteria.city.name}`}/>
+            </ExcelFile>
+          );
+        },
+        label: 
+          <>
+            <FontAwesomeIcon icon={faFileExcel} className="mr-2"/>
+            Download in Excel format
           </>
       }
     ];
@@ -216,7 +216,7 @@ function App({data}) {
           )}
         </div>
 
-        {!searchCriteria.city
+        {!searchCriteria.city || true
         ? <div className="text-light">{/*Select a city to enable downloads*/}</div>
         :
         <DropdownButton title="Download" variant="outline-light" disabled={!searchCriteria.city}>
@@ -270,7 +270,7 @@ function App({data}) {
                   plantTypeNameByCode: data.plantTypeNameByCode,
                   waterUseByCode: data.waterUseByCode,
                   waterUseClassifications: data.waterUseClassifications,
-                  region: searchCriteria.city.region,
+                  region: !!searchCriteria.city ? searchCriteria.city.region : 0,
                   togglePlantFavorite,
                   isPlantFavorite,
                   regions: data.regions

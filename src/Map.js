@@ -39,7 +39,6 @@ const CityMarker = ({city,onClick}) => {
 };
 
 const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
-console.log(process.env);
 const libraries = ['geometry'];
 
 function MyComponent({cities,onSelect}) {

@@ -1,7 +1,10 @@
+
 stages:
   - build
   - deploy
-
+cache:
+  paths:
+    - node_modules/
 yarn:
   image: node:latest    
   stage: build
@@ -14,7 +17,14 @@ yarn:
   artifacts:
     paths:
       - build/      
-
+aws: 
+  image: sleavely/node-awscli:12.x
+  stage: deploy
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID 
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+  script:
+    - echo pwd = $(pwd); ls; aws s3 cp --recursive ./build s3://wucols-plant-search-database-ui 
 pages:
   image: alpine:latest
   stage: deploy

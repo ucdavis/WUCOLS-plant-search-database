@@ -85,6 +85,7 @@ const Favorites = ({
             {!searchCriteria.city
                 ? <div>Select a city to view your favorites</div>
                 : <PlantTable 
+                    showAvailableMedia={true}
                     isPlantFavorite={isPlantFavorite}
                     togglePlantFavorite={togglePlantFavorite}
                     plants={favoritePlants} 

@@ -24,6 +24,19 @@ fetch("WUCOLS.json")
       return dict;
     },{});
 
+  d.cityOptions = d.cities.map(c => ({
+    id: c.id,
+    position: c.position,
+    key: c.id,
+    name: c.name,
+    label: "Region " + c.region + ": " + c.name,
+    value: c.name,
+    region: c.region
+  })).sort((a,b) => a.label > b.label ? 1 : a.label < b.label ? -1 : 0);
+
+  d.plantTypes = d.plantTypes.sort((a,b) => 
+    a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+
   ReactDOM.render(
     <ToastProvider
       autoDismiss

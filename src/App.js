@@ -19,18 +19,27 @@ import {
   //BrowserRouter as Router,
   HashRouter as Router,
   Route,
+  useLocation,
   NavLink,
   Redirect,
 } from "react-router-dom";
 //import groupBy from './groupBy';
 import SimpleReactLightbox from 'simple-react-lightbox'
 import { useToasts } from 'react-toast-notifications'
-
-
+import SearchCriteriaConverter from './SearchCriteriaConverter';
 
 function App({data}) {
   //const {lat,lng,error} = useGeolocation(false,{enableHighAccuracy: true});
-  const [searchCriteria, setSearchCriteria] = React.useState({});
+  const qs = (() => {
+    //IMPORTANT: assumed hash routing
+    let qs = window.location.hash.split('?')[1];
+    return !qs ? '' : '?' + qs;
+  })();
+  const [searchCriteria, setSearchCriteria] = React.useState(
+   SearchCriteriaConverter.initSearchCriteria(
+    qs,
+    data.cityOptions,
+    data.plantTypes));
 
   const [isFavoriteByPlantId, updateIsFavoriteByPlantId] = useLocalStorage('isFavoriteByPlantId', {});
   const favoritePlants = sortPlants(!searchCriteria.city ? 0 : searchCriteria.city.region)(data.plants.filter(p => !!isFavoriteByPlantId[p.id]));
@@ -174,24 +183,26 @@ function App({data}) {
               {
                 label: 'Search',
                 icon: faSearch,
-                to: '/search'
+                to: '/search' + qs
               },
               {
                 label: `Favorites (${favoritePlants.length})`,
                 icon: faStar,
-                to: '/favorites',
+                to: '/favorites' + qs,
                 tooltip: 'Download options available'
               }
-
-            ].map((vm,i) => 
-              <NavLink key={i} activeClassName="active" className="btn btn-outline-light" to={vm.to}>
-                <FontAwesomeIcon icon={vm.icon} />
-                <span className="ml-2" title={vm.tooltip}>
-                  {vm.label}
-                </span>
-              </NavLink>
-    
-    )}
+            ].map((vm,i) => {
+              console.log(vm);
+              return (
+                <NavLink key={i} activeClassName="active" className="btn btn-outline-light" to={vm.to}>
+                  <FontAwesomeIcon icon={vm.icon} />
+                  <span className="ml-2" title={vm.tooltip}>
+                    {vm.label}
+                  </span>
+                </NavLink>
+                );
+              }
+            )}
           </div>
 
           <DropdownButton title="Download" variant="outline-light">
@@ -269,6 +280,7 @@ function App({data}) {
         */}
         <Route exact={true} path="/search" render={match => 
           <Search
+            searchCriteria={searchCriteria}
             isPlantFavorite={isPlantFavorite}
             togglePlantFavorite={togglePlantFavorite}
             setSearchCriteria={setSearchCriteria}

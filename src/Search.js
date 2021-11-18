@@ -7,6 +7,7 @@ import ultimatePagination from 'ultimate-pagination';
 import { Pagination } from 'react-bootstrap';
 import plantTypeCombinatorOptions from './plant-type-combinator-options';
 import SearchForm from './search-form';
+import SearchCriteriaConverter from './SearchCriteriaConverter';
 import {
   //HashRouter as Router,
   useHistory,
@@ -17,44 +18,14 @@ import Welcome from './welcome';
 
 const performancePlantLimit = 50000;
 
-const SearchCriteriaConverter = (() => {
-  return {
-    fromQuerystring: qs => {
-      let ps = new URLSearchParams(qs);
-      return {
-        pageNumber: parseInt(ps.get('p') || "") || 1, 
-        plantTypes: ps.getAll('t').reduce((dict, pt) => {
-          dict[pt] = true;  
-          return dict;
-        },{}),
-        name: (ps.get('n') || "").toLowerCase(),
-        plantTypeCombinatorId: ps.get('tm'),
-        cityId: parseInt(ps.get('c')),
-        waterUseClassifications:ps.getAll('wu').reduce((dict, wu) => {
-          dict[wu] = true;  
-          return dict;
-        },{})
-      };
-    },
-    toQuerystring: sc => {
-      let wu = Object.entries(sc.waterUseClassifications).filter(([,selected]) => selected).map(([code]) => code);
-      let pt = Object.entries(sc.plantTypes).filter(([,selected]) => selected).map(([code]) => code);
-      let ps = new URLSearchParams(
-        [
-            ...(!sc.city ? [] : [ ['c',sc.city.id] ]),
-            //exclude default param values for terser URLs
-            ...(!sc.name ? [] : [['n',sc.name]]),
-            ...(sc.plantTypeCombinator === plantTypeCombinatorOptions.default ? [] : [['tm',sc.plantTypeCombinator.value]]),
-            ...wu.map(wu => ['wu',wu]),
-            ...pt.map(pt => ['t',pt]),
-            ...(sc.pageNumber === 1 ? [] : [['p', sc.pageNumber]]),
-        ]);
-      return ps.toString();
-    }
-  };
-})();
 
-const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) => {
+const Search = ({
+  data,
+  searchCriteria,
+  setSearchCriteria,
+  isPlantFavorite,
+  togglePlantFavorite
+}) => {
   const history = useHistory();
   const location = useLocation();
 
@@ -80,56 +51,6 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
   ];
   const [plantsViewModeId] = React.useState(plantsViewModes[0].id);
   const plantsViewMode = plantsViewModes.filter(vm => vm.id === plantsViewModeId)[0] || plantsViewModes[0];
-  
-  let cityOptions = data.cities.map(c => ({
-    id: c.id,
-    position: c.position,
-    key: c.id,
-    name: c.name,
-    label: "Region " + c.region + ": " + c.name,
-    value: c.name,
-    region: c.region
-  }));
-
-  data.plantTypes = data.plantTypes.sort((a,b) => 
-    a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
-
-  const getDefaultSearchCriteria = () => ({
-    city: null,
-    name: '',
-    waterUseClassifications: {},
-    plantTypes: data.plantTypes.reduce((dict, pt) => {
-      dict[pt.code] = autoSearch ? pt.code === 'A' : false;
-      return dict;
-    },{}),
-    pageNumber: 1,
-    plantTypeCombinator: plantTypeCombinatorOptions.default
-  });
-
-  const initSearchCriteria = () => {
-    let up = SearchCriteriaConverter.fromQuerystring(location.search);
-    //console.log(up);
-    let sc = getDefaultSearchCriteria();
-    sc.waterUseClassifications = up.waterUseClassifications;
-    sc.plantTypes = up.plantTypes;
-    sc.name = up.name;
-    sc.pageNumber = up.pageNumber;
-    sc.city = cityOptions.filter(o => o.id === up.cityId)[0] || sc.city;
-    if(up.plantTypeCombinatorId in plantTypeCombinatorOptions.byId){
-        sc.plantTypeCombinator = plantTypeCombinatorOptions.byId[up.plantTypeCombinatorId];
-    }
-    return sc;
-  };
-
-  /*
-  cityOptions = groupBy(cityOptions, c => "Region " + c.region)
-  .map(g => ({label: g.key, options: g.values}));
-  */
-  cityOptions = cityOptions.sort((a,b) => a.label > b.label ? 1 : a.label < b.label ? -1 : 0);
-   
-  const autoSearch = false;
-
-  const searchCriteria = initSearchCriteria();
 
   const updateSearchCriteria = React.useCallback(sc => {
     let qs = SearchCriteriaConverter.toQuerystring(sc);
@@ -147,7 +68,7 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
     //console.log(sc);
   },[setSearchCriteria,history]);
 
-  const resetSearchCriteria = () => updateSearchCriteria(getDefaultSearchCriteria());
+  const resetSearchCriteria = () => updateSearchCriteria(SearchCriteriaConverter.getDefaultSearchCriteria(data.plantTypes));
 
   const searchPerformed = 
     Object.values(searchCriteria.waterUseClassifications).some(b => b)
@@ -228,7 +149,7 @@ const Search = ({data, setSearchCriteria,isPlantFavorite,togglePlantFavorite }) 
           <SearchForm
             waterUseClassifications={data.waterUseClassifications}
             plantTypes={data.plantTypes}
-            cityOptions={cityOptions}
+            cityOptions={data.cityOptions}
             searchCriteria={searchCriteria}
             updateSearchCriteria={updateSearchCriteria}/>
         </div>

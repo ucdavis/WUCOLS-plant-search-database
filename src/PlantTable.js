@@ -7,7 +7,7 @@ import {
   Link
 } from "react-router-dom";
 
-const PlantTable = ({plants,photosByPlantName,plantTypeNameByCode,waterUseByCode,region,isPlantFavorite,togglePlantFavorite}) =>
+const PlantTable = ({showAvailableMedia, plants,photosByPlantName,plantTypeNameByCode,waterUseByCode,region,isPlantFavorite,togglePlantFavorite}) =>
 {
   return (
 		<table className="table table-sm ">
@@ -19,6 +19,11 @@ const PlantTable = ({plants,photosByPlantName,plantTypeNameByCode,waterUseByCode
 					<th>
 						Name
 					</th>
+					{showAvailableMedia && 
+						<th>
+							Available Media
+						</th>
+					}
 					<th>
 						Water Use
 					</th>
@@ -49,6 +54,11 @@ const PlantTable = ({plants,photosByPlantName,plantTypeNameByCode,waterUseByCode
 									{p.commonName}
 								</div>
 							</td>
+							{showAvailableMedia && 
+								<td>
+									Media
+								</td>
+							}
 							<td>
 								<WaterDropRating waterUseCode={wu.code}/>
 								<small className="ml-2">

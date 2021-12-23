@@ -289,6 +289,17 @@ function App({data}) {
             <Map cities={data.cities} onSelect={city => {alert(city.name)}} />
           </div>);
       }}/>
+      <Route path="/benchcard/:plantId" render={({match}) => {
+        const id = parseInt(match.params.plantId);
+        let plant = data.plants.filter(p => p.id === id || p.url_keyword === match.params.plantId)[0];
+        return !plant 
+          ? <div className="container-fluid my-5">No plant found by that ID</div>
+          : (
+            <PDFViewer style={{width:'100vw',height:'90vh'}} showToolbar={false}>
+              <BenchCardDocument plant={plant} region={searchCriteria.city.region} waterUseByCode={data.waterUseByCode}/>
+            </PDFViewer>
+          );
+      }}/>
       <Route path="/plant/:plantId" render={({match}) => {
         const id = parseInt(match.params.plantId);
         let plant = data.plants.filter(p => p.id === id || p.url_keyword === match.params.plantId)[0];

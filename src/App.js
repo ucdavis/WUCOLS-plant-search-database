@@ -8,7 +8,11 @@ import sortPlants from './sort-plants';
 import Search from './Search';
 import PlantDetail from './PlantDetail';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {  faSearch, faFileExcel, faStar } from '@fortawesome/free-solid-svg-icons'
+import {  faSearch, faFileExcel, faStar, faQrcode, faIdCard } from '@fortawesome/free-solid-svg-icons'
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
+import { PDFViewer, pdf } from "@react-pdf/renderer";
+
 
 import Favorites from './favorites';
 
@@ -27,6 +31,7 @@ import {
 import SimpleReactLightbox from 'simple-react-lightbox'
 import { useToasts } from 'react-toast-notifications'
 import SearchCriteriaConverter from './SearchCriteriaConverter';
+import BenchCardDocument from './BenchCardDocument';
 
 function App({data}) {
   //const {lat,lng,error} = useGeolocation(false,{enableHighAccuracy: true});
@@ -144,9 +149,24 @@ function App({data}) {
           </>
       }
       ,
+      */
       {
         method: () => {
-          alert('Not implemented yet');
+          Promise.all(
+            favoritePlants.map(p =>
+              fetch(p.qrCodeUrl)
+              .then((r) => r.blob())
+              .then((b) => [p, b])
+            )
+          ).then((plantBlobPairs) => {
+            var zip = new JSZip();
+            for (let [p, blob] of plantBlobPairs) {
+              zip.file(p.commonName + ".png", blob, { blob: true });
+            }
+            zip.generateAsync({ type: "blob" }).then(function (content) {
+              saveAs(content, "qr-codes.zip");
+            });
+          });
         },
         label: 
           <>
@@ -156,16 +176,28 @@ function App({data}) {
       },
       {
         method: () => {
-          console.log(favoritePlants);
-          alert('Not implemented yet');
+          Promise.all(
+            favoritePlants.map(p =>
+              pdf(<BenchCardDocument plant={p} region={searchCriteria.city.region} waterUseByCode={data.waterUseByCode}/>)
+              .toBlob()
+              .then((b) => [p, b])
+            )
+          ).then((plantBlobPairs) => {
+            var zip = new JSZip();
+            for (let [p, blob] of plantBlobPairs) {
+              zip.file(p.commonName + ".pdf", blob, { blob: true });
+            }
+            zip.generateAsync({ type: "blob" }).then(function (content) {
+              saveAs(content, "bench-cards.zip");
+            });
+          });
         },
         label: 
           <>
             <FontAwesomeIcon icon={faIdCard} className="mr-2"/>
             Download Bench Cards
           </>
-      }
-      */
+      },
       {
         method: () => {
           sideRender(

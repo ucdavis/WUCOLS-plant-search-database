@@ -4,7 +4,11 @@ import WaterDropRating from './WaterDropRating';
 import { SRLWrapper } from "simple-react-lightbox";
 import PlantFavoriteButton from './PlantFavoriteButton';
 import {PlantDetailQrCode} from './PlantDetailQrCode';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faIdCard} from '@fortawesome/free-solid-svg-icons'
+import {
+  Link
+} from "react-router-dom";
 
 const PlantDetail = ({
   plant,
@@ -12,6 +16,7 @@ const PlantDetail = ({
   waterUseByCode,
   region,
   regions,
+  benchCardTemplates,
   isPlantFavorite,
   togglePlantFavorite
 }) =>
@@ -116,8 +121,29 @@ const PlantDetail = ({
           </table>
         </div>
       </div>
-      <div className="mt-5">
-        <PlantDetailQrCode plant={plant} style={{width:'128px'}}/>
+    </div>
+    <div className="bg-light py-5">
+      <div className="container">
+        <div className="d-flex flex-row">
+          {benchCardTemplates.map(bct => 
+            <div className="card mr-3" key={bct.id}>
+              <div className="card-body d-flex flex-column justify-content-between">
+                <h4>
+                  {/*
+                  <FontAwesomeIcon icon={faIdCard} className="mr-3"/>
+                  */}
+                  {bct.name} Bench Card
+                </h4>
+                <Link key={bct.id} to={`/plant/${plant.id}/benchcard/${bct.id}`} className="mt-3 btn btn-success" target="_blank" >
+                  Download
+                </Link>
+              </div>
+            </div>
+          )}
+          <div className="card mr-3">
+              <PlantDetailQrCode plant={plant} style={{width:'128px'}}/>
+          </div>
+        </div>
       </div>
     </div>
     </>

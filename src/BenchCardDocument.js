@@ -10,8 +10,13 @@ const styles = StyleSheet.create({
       textAlign:'center',
     backgroundColor: "white"
   },
+  waterUseClassificationBox: {
+    backgroundColor: '#304971',
+    padding: '8pt',
+    width: '44%',
+    textAlign: 'center'
+},
   logo: {
-
   },
   logos: {
 
@@ -27,9 +32,9 @@ const styles = StyleSheet.create({
 const dropRatingByWaterUseCode = (() => {
 Font.register({family:'FontAwesome',src:'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/fonts/fontawesome-webfont.ttf'})
   const DropIcon = ({filled}) => 
-<Text style={{opacity:filled ? 1 : 0.3, color: filled ? '#007bff' : 'grey', fontFamily:'FontAwesome'}}>
-    
-</Text>;
+    <Text style={{opacity:filled ? 1 : 0.3, color: filled ? '#007bff' : 'grey', fontFamily:'FontAwesome'}}>
+        
+    </Text>;
     
 /*
     <Image src="/water-drop.svg" style={{opacity:filled ? 1 : 0.4}} />;
@@ -54,20 +59,24 @@ const WaterDropRating = ({waterUseCode}) =>
       {dropRatingByWaterUseCode[waterUseCode]}
     </View> || <>N/A</>;
 
-const BenchCardDocument = ({ plant, region, waterUseByCode }) => {
+const BenchCardDocument = ({ plant, region, waterUseByCode, benchCardTemplate }) => {
     const p = plant;
     const qrCodeUrl = plantDetailQrCodeFromId(plant.id).image_url;
     let wuCode = p.waterUseByRegion[region-1];
     let wu = waterUseByCode[wuCode];
-    //console.log(wu)
-    //console.log(p)
-    let photoUrl = !p.botanicalName.length ? "https://via.placeholder.com/800" : p.photos[0].large.url;
+    //console.log(region, wuCode, wu) //console.log(p)
+    let leadPhoto = p.photos[0];
+    let photoUrl = !leadPhoto ? "" : leadPhoto.large.url;
+    console.log({leadPhoto,photoUrl});
+    const sizeInches = benchCardTemplate.sizeInInches;
+    const sizePoints = {x: sizeInches.x * 72, y: sizeInches.y * 72};
     return (
         <Document debug={debug}>
-            <Page size={[11 * 72, 7 * 72]} style={styles.page}>
+            <Page size={[sizePoints.x, sizePoints.y]} style={styles.page}>
             <View debug={debug} style={{
                 display: 'flex',
-                height:'100%',
+                height: '100%',
+                padding:'18pt',
                 flexDirection: 'col',
                 justifyContent:'space-evenly'
             }}>
@@ -75,25 +84,26 @@ const BenchCardDocument = ({ plant, region, waterUseByCode }) => {
                     <Text debug={debug} style={{ fontSize: "40pt", fontWeight:'extrabold' }}>
                         {plant.botanicalName}
                     </Text>
-                    <Text debug={debug} style={{ fontSize: "30pt", fontWeight:'normal',fontStyle:'italic' }}>
+                    <Text debug={debug} style={{ fontSize: "25pt", fontWeight:'normal', fontStyle:'italic', padding: '20pt' }}>
                         {plant.commonName}
                     </Text>
                 </View>
+
                 <View debug={debug} style={{
                     display: 'flex',
                     flexDirection: 'row',
-                    margin:'18pt',
+                    padding:'18pt',
                     justifyContent:'space-around'
                 }}>
-                    <Image debug={debug} src={photoUrl} style={{width:'45%'}}/>
-                    <View debug={debug} style={{
-                        backgroundColor: '#304972',
-                        padding:'9pt',
-                        width:'45%',
-                        textAlign:'center'
-                    }}>
+                    {!!photoUrl && 
+                        <Image debug={debug} src={photoUrl} style={{ width:'45%' }}/>
+                    }
+
+                    <View debug={debug} style={styles.waterUseClassificationBox}>
                         <Text style={{color:'white', paddingBottom:'9pt'}}>Water Use Classification</Text>
-                        <View style={{backgroundColor:'white', flexGrow:'1',
+                        <View style={{
+                            backgroundColor:'white',
+                            flexGrow:'1',
                             display: 'flex',
                             flexDirection: 'col',
                             justifyContent:'space-evenly'
@@ -117,7 +127,8 @@ const BenchCardDocument = ({ plant, region, waterUseByCode }) => {
                     flexDirection: 'row',
                     justifyContent:'space-evenly',
                     alignItems: 'center',
-                    margin: '2em'
+                    padding: '2em',
+                    margin: '5em'
                 }}>
                     <Image debug={debug} src="/logo-dwr.png" style={{height: "90px", width:'auto'}}/>
                     <Image debug={debug} src="/logo-ucd-ccuh.png" style={{height: "80px", width:'auto'}}/>

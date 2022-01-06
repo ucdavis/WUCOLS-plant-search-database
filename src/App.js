@@ -290,18 +290,7 @@ function App({data}) {
             <Map cities={data.cities} onSelect={city => {alert(city.name)}} />
           </div>);
       }}/>
-      <Route path="/benchcard/:plantId" render={({match}) => {
-        const id = parseInt(match.params.plantId);
-        let plant = data.plants.filter(p => p.id === id || p.url_keyword === match.params.plantId)[0];
-        return !plant 
-          ? <div className="container-fluid my-5">No plant found by that ID</div>
-          : (
-            <PDFViewer style={{width:'100vw',height:'90vh'}} showToolbar={false}>
-              <BenchCardDocument plant={plant} region={searchCriteria.city.region} waterUseByCode={data.waterUseByCode}/>
-            </PDFViewer>
-          );
-      }}/>
-      <Route path="/plant/:plantId" render={({match}) => {
+      <Route path="/plant/:plantId" exact={true} render={({match}) => {
         const id = parseInt(match.params.plantId);
         let plant = data.plants.filter(p => p.id === id || p.url_keyword === match.params.plantId)[0];
         return !plant 
@@ -311,6 +300,7 @@ function App({data}) {
                 <PlantDetail {...{
                   plant,
                   photos: data.photos[plant.botanicalName] || [],
+                  benchCardTemplates: data.benchCardTemplates,
                   plantTypeNameByCode: data.plantTypeNameByCode,
                   waterUseByCode: data.waterUseByCode,
                   waterUseClassifications: data.waterUseClassifications,
@@ -321,6 +311,30 @@ function App({data}) {
                 }} />
               </SimpleReactLightbox>
             </div>;
+      }}/>
+      <Route path="/plant/:plantId/benchcard/:bctId" render={({match}) => {
+        const id = parseInt(match.params.plantId);
+        const bctId = match.params.bctId;
+        const bct = data.benchCardTemplates.filter(bct => bct.id === bctId)[0];
+        let plant = data.plants.filter(p => p.id === id || p.url_keyword === match.params.plantId)[0];
+        return (
+          !plant ? <div className="container-fluid my-5">No plant found by that ID</div>
+          : !bct ? <div className="container-fluid my-5">No Bench Card found by that ID</div>
+          : (
+            <>
+            {/*
+            <pre>{JSON.stringify(plant,null,2)}</pre>
+            */}
+            <PDFViewer style={{width:'100vw',height:'90vh'}} showToolbar={false}>
+              <BenchCardDocument 
+                benchCardTemplate={bct}
+                plant={plant}
+                region={(searchCriteria.city && searchCriteria.city.region) || 1}
+                waterUseByCode={data.waterUseByCode} />
+            </PDFViewer>
+            </>
+          )
+        );
       }}/>
       <Route exact={true} path="/favorites">
         <Favorites {...

@@ -10,8 +10,12 @@ import {
 } from "react-router-dom";
 
 const plantDetailUrlFromId = id =>
-  "https://ucanr.edu/sites/WUCOLS/Plant_Search/?step=plant&plant_id=" + id;
-  //"http://localhost:3000/#/plant/plant_id=" + id;
+  /* example expected patterns:
+    - https://some.website-of-yours.app/plants/:id/detail 
+    - https://some.website-of-yours.app/plants?id=:id&utm_source=qr_code
+  */
+  process.env.REACT_APP_PLANT_DETAIL_URL_PATTERN
+    .replace(':id',id);
 
 fetch("WUCOLS.json")
 .then(r => r.json())

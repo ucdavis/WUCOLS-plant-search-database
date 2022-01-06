@@ -9,12 +9,18 @@ import {
   HashRouter as Router
 } from "react-router-dom";
 
+const plantDetailUrlFromId = id =>
+  "https://ucanr.edu/sites/WUCOLS/Plant_Search/?step=plant&plant_id=" + id;
+  //"http://localhost:3000/#/plant/plant_id=" + id;
+
 fetch("WUCOLS.json")
 .then(r => r.json())
 .then(d => {
   window.wucols_data = d;
   d.plants.forEach(p => {
     p.searchName = (p.commonName + ' ' + p.botanicalName).toLowerCase();
+    let plantDetailUrl = plantDetailUrlFromId(p.id); 
+    p.qrCodeUrl = `https://chart.googleapis.com/chart?chs=500x500&cht=qr&choe=UTF-8&chl=${encodeURIComponent(plantDetailUrl)}`;
   });
 
   d.plantTypeNameByCode = 

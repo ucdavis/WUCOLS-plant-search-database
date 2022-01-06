@@ -2,6 +2,7 @@ import React from 'react';
 import PlantTypeBadge from './PlantTypeBadge';
 import WaterDropRating from './WaterDropRating';
 import PlantFavoriteButton from './PlantFavoriteButton';
+import {PlantDetailQrCode} from './PlantDetailQrCode';
 import {
   Link
 } from "react-router-dom";
@@ -66,14 +67,7 @@ const PlantTable = ({
 							</td>
 							{showAvailableMedia && 
 								<td>
-									<a href={p.qrCodeUrl} target="_blank" rel="noreferrer">
-										<img
-											src={p.qrCodeUrl} 
-											alt={"QR Code for " + p.botanicalName}
-											className="img-responsive"
-											style={{width:'64px'}}
-										/>
-									</a>
+									<PlantDetailQrCode plant={p} />
 								</td>
 							}
 							<td>

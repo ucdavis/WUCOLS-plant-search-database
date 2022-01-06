@@ -9,22 +9,12 @@ import {
   HashRouter as Router
 } from "react-router-dom";
 
-const plantDetailUrlFromId = id =>
-  /* example expected patterns:
-    - https://some.website-of-yours.app/plants/:id/detail 
-    - https://some.website-of-yours.app/plants?id=:id&utm_source=qr_code
-  */
-  process.env.REACT_APP_PLANT_DETAIL_URL_PATTERN
-    .replace(':id',id);
-
 fetch("WUCOLS.json")
 .then(r => r.json())
 .then(d => {
   window.wucols_data = d;
   d.plants.forEach(p => {
     p.searchName = (p.commonName + ' ' + p.botanicalName).toLowerCase();
-    let plantDetailUrl = plantDetailUrlFromId(p.id); 
-    p.qrCodeUrl = `https://chart.googleapis.com/chart?chs=500x500&cht=qr&choe=UTF-8&chl=${encodeURIComponent(plantDetailUrl)}`;
   });
 
   d.plantTypeNameByCode = 

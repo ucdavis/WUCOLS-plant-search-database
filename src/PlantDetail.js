@@ -3,6 +3,7 @@ import PlantTypeBadge from './PlantTypeBadge';
 import WaterDropRating from './WaterDropRating';
 import { SRLWrapper } from "simple-react-lightbox";
 import PlantFavoriteButton from './PlantFavoriteButton';
+import {PlantDetailQrCode} from './PlantDetailQrCode';
 
 
 const PlantDetail = ({
@@ -115,7 +116,9 @@ const PlantDetail = ({
           </table>
         </div>
       </div>
-
+      <div className="mt-5">
+        <PlantDetailQrCode plant={plant} style={{width:'128px'}}/>
+      </div>
     </div>
     </>
   );

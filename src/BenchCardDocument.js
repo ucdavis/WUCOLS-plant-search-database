@@ -1,5 +1,7 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet, Font, Image } from "@react-pdf/renderer";
+import {plantDetailQrCodeFromId} from './PlantDetailQrCode';
+
 const debug=false;
 
 // Create styles
@@ -54,10 +56,11 @@ const WaterDropRating = ({waterUseCode}) =>
 
 const BenchCardDocument = ({ plant, region, waterUseByCode }) => {
     const p = plant;
+    const qrCodeUrl = plantDetailQrCodeFromId(plant.id).image_url;
     let wuCode = p.waterUseByRegion[region-1];
     let wu = waterUseByCode[wuCode];
-    console.log(wu)
-    console.log(p)
+    //console.log(wu)
+    //console.log(p)
     let photoUrl = !p.botanicalName.length ? "https://via.placeholder.com/800" : p.photos[0].large.url;
     return (
         <Document debug={debug}>
@@ -119,7 +122,7 @@ const BenchCardDocument = ({ plant, region, waterUseByCode }) => {
                     <Image debug={debug} src="/logo-dwr.png" style={{height: "90px", width:'auto'}}/>
                     <Image debug={debug} src="/logo-ucd-ccuh.png" style={{height: "80px", width:'auto'}}/>
                     <Image debug={debug} src="/logo-ucanr.png" style={{height: "80px", width:'auto'}}/>
-                    <Image debug={debug} src={p.qrCodeUrl} style={{height: "80px", width:'auto'}}/>
+                    <Image debug={debug} src={qrCodeUrl} style={{height: "80px", width:'auto'}}/>
                 </View>
             </View>
             </Page>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import PlantTypeBadge from './PlantTypeBadge';
 import WaterDropRating from './WaterDropRating';
@@ -6,12 +5,6 @@ import PlantFavoriteButton from './PlantFavoriteButton';
 import {
   Link
 } from "react-router-dom";
-import { faIdCard} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-const benchCardForPlantRegionAndTemplateId = (p,region,templateId) => 
-	region in p.benchCards && templateId in p.benchCards[region]
-	? p.benchCards[region][templateId]
-	: undefined;
 
 const PlantTable = ({
 	queryString,
@@ -22,8 +15,7 @@ const PlantTable = ({
 	waterUseByCode,
 	region,
 	isPlantFavorite,
-	togglePlantFavorite,
-	benchCardTemplates
+	togglePlantFavorite
 }) => {
   return (
 		<table className="table table-sm ">
@@ -40,10 +32,6 @@ const PlantTable = ({
 							<th rowSpan="2">
 								QR Code
 							</th>
-							<th colSpan={benchCardTemplates.length}>
-								Bench Cards
-								<FontAwesomeIcon icon={faIdCard} className="ml-2"/>
-							</th>
 						</>
 					}
 					<th rowSpan="2">
@@ -54,13 +42,6 @@ const PlantTable = ({
 					</th>
 					<th rowSpan="2">Favorite</th>
 				</tr>
-				{showAvailableMedia &&
-					<tr>
-						{benchCardTemplates.map(t => 
-							<th key={t.id}>{t.name}</th>
-						)}
-					</tr>
-				}
 			</thead>
 			<tbody>
 				{plants.map(p => {
@@ -95,16 +76,6 @@ const PlantTable = ({
 									</a>
 								</td>
 							}
-							{showAvailableMedia && 
-								benchCardTemplates.map(t => {
-									var bc = benchCardForPlantRegionAndTemplateId(p,region,t.id);
-									return <td key={t.id}>
-										{!bc 
-											? <>N/A</> 
-											: <a href={bc.url} target="_blank" rel="noreferrer" className="btn btn-success btn-sm">Download</a>}
-									</td>
-								}
-								)}
 							<td>
 								<WaterDropRating waterUseCode={wu.code}/>
 								<small className="ml-2">

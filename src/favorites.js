@@ -95,7 +95,6 @@ const Favorites = ({
                     showAvailableMedia={true}
                     isPlantFavorite={isPlantFavorite}
                     togglePlantFavorite={togglePlantFavorite}
-                    benchCardTemplates={data.benchCardTemplates}
                     plants={favoritePlants} 
                     photosByPlantName={data.photos}
                     plantTypeNameByCode={data.plantTypeNameByCode} 

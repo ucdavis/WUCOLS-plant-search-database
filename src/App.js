@@ -174,7 +174,8 @@ function App({data}) {
             Download QR codes
           </>
       },
-      {
+     ...data.benchCardTemplates.map(bct => 
+      ({
         method: () => {
           Promise.all(
             favoritePlants.map(p =>
@@ -188,16 +189,16 @@ function App({data}) {
               zip.file(p.commonName + ".pdf", blob, { blob: true });
             }
             zip.generateAsync({ type: "blob" }).then(function (content) {
-              saveAs(content, "bench-cards.zip");
+              saveAs(content, `bench-cards-${bct.name}.zip`);
             });
           });
         },
         label: 
           <>
             <FontAwesomeIcon icon={faIdCard} className="mr-2"/>
-            Download Bench Cards
+            Download Bench Cards ({bct.name})
           </>
-      },
+      })),
       {
         method: () => {
           sideRender(

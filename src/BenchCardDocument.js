@@ -52,9 +52,8 @@ const WaterDropRating = ({waterUseCode}) =>
       {dropRatingByWaterUseCode[waterUseCode]}
     </View> || <>N/A</>;
 
-export default ({ plant, region, waterUseByCode }) => {
+const BenchCardDocument = ({ plant, region, waterUseByCode }) => {
     const p = plant;
-    const imageSize = '64px';
     let wuCode = p.waterUseByRegion[region-1];
     let wu = waterUseByCode[wuCode];
     console.log(wu)
@@ -126,4 +125,6 @@ export default ({ plant, region, waterUseByCode }) => {
             </Page>
         </Document>
     );
-}
+};
+
+export default BenchCardDocument;

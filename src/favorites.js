@@ -67,9 +67,9 @@ const Favorites = ({
                 !!favoritePlants.length
                 && (
                     <div className="mb-3 d-flex flex-column justify-content-around">
-                        <p>
-                            {downloadButtons("btn btn-success btn-block",searchCriteria,favoritePlants).map(c => <div className="my-2">{c}</div>)}
-                        </p>
+                        <div className="mb-3">
+                            {downloadButtons("btn btn-success btn-block",searchCriteria,favoritePlants).map((c,i) => <div className="my-2" key={i}>{c}</div>)}
+                        </div>
                         <p>
                             QR Codes and Bench Cards can be downloaded individually for each plant in the table to the right.
                         </p>

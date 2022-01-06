@@ -51,7 +51,7 @@ const PlantTable = ({
 					return (
 						<tr key={p.id}>
 							<td style={{width:imageSize}}>
-								<img className="card-img"
+								<img className="card-img mr-2"
 									style={{width:imageSize,height:imageSize,background:`url(${photoUrl})`, backgroundSize:'cover'}}
 									src={photoUrl}
 									alt={p.botanicalName}/>

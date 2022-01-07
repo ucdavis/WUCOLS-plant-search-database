@@ -71,7 +71,7 @@ const Favorites = ({
                             {downloadButtons("btn btn-success btn-block",searchCriteria,favoritePlants).map((c,i) => <div className="my-2" key={i}>{c}</div>)}
                         </div>
                         <p>
-                            QR Codes and Bench Cards can be downloaded individually for each plant in the table to the right.
+                            QR Codes and Bench Cards can be downloaded individually for each plant from that plant&apos;s detail screen.
                         </p>
                     </div>
                 )

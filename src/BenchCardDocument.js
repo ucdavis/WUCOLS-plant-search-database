@@ -70,6 +70,7 @@ const BenchCardDocument = ({ plant, region, waterUseByCode, benchCardTemplate })
     console.log({leadPhoto,photoUrl});
     const sizeInches = benchCardTemplate.sizeInInches;
     const sizePoints = {x: sizeInches.x * 72, y: sizeInches.y * 72};
+    const logoStyle = {height: `${sizeInches.y/5}in`, width:'auto'};
     return (
         <Document debug={debug}>
             <Page size={[sizePoints.x, sizePoints.y]} style={styles.page}>
@@ -81,7 +82,7 @@ const BenchCardDocument = ({ plant, region, waterUseByCode, benchCardTemplate })
                 justifyContent:'space-evenly'
             }}>
                 <View>
-                    <Text debug={debug} style={{ fontSize: "40pt", fontWeight:'extrabold' }}>
+                    <Text debug={debug} style={{ fontSize: `${0.5}in`, fontWeight:'extrabold' }}>
                         {plant.botanicalName}
                     </Text>
                     <Text debug={debug} style={{ fontSize: "25pt", fontWeight:'normal', fontStyle:'italic', padding: '20pt' }}>
@@ -92,15 +93,18 @@ const BenchCardDocument = ({ plant, region, waterUseByCode, benchCardTemplate })
                 <View debug={debug} style={{
                     display: 'flex',
                     flexDirection: 'row',
-                    padding:'18pt',
+                    padding:`${sizeInches.x/11/8}in`,
                     justifyContent:'space-around'
                 }}>
                     {!!photoUrl && 
                         <Image debug={debug} src={photoUrl} style={{ width:'45%' }}/>
                     }
 
-                    <View debug={debug} style={styles.waterUseClassificationBox}>
-                        <Text style={{color:'white', paddingBottom:'9pt'}}>Water Use Classification</Text>
+                    <View debug={debug} style={[styles.waterUseClassificationBox,
+                    {
+                        fontSize: `${sizeInches.x/11/4}in`
+                    }]}>
+                        <Text style={{color:'white', paddingBottom:`${sizeInches.x/11/8}in`}}>Water Use Classification</Text>
                         <View style={{
                             backgroundColor:'white',
                             flexGrow:'1',
@@ -108,10 +112,8 @@ const BenchCardDocument = ({ plant, region, waterUseByCode, benchCardTemplate })
                             flexDirection: 'col',
                             justifyContent:'space-evenly'
                         }}>
-                            <Text style={{
-                                fontSize:'22pt'
-                            }}>{wu.name}</Text>
-                            <View style={{ fontSize:'40pt' }}>
+                            <Text>{wu.name}</Text>
+                            <View style={{ fontSize: `${sizeInches.x/11/2}in` }}>
                                 <WaterDropRating waterUseCode={wu.code}/>
                             </View>
                             <View>
@@ -130,10 +132,10 @@ const BenchCardDocument = ({ plant, region, waterUseByCode, benchCardTemplate })
                     padding: '2em',
                     margin: '5em'
                 }}>
-                    <Image debug={debug} src="/logo-dwr.png" style={{height: "90px", width:'auto'}}/>
-                    <Image debug={debug} src="/logo-ucd-ccuh.png" style={{height: "80px", width:'auto'}}/>
-                    <Image debug={debug} src="/logo-ucanr.png" style={{height: "80px", width:'auto'}}/>
-                    <Image debug={debug} src={qrCodeUrl} style={{height: "80px", width:'auto'}}/>
+                    <Image debug={debug} src="/logo-dwr.png" style={logoStyle}/>
+                    <Image debug={debug} src="/logo-ucd-ccuh.png" style={logoStyle}/>
+                    <Image debug={debug} src="/logo-ucanr.png" style={logoStyle}/>
+                    <Image debug={debug} src={qrCodeUrl} style={logoStyle}/>
                 </View>
             </View>
             </Page>

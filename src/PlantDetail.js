@@ -39,7 +39,6 @@ const PlantDetail = ({
         <img className="mr-3"
           src={photoUrl}
           style={{objectFit: 'cover', width:imageSize,height:imageSize}}
-          src={photoUrl}
           alt={plant.botanicalName}/>
       }
       <h1 className="m0"><em>{plant.botanicalName}</em></h1>

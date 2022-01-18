@@ -8,7 +8,7 @@ const plantDetailUrlFromId = id =>
     - https://some.website-of-yours.app/plants/:id/detail 
     - https://some.website-of-yours.app/plants?id=:id&utm_source=qr_code
   */
-  process.env.REACT_APP_PLANT_DETAIL_URL_PATTERN
+  (process.env.REACT_APP_PLANT_DETAIL_URL_PATTERN || "")
     .replace(':id',id);
 
 export const plantDetailQrCodeFromId = id => {

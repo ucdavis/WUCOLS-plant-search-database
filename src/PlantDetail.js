@@ -112,7 +112,7 @@ const PlantDetail = ({
           <SRLWrapper key="plant gallery">
             <div className="row row-cols-1 row-cols-md-3 g-4">
             {plant.photos.map((p,i) => 
-              <div className="col">
+              <div className="col" key={i}>
                 <div className="card mb-3" key={i}>
                   <a href={p.full.url}>
                     <img src={p.large.url} className="card-img-top" alt={p.caption} style={{

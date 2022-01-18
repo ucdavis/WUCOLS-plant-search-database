@@ -151,7 +151,7 @@ const SearchForm = ({
                     <input
                         className="form-check-input"
                         type="checkbox"
-                        checked={searchCriteria.plantTypes[pt.code]}
+                        checked={searchCriteria.plantTypes[pt.code] || false}
                         onChange={e => setPlantType(pt.code, e.target.checked)}
                         id={pt.code + '_checkbox'} />
                     <label

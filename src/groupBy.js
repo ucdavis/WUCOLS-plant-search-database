@@ -7,7 +7,7 @@ const groupBy = (xs, key) =>
     } else {
       rv.push({ key: v, values: [x] });
     }
-    return rv; 
+    return rv;
   }, []);
 
-  export default groupBy;
+export default groupBy;

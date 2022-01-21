@@ -247,4 +247,8 @@ const BenchCardDocument = ({
   );
 };
 
+BenchCardDocument.defaultProps = {
+  benchCardTemplate: undefined,
+};
+
 export default BenchCardDocument;

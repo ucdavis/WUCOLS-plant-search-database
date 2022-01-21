@@ -23,7 +23,7 @@ import Favorites from "./favorites";
 
 import { DropdownButton, Dropdown } from "react-bootstrap";
 
-import ReactExport from "react-export-excel";
+import ReactExport, { ExcelCellData, ExcelSheetData } from "react-export-excel";
 import {
   //BrowserRouter as Router,
   useLocation,
@@ -38,7 +38,14 @@ import { useToasts } from "react-toast-notifications";
 import SearchCriteriaConverter from "./SearchCriteriaConverter";
 import BenchCardDocument from "./BenchCardDocument";
 
-function App({ data }) {
+import { City, Data, Plant, SearchCriteria } from "./types";
+import { plantDetailQrCodeFromId } from "./PlantDetailQrCode";
+
+interface Props {
+  data: Data;
+}
+
+function App({ data }: Props) {
   //const {lat,lng,error} = useGeolocation(false,{enableHighAccuracy: true});
   const location = useLocation();
   const history = useHistory();
@@ -58,7 +65,7 @@ function App({ data }) {
       }
       //console.log(history)
       history.push({
-        path: "/search",
+        pathname: "/search",
         search: qs,
       });
       //console.log(sc);
@@ -73,16 +80,16 @@ function App({ data }) {
   const favoritePlants = sortPlants(
     !searchCriteria.city ? 0 : searchCriteria.city.region
   )(data.plants.filter((p) => !!isFavoriteByPlantId[p.id]));
-  const isPlantFavorite = (p) => !!isFavoriteByPlantId[p.id];
+  const isPlantFavorite = (p: Plant) => !!isFavoriteByPlantId[p.id];
 
   const { addToast, removeToast } = useToasts();
-  function togglePlantFavorite(p) {
+  function togglePlantFavorite(p: Plant) {
     let isFavoriteNow = !isFavoriteByPlantId[p.id];
     updateIsFavoriteByPlantId({
       ...isFavoriteByPlantId,
       [p.id]: isFavoriteNow,
     });
-    let thisToastId = undefined;
+    let thisToastId = "";
     addToast(
       <div>
         Plant {isFavoriteNow ? "added to" : "removed from"} favorites
@@ -111,10 +118,15 @@ function App({ data }) {
     );
   }
 
-  const favoriteAsSpreadsheets = (data, searchCriteria, favoritePlants) => {
+  const favoriteAsSpreadsheets = (
+    data: Data,
+    searchCriteria: SearchCriteria,
+    favoritePlants: Plant[]
+  ): [string[][], ExcelSheetData[]] => {
     if (!searchCriteria.city) {
       return [[], []];
     }
+    let cityRegionIx = parseInt(searchCriteria.city.region) - 1;
     const csv = [
       [
         "Type(s)",
@@ -127,10 +139,9 @@ function App({ data }) {
         p.types.map((t) => data.plantTypeNameByCode[t]).join(", "),
         p.botanicalName,
         p.commonName,
-        data.waterUseByCode[p.waterUseByRegion[searchCriteria.city.region - 1]]
-          .name,
-        data.waterUseByCode[p.waterUseByRegion[searchCriteria.city.region - 1]]
-          .percentageET0 + "%",
+        data.waterUseByCode[p.waterUseByRegion[cityRegionIx]].name,
+        data.waterUseByCode[p.waterUseByRegion[cityRegionIx]].percentageET0 +
+          "%",
       ]),
     ];
 
@@ -142,29 +153,29 @@ function App({ data }) {
           "Common Name",
           "Water Use",
           "Percentage of ET0",
-        ]
-          .map((c) => ({
-            value: c,
-          }))
-          .map((c) => c.value),
-        data: favoritePlants.map((p) => [
-          p.types.map((t) => data.plantTypeNameByCode[t]).join(", "),
-          p.botanicalName,
-          p.commonName,
-          data.waterUseByCode[
-            p.waterUseByRegion[searchCriteria.city.region - 1]
-          ].name,
-          data.waterUseByCode[
-            p.waterUseByRegion[searchCriteria.city.region - 1]
-          ].percentageET0 + "%",
-        ]),
-      },
+        ],
+        data: favoritePlants.map(
+          (p) =>
+            [
+              p.types.map((t) => data.plantTypeNameByCode[t]).join(", "),
+              p.botanicalName,
+              p.commonName,
+              data.waterUseByCode[p.waterUseByRegion[cityRegionIx]].name,
+              data.waterUseByCode[p.waterUseByRegion[cityRegionIx]]
+                .percentageET0 + "%",
+            ] as ExcelCellData[]
+        ),
+      } as ExcelSheetData,
     ];
 
     return [csv, xl];
   };
 
-  const downloadActions = (data, searchCriteria, favoritePlants) => {
+  const downloadActions = (
+    data: Data,
+    searchCriteria: SearchCriteria,
+    favoritePlants: Plant[]
+  ) => {
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     let [, excelData] = favoriteAsSpreadsheets(
@@ -172,7 +183,7 @@ function App({ data }) {
       searchCriteria,
       favoritePlants
     );
-    const sideRender = (el) => {
+    const sideRender = (el: any) => {
       ReactDOM.render(el, document.getElementById("download-outlet"));
     };
     return [
@@ -198,15 +209,21 @@ function App({ data }) {
       {
         method: () => {
           Promise.all(
-            favoritePlants.map((p) =>
-              fetch(p.qrCodeUrl)
+            favoritePlants.map((p: Plant) =>
+              fetch(plantDetailQrCodeFromId(p.id).image_url)
                 .then((r) => r.blob())
-                .then((b) => [p, b])
+                .then((b) => [p, b] as [Plant, Blob])
             )
           ).then((plantBlobPairs) => {
             var zip = new JSZip();
             for (let [p, blob] of plantBlobPairs) {
-              zip.file(p.commonName + ".png", blob, { blob: true });
+              zip.file(
+                p.commonName + ".png",
+                blob as unknown as null,
+                {
+                  blob: true,
+                } as unknown as JSZip.JSZipFileOptions & { dir: true }
+              );
             }
             zip.generateAsync({ type: "blob" }).then(function (content) {
               saveAs(content, "qr-codes.zip");
@@ -223,7 +240,7 @@ function App({ data }) {
       ...data.benchCardTemplates.map((bct) => ({
         method: () => {
           Promise.all(
-            favoritePlants.map((p) =>
+            favoritePlants.map((p: Plant) =>
               pdf(
                 <BenchCardDocument
                   plant={p}
@@ -232,12 +249,18 @@ function App({ data }) {
                 />
               )
                 .toBlob()
-                .then((b) => [p, b])
+                .then((b) => [p, b] as [Plant, Blob])
             )
           ).then((plantBlobPairs) => {
             var zip = new JSZip();
             for (let [p, blob] of plantBlobPairs) {
-              zip.file(p.commonName + ".pdf", blob, { blob: true });
+              zip.file(
+                p.commonName + ".pdf",
+                blob as unknown as null,
+                {
+                  blob: true,
+                } as unknown as JSZip.JSZipFileOptions & { dir: true }
+              );
             }
             zip.generateAsync({ type: "blob" }).then(function (content) {
               saveAs(content, `bench-cards-${bct.name}.zip`);
@@ -362,7 +385,7 @@ function App({ data }) {
             <div>
               <Map
                 cities={data.cities}
-                onSelect={(city) => {
+                onSelect={(city: City) => {
                   alert(city.name);
                 }}
               />

@@ -4,6 +4,7 @@ import { Url } from "url";
 export type NumericString = string;
 export type TypeCode = string;
 export type WaterUseCode = string;
+export type BoolDict = { [key: string]: boolean };
 
 export interface Region {
   id: NumericString;
@@ -85,6 +86,27 @@ export interface Data {
   cities: City[];
   benchCardTemplates: BenchCardTemplate[];
   plantTypeNameByCode: { [key: string]: string };
-  waterUseByCode: { [key: string]: string };
+  waterUseByCode: { [key: string]: WaterUseClassification };
   cityOptions: CityOption[];
+}
+
+export interface PlantTypeCombinator {
+  label: string;
+  value: string;
+  fn: (a: any, b: any) => boolean; // doesn't appear to be used anywhere
+}
+
+export interface PlantTypeCombinatorOptions {
+  default: PlantTypeCombinator;
+  array: PlantTypeCombinator[];
+  byId: { [key: string]: PlantTypeCombinator };
+}
+
+export interface SearchCriteria {
+  city: City;
+  name: string;
+  waterUseClassifications: BoolDict;
+  plantTypes: BoolDict;
+  pageNumber: number;
+  plantTypeCombinator: PlantTypeCombinator;
 }

@@ -3,6 +3,18 @@ import PlantTypeBadge from "./PlantTypeBadge";
 import WaterDropRating from "./WaterDropRating";
 import PlantFavoriteButton from "./PlantFavoriteButton";
 import { Link } from "react-router-dom";
+import { Photo, Plant, WaterUseClassification } from "./types";
+
+interface Props {
+  className: string;
+  plants: Plant[];
+  photosByPlantName: { [key: string]: Photo };
+  plantTypeNameByCode: { [key: string]: string };
+  waterUseByCode: { [key: string]: WaterUseClassification };
+  region: number;
+  isPlantFavorite: (plant: Plant) => boolean;
+  togglePlantFavorite: (plant: Plant) => void;
+}
 
 const PlantList = ({
   className,
@@ -13,7 +25,7 @@ const PlantList = ({
   region,
   isPlantFavorite,
   togglePlantFavorite,
-}) => {
+}: Props) => {
   return (
     <div className="row no-gutters">
       {plants.map((p) => {

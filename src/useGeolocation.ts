@@ -8,9 +8,9 @@ const defaultSettings = {
 
 export const useGeolocation = (watch = false, settings = defaultSettings) => {
   const [position, setPosition] = useState({});
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const onChange = ({ coords, timestamp }) => {
+  const onChange = ({ coords, timestamp }: GeolocationPosition) => {
     setPosition({
       lat: coords.latitude,
       lng: coords.longitude,
@@ -19,7 +19,7 @@ export const useGeolocation = (watch = false, settings = defaultSettings) => {
     });
   };
 
-  const onError = (error) => {
+  const onError = (error: GeolocationPositionError) => {
     setError(error.message);
   };
 
@@ -29,7 +29,7 @@ export const useGeolocation = (watch = false, settings = defaultSettings) => {
       return;
     }
 
-    let watcher = null;
+    let watcher: number | null = null;
     if (watch) {
       watcher = navigator.geolocation.watchPosition(
         onChange,
@@ -40,7 +40,9 @@ export const useGeolocation = (watch = false, settings = defaultSettings) => {
       navigator.geolocation.getCurrentPosition(onChange, onError, settings);
     }
 
-    return () => watcher && navigator.geolocation.clearWatch(watcher);
+    return () => {
+      watcher && navigator.geolocation.clearWatch(watcher);
+    };
   }, [
     watch,
     settings,

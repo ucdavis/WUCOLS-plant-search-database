@@ -30,7 +30,7 @@ export const plantDetailQrCodeFromId = (id: number) => {
 
 interface Props {
   plant: Plant;
-  style: React.CSSProperties;
+  style?: React.CSSProperties;
 }
 
 export const PlantDetailQrCode = ({ plant, style }: Props) => {

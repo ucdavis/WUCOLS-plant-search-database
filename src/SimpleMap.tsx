@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import GoogleMapReact from "google-map-react";
 
-const AnyReactComponent = ({ text }) => (
+const AnyReactComponent = ({ text }: { text: any }) => (
   <h4>
     <span className="badge badge-primary">{text}</span>
   </h4>

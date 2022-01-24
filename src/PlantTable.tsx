@@ -4,6 +4,19 @@ import WaterDropRating from "./WaterDropRating";
 import PlantFavoriteButton from "./PlantFavoriteButton";
 import { PlantDetailQrCode } from "./PlantDetailQrCode";
 import { Link } from "react-router-dom";
+import { Photo, Plant, WaterUseClassification } from "./types";
+
+interface Props {
+  queryString: string;
+  showAvailableMedia: boolean;
+  plants: Plant[];
+  photosByPlantName: { [key: string]: Photo };
+  plantTypeNameByCode: { [key: string]: string };
+  waterUseByCode: { [key: string]: WaterUseClassification };
+  region: number;
+  isPlantFavorite: (plant: Plant) => boolean;
+  togglePlantFavorite: (plant: Plant) => void;
+}
 
 const PlantTable = ({
   queryString,
@@ -15,21 +28,21 @@ const PlantTable = ({
   region,
   isPlantFavorite,
   togglePlantFavorite,
-}) => {
+}: Props) => {
   return (
     <table className="table table-sm ">
       <thead>
         <tr>
-          <th rowSpan="2">Photo</th>
-          <th rowSpan="2">Name</th>
+          <th rowSpan={2}>Photo</th>
+          <th rowSpan={2}>Name</th>
           {showAvailableMedia && (
             <>
-              <th rowSpan="2">QR Code</th>
+              <th rowSpan={2}>QR Code</th>
             </>
           )}
-          <th rowSpan="2">Water Use</th>
-          <th rowSpan="2">Type(s)</th>
-          <th rowSpan="2">Favorite</th>
+          <th rowSpan={2}>Water Use</th>
+          <th rowSpan={2}>Type(s)</th>
+          <th rowSpan={2}>Favorite</th>
         </tr>
       </thead>
       <tbody>

@@ -38,7 +38,7 @@ import { useToasts } from "react-toast-notifications";
 import SearchCriteriaConverter from "./SearchCriteriaConverter";
 import BenchCardDocument from "./BenchCardDocument";
 
-import { City, Data, Plant, SearchCriteria } from "./types";
+import { BoolDict, City, Data, Plant, SearchCriteria } from "./types";
 import { plantDetailQrCodeFromId } from "./PlantDetailQrCode";
 
 interface Props {
@@ -56,7 +56,7 @@ function App({ data }: Props) {
   );
 
   const updateSearchCriteria = React.useCallback(
-    (sc) => {
+    (sc: SearchCriteria) => {
       let qs = SearchCriteriaConverter.toQuerystring(sc);
       //console.log('search altered',qs);
       if (!history) {
@@ -73,10 +73,8 @@ function App({ data }: Props) {
     [history]
   );
 
-  const [isFavoriteByPlantId, updateIsFavoriteByPlantId] = useLocalStorage(
-    "isFavoriteByPlantId",
-    {}
-  );
+  const [isFavoriteByPlantId, updateIsFavoriteByPlantId] =
+    useLocalStorage<BoolDict>("isFavoriteByPlantId", {});
   const favoritePlants = sortPlants(
     !searchCriteria.city ? 0 : searchCriteria.city.region
   )(data.plants.filter((p) => !!isFavoriteByPlantId[p.id]));
@@ -126,7 +124,7 @@ function App({ data }: Props) {
     if (!searchCriteria.city) {
       return [[], []];
     }
-    let cityRegionIx = parseInt(searchCriteria.city.region) - 1;
+    let cityRegionIx = searchCriteria.city.region - 1;
     const csv = [
       [
         "Type(s)",

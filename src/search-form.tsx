@@ -4,15 +4,35 @@ import Map from "./Map";
 import plantTypeCombinatorOptions from "./plant-type-combinator-options";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMap } from "@fortawesome/free-solid-svg-icons";
+import {
+  BoolDict,
+  City,
+  PlantType,
+  PlantTypeCombinator,
+  SearchCriteria,
+  WaterUseClassification,
+} from "./types";
 
-const MapModal = ({ cities, visible, setVisible, onCityChange }) => (
+interface MapModalProps {
+  cities: City[];
+  visible: boolean;
+  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  onCityChange: (city: City) => void;
+}
+
+const MapModal = ({
+  cities,
+  visible,
+  setVisible,
+  onCityChange,
+}: MapModalProps) => (
   <>
     {visible && (
       <div
         className={"modal fade" + (visible ? " show" : "")}
         style={{ display: visible ? "block" : "none" }}
         id="mapModal"
-        tabIndex="-1"
+        tabIndex={-1}
         aria-labelledby="exampleModalLabel"
         aria-hidden="true"
       >
@@ -38,7 +58,7 @@ const MapModal = ({ cities, visible, setVisible, onCityChange }) => (
             <div className="modal-body">
               <Map
                 cities={cities}
-                onSelect={(city) => {
+                onSelect={(city: City) => {
                   onCityChange(city);
                   setVisible(false);
                 }}
@@ -51,46 +71,57 @@ const MapModal = ({ cities, visible, setVisible, onCityChange }) => (
   </>
 );
 
+interface SearchFormProps {
+  cityOptions: City[];
+  searchCriteria: SearchCriteria;
+  plantTypes: PlantType[];
+  waterUseClassifications: WaterUseClassification[];
+  updateSearchCriteria: (searchCriteria: SearchCriteria) => void;
+}
+
 const SearchForm = ({
   cityOptions,
   searchCriteria,
   plantTypes,
   waterUseClassifications,
   updateSearchCriteria,
-}) => {
+}: SearchFormProps) => {
   const [mapModalVisible, setMapModalVisible] = React.useState(false);
-  const setPlantType = (code, checked) =>
+  const setPlantType = (code: string, checked: boolean) =>
     updateSearchCriteria({
       ...searchCriteria,
       pageNumber: 1,
       plantTypes: { ...searchCriteria.plantTypes, [code]: checked },
     });
-  const selectAllWaterUseClassifications = (selected) => {
+  const selectAllWaterUseClassifications = (selected: boolean) => {
     updateSearchCriteria({
       ...searchCriteria,
       pageNumber: 1,
-      waterUseClassifications: waterUseClassifications.reduce((dict, wu) => {
-        dict[wu.code] = selected;
-        return dict;
-      }, {}),
+      waterUseClassifications: waterUseClassifications.reduce(
+        (dict: BoolDict, wu) => {
+          dict[wu.code] = selected;
+          return dict;
+        },
+        {}
+      ),
     });
   };
-  const onCityChange = (o) => {
+  const onCityChange = (o: City) => {
     //console.log('onCityChange',o);
     updateSearchCriteria({ ...searchCriteria, pageNumber: 1, city: o });
   };
-  const onPlantTypeCombinatorChange = (ptc) => {
+  const onPlantTypeCombinatorChange = (ptc: PlantTypeCombinator) => {
     updateSearchCriteria({
       ...searchCriteria,
       pageNumber: 1,
       plantTypeCombinator: ptc,
     });
   };
-  const selectAllPlantTypes = (selected) => {
+  const selectAllPlantTypes = (selected: boolean) => {
     updateSearchCriteria({
       ...searchCriteria,
       pageNumber: 1,
-      plantTypes: plantTypes.reduce((dict, pt) => {
+      plantTypes: plantTypes.reduce((dict: BoolDict, pt) => {
         dict[pt.code] = selected;
         return dict;
       }, {}),
@@ -181,7 +212,7 @@ const SearchForm = ({
         <div>
           <Select
             styles={{
-              container: (base) => ({
+              container: (base: any) => ({
                 ...base,
                 flex: 1,
               }),
@@ -226,7 +257,7 @@ const SearchForm = ({
         </label>
         <Select
           styles={{
-            container: (base) => ({
+            container: (base: any) => ({
               ...base,
               flex: 1,
             }),

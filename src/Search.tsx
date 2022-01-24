@@ -1,7 +1,12 @@
 import React from "react";
 import PlantList from "./PlantList";
 import PlantTable from "./PlantTable";
-import { faTh, faThLarge, faBars } from "@fortawesome/free-solid-svg-icons";
+import {
+  faTh,
+  faThLarge,
+  faBars,
+  IconDefinition,
+} from "@fortawesome/free-solid-svg-icons";
 import sortPlants from "./sort-plants";
 import ultimatePagination from "ultimate-pagination";
 import { Pagination } from "react-bootstrap";
@@ -9,8 +14,25 @@ import plantTypeCombinatorOptions from "./plant-type-combinator-options";
 import SearchForm from "./search-form";
 import SearchCriteriaConverter from "./SearchCriteriaConverter";
 import Welcome from "./welcome";
+import { Data, Plant, SearchCriteria } from "./types";
 
 const performancePlantLimit = 50000;
+
+interface Props {
+  data: Data;
+  searchCriteria: SearchCriteria;
+  setSearchCriteria: (searchCriteria: SearchCriteria) => void;
+  isPlantFavorite: (plant: Plant) => boolean;
+  togglePlantFavorite: (plant: Plant) => void;
+  queryString: string;
+}
+
+export interface PlantsViewMode {
+  id: string;
+  label: string;
+  component: React.ComponentType<any>;
+  icon: IconDefinition;
+}
 
 const Search = ({
   data,
@@ -19,8 +41,8 @@ const Search = ({
   isPlantFavorite,
   togglePlantFavorite,
   queryString,
-}) => {
-  let plantsViewModes = [
+}: Props) => {
+  let plantsViewModes: PlantsViewMode[] = [
     {
       id: "list",
       label: "List",
@@ -104,7 +126,7 @@ const Search = ({
   });
   //console.log('pagination',paginationModel);
 
-  const setCurrentPageNumber = (pn) =>
+  const setCurrentPageNumber = (pn: number) =>
     setSearchCriteria({ ...searchCriteria, pageNumber: pn });
   const actualPagination = pageCount > 1 && (
     <Pagination>

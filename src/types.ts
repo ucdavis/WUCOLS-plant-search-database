@@ -1,9 +1,7 @@
-import { Url } from "url";
-
 // these type aliases are just to make it more clear what sort of data is being passed around
 export type NumericString = string;
 export type TypeCode = string;
-export type WaterUseCode = string;
+export type WaterUseCode = "VL" | "LO" | "M" | "H" | "?" | "/";
 export type BoolDict = { [key: string]: boolean };
 
 export interface Region {
@@ -24,7 +22,7 @@ export interface WaterUseClassification {
 }
 
 export interface PhotoReference {
-  url: Url;
+  url: string;
   width: number;
   height: number;
 }
@@ -46,18 +44,19 @@ export interface Plant {
   types: TypeCode[];
   culturalInformation: string;
   waterUseByRegion: WaterUseCode[]; // number of elements is the number of regions
+  searchName: string;
 }
 
-export interface Position {
+export interface Coordinates {
   lat: number;
   lng: number;
 }
 
 export interface City {
-  region: NumericString;
+  region: number;
   name: string;
   id: number;
-  position: Position;
+  position: Coordinates;
 }
 
 export interface CityOption extends City {
@@ -82,7 +81,7 @@ export interface Data {
   plantTypes: PlantType[];
   waterUseClassifications: WaterUseClassification[];
   plants: Plant[];
-  photos: Record<string, Photo>;
+  photos: { [key: string]: Photo };
   cities: City[];
   benchCardTemplates: BenchCardTemplate[];
   plantTypeNameByCode: { [key: string]: string };

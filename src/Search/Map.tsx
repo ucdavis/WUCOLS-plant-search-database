@@ -1,6 +1,6 @@
 import React from "react";
 import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
-import { City } from "./types";
+import { City } from "../types";
 
 declare global {
   interface Window {

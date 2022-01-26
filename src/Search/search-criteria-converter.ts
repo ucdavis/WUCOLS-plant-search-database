@@ -1,5 +1,5 @@
-import plantTypeCombinatorOptions from "./plant-type-combinator-options";
-import { City, PlantType, SearchCriteria } from "./types";
+import plantTypeCombinatorOptions from "../Plant/plant-type-combinator-options";
+import { City, PlantType, SearchCriteria } from "../types";
 
 type BoolDict = { [key: string]: boolean };
 const autoSearch = false;

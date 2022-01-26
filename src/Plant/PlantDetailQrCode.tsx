@@ -1,5 +1,5 @@
 import React from "react";
-import { Plant } from "./types";
+import { Plant } from "../types";
 
 const googleQrCodeUrl = (destination_url: string) =>
   `https://chart.googleapis.com/chart?chs=500x500&cht=qr&choe=UTF-8&chl=${encodeURIComponent(

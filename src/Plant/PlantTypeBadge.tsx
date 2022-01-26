@@ -1,6 +1,6 @@
 import React from "react";
 
-import { TypeCode } from "./types";
+import { TypeCode } from "../types";
 
 interface Props {
   type: TypeCode;

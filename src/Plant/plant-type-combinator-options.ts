@@ -1,4 +1,4 @@
-import { PlantTypeCombinator, PlantTypeCombinatorOptions } from "./types";
+import { PlantTypeCombinator, PlantTypeCombinatorOptions } from "../types";
 
 const combinators: PlantTypeCombinator[] = [
   {

@@ -4,7 +4,7 @@ import WaterDropRating from "./WaterDropRating";
 import PlantFavoriteButton from "./PlantFavoriteButton";
 import { PlantDetailQrCode } from "./PlantDetailQrCode";
 import { Link } from "react-router-dom";
-import { Photo, Plant, WaterUseClassification } from "./types";
+import { Photo, Plant, WaterUseClassification } from "../types";
 
 interface Props {
   queryString: string;

@@ -1,4 +1,4 @@
-import { Plant, WaterUseCode } from "./types";
+import { Plant, WaterUseCode } from "../types";
 
 const sortValueByWaterUseCode: {
   [key in WaterUseCode]: number;

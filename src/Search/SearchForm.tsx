@@ -1,7 +1,7 @@
 import React from "react";
 import Select, { ActionMeta, ValueType } from "react-select";
 import Map from "./Map";
-import plantTypeCombinatorOptions from "./plant-type-combinator-options";
+import plantTypeCombinatorOptions from "../Plant/plant-type-combinator-options";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMap } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -11,7 +11,7 @@ import {
   PlantTypeCombinator,
   SearchCriteria,
   WaterUseClassification,
-} from "./types";
+} from "../types";
 
 interface MapModalProps {
   cities: City[];

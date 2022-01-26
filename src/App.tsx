@@ -1,12 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./App.css";
-import Map from "./Map";
+import Map from "./Search/Map";
 //import {useGeolocation} from '../src/useGeolocation';
-import useLocalStorage from "./useLocalStorage";
-import sortPlants from "./sort-plants";
-import Search from "./Search";
-import PlantDetail from "./PlantDetail";
+import useLocalStorage from "./Utilities/useLocalStorage";
+import sortPlants from "./Search/sort-plants";
+import Search from "./Search/Search";
+import PlantDetail from "./Plant/PlantDetail";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSearch,
@@ -19,7 +19,7 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { PDFViewer, pdf } from "@react-pdf/renderer";
 
-import Favorites from "./favorites";
+import Favorites from "./Favorites/Favorites";
 
 import { DropdownButton, Dropdown } from "react-bootstrap";
 
@@ -35,8 +35,8 @@ import {
 
 import SimpleReactLightbox from "simple-react-lightbox";
 import { useToasts } from "react-toast-notifications";
-import SearchCriteriaConverter from "./SearchCriteriaConverter";
-import BenchCardDocument from "./BenchCardDocument";
+import SearchCriteriaConverter from "./Search/search-criteria-converter";
+import BenchCardDocument from "./Plant/BenchCardDocument";
 
 import {
   BoolDict,
@@ -46,7 +46,7 @@ import {
   Plant,
   SearchCriteria,
 } from "./types";
-import { plantDetailQrCodeFromId } from "./PlantDetailQrCode";
+import { plantDetailQrCodeFromId } from "./Plant/PlantDetailQrCode";
 
 interface Props {
   data: Data;
@@ -248,6 +248,7 @@ function App({ data }: Props) {
             favoritePlants.map((p: Plant) =>
               pdf(
                 <BenchCardDocument
+                  benchCardTemplate={bct}
                   plant={p}
                   region={searchCriteria.city.region}
                   waterUseByCode={data.waterUseByCode}

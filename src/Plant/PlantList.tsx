@@ -3,7 +3,7 @@ import PlantTypeBadge from "./PlantTypeBadge";
 import WaterDropRating from "./WaterDropRating";
 import PlantFavoriteButton from "./PlantFavoriteButton";
 import { Link } from "react-router-dom";
-import { Photo, Plant, WaterUseClassification } from "./types";
+import { Photo, Plant, WaterUseClassification } from "../types";
 
 interface Props {
   className: string;

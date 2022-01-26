@@ -1,12 +1,12 @@
 import React from "react";
-import PlantTable from "./PlantTable";
+import PlantTable from "../Plant/PlantTable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faQrcode,
   faFileExcel,
   faIdCard,
 } from "@fortawesome/free-solid-svg-icons";
-import { Data, DownloadAction, Plant, SearchCriteria } from "./types";
+import { Data, DownloadAction, Plant, SearchCriteria } from "../types";
 
 interface Props {
   queryString: string;

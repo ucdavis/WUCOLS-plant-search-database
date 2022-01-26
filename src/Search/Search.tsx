@@ -1,6 +1,6 @@
 import React from "react";
-import PlantList from "./PlantList";
-import PlantTable from "./PlantTable";
+import PlantList from "../Plant/PlantList";
+import PlantTable from "../Plant/PlantTable";
 import {
   faTh,
   faThLarge,
@@ -10,11 +10,11 @@ import {
 import sortPlants from "./sort-plants";
 import ultimatePagination from "ultimate-pagination";
 import { Pagination } from "react-bootstrap";
-import plantTypeCombinatorOptions from "./plant-type-combinator-options";
-import SearchForm from "./search-form";
-import SearchCriteriaConverter from "./SearchCriteriaConverter";
-import Welcome from "./welcome";
-import { Data, Plant, SearchCriteria } from "./types";
+import plantTypeCombinatorOptions from "../Plant/plant-type-combinator-options";
+import SearchForm from "./SearchForm";
+import SearchCriteriaConverter from "./search-criteria-converter";
+import Welcome from "./Welcome";
+import { Data, Plant, SearchCriteria } from "../types";
 
 const performancePlantLimit = 50000;
 

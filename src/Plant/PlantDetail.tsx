@@ -10,7 +10,7 @@ import {
   Plant,
   Region,
   WaterUseClassification,
-} from "./types";
+} from "../types";
 
 interface Props {
   plant: Plant;

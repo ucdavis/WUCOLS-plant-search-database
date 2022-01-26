@@ -14,7 +14,7 @@ import {
   Plant,
   WaterUseClassification,
   WaterUseCode,
-} from "./types";
+} from "../types";
 
 const debug = false;
 

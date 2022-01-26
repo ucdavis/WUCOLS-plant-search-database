@@ -6,18 +6,37 @@ import {
   faFileExcel,
   faIdCard,
 } from "@fortawesome/free-solid-svg-icons";
+import { Data, DownloadAction, Plant, SearchCriteria } from "./types";
+
+interface Props {
+  queryString: string;
+  favoritePlants: Plant[];
+  getDownloadActions: (
+    data: Data,
+    searchCriteria: SearchCriteria,
+    favoritePlants: Plant[]
+  ) => DownloadAction[];
+  data: Data;
+  isPlantFavorite: (plant: Plant) => boolean;
+  togglePlantFavorite: (plant: Plant) => void;
+  searchCriteria: SearchCriteria;
+}
 
 const Favorites = ({
   queryString,
   favoritePlants,
-  downloadActions,
+  getDownloadActions,
   data,
   isPlantFavorite,
   togglePlantFavorite,
   searchCriteria,
-}) => {
-  const downloadButtons = (className, searchCriteria, favoritePlants) => {
-    return downloadActions(data, searchCriteria, favoritePlants).map((a) => (
+}: Props) => {
+  const downloadButtons = (
+    className: string,
+    searchCriteria: SearchCriteria,
+    favoritePlants: Plant[]
+  ) => {
+    return getDownloadActions(data, searchCriteria, favoritePlants).map((a) => (
       <button className={className} onClick={a.method}>
         {a.label}
       </button>

@@ -99,6 +99,9 @@ const Search = ({
     return sortPlants(searchCriteria.city.region)(
       data.plants.filter((p) => {
         let typeOk = noType || typeFn((t) => p.types.indexOf(t) > -1);
+        if (!searchCriteria.city) {
+          return false;
+        }
         let wu = p.waterUseByRegion[searchCriteria.city.region - 1];
         let wuOk = searchCriteria.waterUseClassifications[wu] || noWu;
         let nameOk =

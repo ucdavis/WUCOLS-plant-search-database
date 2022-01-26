@@ -9,6 +9,7 @@ const sortValueByWaterUseCode: {
   H: 4,
   "?": 5,
   "/": 6,
+  N: 7,
 };
 
 const getWaterUseSortValue = (code: WaterUseCode) => {

@@ -1,20 +1,34 @@
 import React from "react";
 import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
+import { City } from "./types";
+
+declare global {
+  interface Window {
+    map: google.maps.Map;
+    extraControls: HTMLDivElement;
+    currentPosition: google.maps.LatLng;
+  }
+}
 
 const containerStyle = {
   width: "100%",
   height: "70vh",
 };
 
-const CityMarker = ({ city, onClick }) => {
-  const markerRef = React.useRef(null);
+interface CityMarkerProps {
+  city: City;
+  onClick: (city: City) => void;
+}
+
+const CityMarker = ({ city, onClick }: CityMarkerProps) => {
+  const markerRef = React.useRef<Marker | null>(null);
   let iw = new window.google.maps.InfoWindow({
     content: `<div>${city.name}</div>`,
   });
-  const setNameVisible = (v) => {
+  const setNameVisible = (v: boolean) => {
     if (v) {
-      let marker = markerRef.current.marker;
-      let map = marker.map;
+      let marker = markerRef.current?.marker as any;
+      let map = marker?.map;
       iw.open({
         anchor: marker,
         map,
@@ -45,18 +59,32 @@ const CityMarker = ({ city, onClick }) => {
 };
 
 const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
-const libraries = ["geometry"];
+const libraries: ["geometry"] = ["geometry"];
 
-function MyComponent({ cities, onSelect }) {
+interface MyComponentProps {
+  cities: City[];
+  onSelect: (city: City) => void;
+}
+
+function MyComponent({ cities, onSelect }: MyComponentProps) {
+  interface CityMeasurement {
+    city: City;
+    cityPosition: google.maps.LatLng;
+    distance: number;
+  }
+
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     libraries,
     googleMapsApiKey: apiKey,
   });
 
-  const [, setMap] = React.useState(null);
+  const [, setMap] = React.useState<google.maps.Map | null>(null);
 
-  const fitPositions = (map, positions) => {
+  const fitPositions = (
+    map: google.maps.Map,
+    positions: google.maps.LatLng[]
+  ) => {
     const bounds = new window.google.maps.LatLngBounds();
     positions.forEach((p) => {
       bounds.extend(p);
@@ -65,9 +93,11 @@ function MyComponent({ cities, onSelect }) {
   };
 
   const onLoad = React.useCallback(
-    function callback(map) {
-      const cityPositions = cities.map((c) => c.position);
-      var visitorMarker = undefined;
+    function callback(map: google.maps.Map) {
+      const cityPositions = cities.map(
+        (c) => new google.maps.LatLng(c.position)
+      );
+      var visitorMarker: google.maps.Marker | undefined = undefined;
       fitPositions(map, cityPositions);
       setMap(map);
       window.map = map;
@@ -107,7 +137,7 @@ function MyComponent({ cities, onSelect }) {
       });
 
       buttons[0].addEventListener("click", () => {
-        function success(pos) {
+        function success(pos: GeolocationPosition) {
           let currentPosition = new window.google.maps.LatLng({
             lat: pos.coords.latitude,
             lng: pos.coords.longitude,
@@ -125,7 +155,7 @@ function MyComponent({ cities, onSelect }) {
                     currentPosition,
                     cityPosition
                   ),
-              };
+              } as CityMeasurement;
             })
             .sort((a, b) => a.distance - b.distance)
             .slice(0, 5);
@@ -147,10 +177,14 @@ function MyComponent({ cities, onSelect }) {
               position: currentPosition,
             });
             visitorMarker.addListener("click", function toggleBounce() {
-              if (visitorMarker.getAnimation() !== null) {
-                visitorMarker.setAnimation(null);
-              } else {
-                visitorMarker.setAnimation(window.google.maps.Animation.BOUNCE);
+              if (!!visitorMarker) {
+                if (visitorMarker.getAnimation() !== null) {
+                  visitorMarker.setAnimation(null);
+                } else {
+                  visitorMarker.setAnimation(
+                    window.google.maps.Animation.BOUNCE
+                  );
+                }
               }
             });
           }, 1000);
@@ -158,7 +192,7 @@ function MyComponent({ cities, onSelect }) {
           console.log(measurements);
         }
 
-        function error(err) {
+        function error(err: GeolocationPositionError) {
           console.warn(`ERROR(${err.code}): ${err.message}`);
           alert(
             err.code === 3

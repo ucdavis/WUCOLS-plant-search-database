@@ -8,24 +8,36 @@ import {
   //BrowserRouter as Router,
   HashRouter as Router,
 } from "react-router-dom";
+import { Data, WaterUseClassification } from "./types";
 
+declare global {
+  interface Window {
+    wucols_data: Data;
+  }
+}
 fetch("WUCOLS.json")
   .then((r) => r.json())
-  .then((d) => {
+  .then((d: Data) => {
     window.wucols_data = d;
     d.plants.forEach((p) => {
       p.searchName = (p.commonName + " " + p.botanicalName).toLowerCase();
     });
 
-    d.plantTypeNameByCode = d.plantTypes.reduce((dict, t) => {
-      dict[t.code] = t.name;
-      return dict;
-    }, {});
+    d.plantTypeNameByCode = d.plantTypes.reduce(
+      (dict: { [key: string]: string }, t) => {
+        dict[t.code] = t.name;
+        return dict;
+      },
+      {}
+    );
 
-    d.waterUseByCode = d.waterUseClassifications.reduce((dict, wu) => {
-      dict[wu.code] = wu;
-      return dict;
-    }, {});
+    d.waterUseByCode = d.waterUseClassifications.reduce(
+      (dict: { [key: string]: WaterUseClassification }, wu) => {
+        dict[wu.code] = wu;
+        return dict;
+      },
+      {}
+    );
 
     d.cityOptions = d.cities
       .map((c) => ({

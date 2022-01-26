@@ -9,6 +9,12 @@ import {
   Image,
 } from "@react-pdf/renderer";
 import { plantDetailQrCodeFromId } from "./PlantDetailQrCode";
+import {
+  BenchCardTemplate,
+  Plant,
+  WaterUseClassification,
+  WaterUseCode,
+} from "./types";
 
 const debug = false;
 
@@ -33,12 +39,12 @@ const styles = StyleSheet.create({
   },
 });
 
-const dropRatingByWaterUseCode = (() => {
+const dropRatingByWaterUseCode: { [key: string]: JSX.Element } = (() => {
   Font.register({
     family: "FontAwesome",
     src: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/fonts/fontawesome-webfont.ttf",
   });
-  const DropIcon = ({ filled }) => (
+  const DropIcon = ({ filled }: { filled?: boolean }) => (
     <Text
       style={{
         opacity: filled ? 1 : 0.3,
@@ -110,7 +116,11 @@ const dropRatingByWaterUseCode = (() => {
   };
 })();
 
-const WaterDropRating = ({ waterUseCode }) =>
+interface WaterDropRatingProps {
+  waterUseCode: WaterUseCode;
+}
+
+const WaterDropRating = ({ waterUseCode }: WaterDropRatingProps) =>
   (
     <View
       style={{
@@ -124,12 +134,19 @@ const WaterDropRating = ({ waterUseCode }) =>
     </View>
   ) || <>N/A</>;
 
+interface BenchCardDocumentProps {
+  plant: Plant;
+  region: number;
+  waterUseByCode: { [key: string]: WaterUseClassification };
+  benchCardTemplate: BenchCardTemplate;
+}
+
 const BenchCardDocument = ({
   plant,
   region,
   waterUseByCode,
   benchCardTemplate,
-}) => {
+}: BenchCardDocumentProps) => {
   const p = plant;
   const qrCodeUrl = plantDetailQrCodeFromId(plant.id).image_url;
   let wuCode = p.waterUseByRegion[region - 1];
@@ -142,7 +159,7 @@ const BenchCardDocument = ({
   const sizePoints = { x: sizeInches.x * 72, y: sizeInches.y * 72 };
   const logoStyle = { height: `${sizeInches.y / 5}in`, width: "auto" };
   return (
-    <Document debug={debug}>
+    <Document>
       <Page size={[sizePoints.x, sizePoints.y]} style={styles.page}>
         <View
           debug={debug}
@@ -150,7 +167,7 @@ const BenchCardDocument = ({
             display: "flex",
             height: "100%",
             padding: "18pt",
-            flexDirection: "col",
+            flexDirection: "column",
             justifyContent: "space-evenly",
           }}
         >
@@ -207,9 +224,9 @@ const BenchCardDocument = ({
               <View
                 style={{
                   backgroundColor: "white",
-                  flexGrow: "1",
+                  flexGrow: 1,
                   display: "flex",
-                  flexDirection: "col",
+                  flexDirection: "column",
                   justifyContent: "space-evenly",
                 }}
               >

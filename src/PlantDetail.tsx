@@ -5,6 +5,23 @@ import { SRLWrapper } from "simple-react-lightbox";
 import PlantFavoriteButton from "./PlantFavoriteButton";
 import { PlantDetailQrCode } from "./PlantDetailQrCode";
 import { Link } from "react-router-dom";
+import {
+  BenchCardTemplate,
+  Plant,
+  Region,
+  WaterUseClassification,
+} from "./types";
+
+interface Props {
+  plant: Plant;
+  plantTypeNameByCode: { [key: string]: string };
+  waterUseByCode: { [key: string]: WaterUseClassification };
+  region: number;
+  regions: Region[];
+  benchCardTemplates: BenchCardTemplate[];
+  isPlantFavorite: (plant: Plant) => boolean;
+  togglePlantFavorite: (plant: Plant) => void;
+}
 
 const PlantDetail = ({
   plant,
@@ -15,15 +32,14 @@ const PlantDetail = ({
   benchCardTemplates,
   isPlantFavorite,
   togglePlantFavorite,
-}) => {
+}: Props) => {
   if (!plant) {
     return <div>Invalid Plant</div>;
   }
   //let wu = waterUseByCode[plant.waterUseByRegion[region-1]];
-  let regionWaterUsePairs = regions.map((r) => [
-    r,
-    waterUseByCode[plant.waterUseByRegion[r.id - 1]],
-  ]);
+  let regionWaterUsePairs: [Region, WaterUseClassification][] = regions.map(
+    (r) => [r, waterUseByCode[plant.waterUseByRegion[r.id - 1]]]
+  );
 
   const imageSize = "64px";
   let leadPhoto = plant.photos[0];

@@ -32,13 +32,20 @@ import {
   NavLink,
   Redirect,
 } from "react-router-dom";
-//import groupBy from './groupBy';
+
 import SimpleReactLightbox from "simple-react-lightbox";
 import { useToasts } from "react-toast-notifications";
 import SearchCriteriaConverter from "./SearchCriteriaConverter";
 import BenchCardDocument from "./BenchCardDocument";
 
-import { BoolDict, City, Data, Plant, SearchCriteria } from "./types";
+import {
+  BoolDict,
+  City,
+  Data,
+  DownloadAction,
+  Plant,
+  SearchCriteria,
+} from "./types";
 import { plantDetailQrCodeFromId } from "./PlantDetailQrCode";
 
 interface Props {
@@ -169,11 +176,11 @@ function App({ data }: Props) {
     return [csv, xl];
   };
 
-  const downloadActions = (
+  const getDownloadActions = (
     data: Data,
     searchCriteria: SearchCriteria,
     favoritePlants: Plant[]
-  ) => {
+  ): DownloadAction[] => {
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     let [, excelData] = favoriteAsSpreadsheets(
@@ -343,7 +350,7 @@ function App({ data }: Props) {
             variant="outline-light"
             disabled={!searchCriteria.city}
           >
-            {downloadActions(data, searchCriteria, favoritePlants).map(
+            {getDownloadActions(data, searchCriteria, favoritePlants).map(
               (a, i) => (
                 <Dropdown.Item onClick={a.method} key={i}>
                   {a.label}
@@ -473,7 +480,7 @@ function App({ data }: Props) {
           {...{
             favoritePlants,
             queryString: location.search,
-            downloadActions,
+            getDownloadActions: getDownloadActions,
             isPlantFavorite,
             togglePlantFavorite,
             searchCriteria,

@@ -1,5 +1,5 @@
 import React from "react";
-import Select from "react-select";
+import Select, { ActionMeta, ValueType } from "react-select";
 import Map from "./Map";
 import plantTypeCombinatorOptions from "./plant-type-combinator-options";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -219,7 +219,12 @@ const SearchForm = ({
             }}
             options={plantTypeCombinatorOptions.array}
             value={searchCriteria.plantTypeCombinator}
-            onChange={onPlantTypeCombinatorChange}
+            onChange={
+              onPlantTypeCombinatorChange as (
+                o: ValueType<PlantTypeCombinator, false>,
+                _: ActionMeta<PlantTypeCombinator>
+              ) => void
+            }
             noOptionsMessage={() => "No result"}
           />
         </div>
@@ -265,7 +270,12 @@ const SearchForm = ({
           options={cityOptions}
           placeholder="Select a city"
           value={searchCriteria.city}
-          onChange={onCityChange}
+          onChange={
+            onCityChange as (
+              o: ValueType<City, false>,
+              _: ActionMeta<City>
+            ) => void
+          }
           noOptionsMessage={() => "No cities found by that name"}
         />
         {" or "}

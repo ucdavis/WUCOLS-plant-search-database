@@ -1,12 +1,19 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
+import { Plant } from "./types";
+
+interface Props {
+  plant: Plant;
+  togglePlantFavorite: (plant: Plant) => void;
+  isPlantFavorite: (plant: Plant) => boolean;
+}
 
 const PlantFavoriteButton = ({
   plant,
   togglePlantFavorite,
   isPlantFavorite,
-}) => {
+}: Props) => {
   const FavoriteIcon = () => <FontAwesomeIcon icon={faStar} />;
   const dropShadowCss = "drop-shadow( 0px 1px 1px rgba(0, 0, 0, .3))";
   return (

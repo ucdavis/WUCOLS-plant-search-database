@@ -45,7 +45,7 @@ const toQuerystring = (sc: SearchCriteria) => {
 
 const getDefaultSearchCriteria = (plantTypes: PlantType[]) =>
   ({
-    city: null,
+    city: null as unknown as City,
     name: "",
     waterUseClassifications: {},
     plantTypes: plantTypes.reduce((dict: BoolDict, pt) => {

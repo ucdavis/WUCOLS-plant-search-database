@@ -10,6 +10,8 @@ import {
 } from "react-router-dom";
 import { Data, WaterUseClassification } from "./types";
 
+import "./sass/wucols.scss";
+
 declare global {
   interface Window {
     wucols_data: Data;

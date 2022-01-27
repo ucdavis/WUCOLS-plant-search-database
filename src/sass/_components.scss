@@ -88,8 +88,7 @@
   background: rgba(0, 0, 0, 0);
   border: 0px;
   box-shadow: none;
-  padding-left: 8px;
-  padding-right: 0;
+  padding: 4px 0 4px 0;
   text-decoration: none !important;
   &:hover {
     color: darken($primary-color, 3);

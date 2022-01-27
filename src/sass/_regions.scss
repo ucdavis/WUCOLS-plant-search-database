@@ -7,6 +7,14 @@
 
 .sidebar {
   box-shadow: $box-shadow;
+  .form-group {
+    border-bottom: 1px solid $borders;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+  }
+  label {
+    margin-bottom: 0px;
+  }
 }
 // vendor
 

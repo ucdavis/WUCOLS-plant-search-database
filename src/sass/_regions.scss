@@ -13,9 +13,12 @@
     margin-bottom: 16px;
   }
   label {
-    margin-bottom: 0px;
+    strong {
+      margin-bottom: 0px;
+    }
   }
 }
+
 // vendor
 
 .page-item.active .page-link {
@@ -24,4 +27,8 @@
 }
 .page-link {
   color: $primary-color;
+}
+
+.fa-star {
+  color: #fff;
 }

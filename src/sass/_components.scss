@@ -13,6 +13,13 @@
     border-color: lighten($primary-color, 7);
   }
 }
+.btn-light {
+  background-color: lighten($primary-color, 9);
+  border-color: lighten($primary-color, 9);
+  &:hover {
+    background-color: lighten($primary-color, 5) !important;
+  }
+}
 .btn-outline-disabled {
   background-color: #fff;
   border-color: $secondary-font;

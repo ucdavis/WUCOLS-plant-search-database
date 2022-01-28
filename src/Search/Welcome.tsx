@@ -1,12 +1,4 @@
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faMapMarkerAlt,
-  faSearch,
-  faStar,
-  faLeaf,
-  faDownload,
-} from "@fortawesome/free-solid-svg-icons";
 
 const Welcome = () => (
   <div className="welcome-wrapper">

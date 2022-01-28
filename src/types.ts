@@ -3,7 +3,7 @@ import React from "react";
 // these type aliases are just to make it more clear what sort of data is being passed around
 export type NumericString = string;
 export type TypeCode = string;
-export type WaterUseCode = "VL" | "LO" | "M" | "H" | "?" | "N" | "/";
+export type WaterUseCode = "VL" | "LO" | "M" | "H" | "U" | "NA";
 export type BoolDict = { [key: string]: boolean };
 
 export interface Region {

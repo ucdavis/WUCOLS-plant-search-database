@@ -6,18 +6,12 @@ h4 {
 }
 h1 {
   font-weight: 600;
-  font-size: 1.8rem;
-  header & {
-    color: #fff;
-  }
+  font-size: 2rem;
   a {
     text-decoration: underline;
   }
 }
 h2 {
-  font-size: 1.6rem;
-}
-h3 {
   font-size: 1.4rem;
 }
 h4 {
@@ -30,38 +24,21 @@ h5 {
   font-size: 1.2rem;
   font-family: $sans-bold;
 }
-.current-year {
-  font-weight: 400;
-  font-size: 1.4rem;
-}
-.logo {
-  line-height: 1;
-  font-size: 1.8rem;
+a {
+  color: $primary-color;
+  &:hover {
+    color: darken($primary-color, 0.4);
+  }
 }
 p {
   font-size: 1rem;
   &.subtitle {
     margin-bottom: 0;
   }
-  &.lede {
-    font-size: 1.1rem;
-    font-family: $sans-bold;
-  }
-  &.discreet {
-    font-style: italic;
-    color: $secondary-font;
+  &.lead {
+    max-width: 598px;
   }
 }
-label {
-  font-size: 1.2rem;
-  text-transform: capitalize;
-}
-a {
-  color: $primary-color;
-  &:hover {
-    color: darken($primary-color, 4);
-  }
-}
-label {
-  text-transform: none !important;
+.discreet {
+  font-style: italic;
 }

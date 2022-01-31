@@ -88,7 +88,7 @@ const Favorites = ({
                   <div className="mb-3 d-flex flex-column justify-content-around">
                     <div className="mb-3">
                       {downloadButtons(
-                        "btn btn-success btn-block",
+                        "btn btn-primary btn-block",
                         searchCriteria,
                         favoritePlants
                       ).map((c, i) => (

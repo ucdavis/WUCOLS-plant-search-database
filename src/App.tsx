@@ -306,11 +306,7 @@ function App({ data }: Props) {
 
   return (
     <div className="App">
-      <nav className="navbar navbar-dark bg-dark sticky-top navbar-light bg-light d-flex justify-content-between">
-        <a className="navbar-brand" href="/">
-          WUCOLS Plant Search Database
-        </a>
-
+      <nav className="navbar navbar-dark bg-dark sticky-top d-flex justify-content-between">
         <div className="btn-group">
           {[
             {

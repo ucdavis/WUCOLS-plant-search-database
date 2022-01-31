@@ -170,10 +170,7 @@ const PlantDetail = ({
         <div className="col-md-8 col-xl-9 ml-sm-auto pt-3 pb-5 px-5">
           {webBenchCard}
         </div>
-        <nav
-          className="col-md-4 col-xl-3 bg-light"
-          style={{ borderLeft: "1px solid #ddd" }}
-        >
+        <nav className="col-md-4 col-xl-3">
           <div className="p-3">
             <div className="d-flex flex-column">
               {benchCardTemplates.map((bct) => (
@@ -183,7 +180,7 @@ const PlantDetail = ({
                     <Link
                       key={bct.id}
                       to={`/plant/${plant.id}/benchcard/${bct.id}`}
-                      className="mt-3 btn btn-success"
+                      className="mt-3 btn btn-primary"
                       target="_blank"
                     >
                       Download

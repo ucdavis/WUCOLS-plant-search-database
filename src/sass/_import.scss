@@ -1,7 +1,7 @@
 @import "bootstrap/scss/_functions";
 @import "bootstrap/scss/_variables";
 @import "@ucdavis/gunrockin/sass/gunrockin.scss";
-$primary-color: $redwood;
+$primary-color: #14447a;
 $secondary-color: $california;
 $theme-colors: (
   primary: $primary-color,
@@ -10,8 +10,8 @@ $theme-colors: (
 @import "bootstrap/scss/bootstrap";
 @import "@ucdavis/gunrockin/sass/_typography.scss";
 
-$bg-primary: #f7f7f7;
-$bg-secondary: #f7fafc;
+$bg-primary: #fff;
+$bg-secondary: #f8f8f8;
 $danger: $merlot;
 $error-color: $danger;
 

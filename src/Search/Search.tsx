@@ -163,7 +163,7 @@ const Search = ({
     </div>
     */}
       <div className="row">
-        <nav className="col-sm-4 col-lg-3 col-xl-2 sidebar bg-light">
+        <nav className="col-sm-5 col-lg-4 col-xl-3 sidebar bg-light">
           <div className="sidebar-sticky p-3">
             <SearchForm
               waterUseClassifications={data.waterUseClassifications}
@@ -175,7 +175,7 @@ const Search = ({
           </div>
         </nav>
 
-        <main className="col-sm-8 col-lg-9 col-xl-10 ml-sm-auto" role="main">
+        <main className="col-sm-7 col-lg-8 col-xl-9 ml-sm-auto" role="main">
           {!searchPerformed ? (
             <Welcome />
           ) : (

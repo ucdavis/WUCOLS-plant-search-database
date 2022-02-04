@@ -29,24 +29,6 @@ const WaterDropRating = ({ waterUseCode }: Props) => {
   //let d = <span role="img" aria-label="empty-water-drop" style={{opacity:0.3}}>💧</span>;
   //let D = <span role="img" aria-label="full-water-drop">💧</span>;
   switch (waterUseCode) {
-    case "?":
-      return (
-        <>
-          {d}
-          {d}
-          {d}
-          {d}
-        </>
-      );
-    case "N":
-      return (
-        <>
-          {d}
-          {d}
-          {d}
-          {d}
-        </>
-      );
     case "VL":
       return (
         <>
@@ -83,6 +65,16 @@ const WaterDropRating = ({ waterUseCode }: Props) => {
           {D}
         </>
       );
+    case "U":
+      return (
+        <>
+          {d}
+          {d}
+          {d}
+          {d}
+        </>
+      );
+
     default:
       return <>N/A</>;
   }

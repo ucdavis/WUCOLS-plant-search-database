@@ -153,7 +153,7 @@ const BenchCardDocument = ({
   let wu = waterUseByCode[wuCode];
   //console.log(region, wuCode, wu) //console.log(p)
   let leadPhoto = p.photos[0];
-  let photoUrl = !leadPhoto ? "" : leadPhoto.large.url;
+  let photoUrl = !leadPhoto ? "" : leadPhoto.small.url;
   console.log({ leadPhoto, photoUrl });
   const sizeInches = benchCardTemplate.sizeInInches;
   const sizePoints = { x: sizeInches.x * 72, y: sizeInches.y * 72 };

@@ -31,8 +31,8 @@ export interface PhotoReference {
 
 export interface Photo {
   small: PhotoReference;
-  large: PhotoReference;
-  full: PhotoReference;
+  // large: PhotoReference;
+  // full: PhotoReference;
   filename: string;
   caption: string;
 }
@@ -115,4 +115,8 @@ export interface SearchCriteria {
 export interface DownloadAction {
   method: () => void;
   label: React.ReactElement;
+}
+
+export interface WucolsBlobLink {
+  cachedBlobUrl: string;
 }

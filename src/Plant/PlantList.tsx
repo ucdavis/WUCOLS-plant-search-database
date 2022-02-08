@@ -33,7 +33,7 @@ const PlantList = ({
         let wu = waterUseByCode[p.waterUseByRegion[region - 1]];
         let photoUrl = !photosByPlantName[p.botanicalName]
           ? "https://via.placeholder.com/200"
-          : photosByPlantName[p.botanicalName].large.url;
+          : photosByPlantName[p.botanicalName].small.url;
         return (
           <div className={className} key={p.id}>
             <div className="card mr-2 mb-2">

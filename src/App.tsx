@@ -14,7 +14,6 @@ import {
   faStar,
   faQrcode,
   faIdCard,
-  fas,
 } from "@fortawesome/free-solid-svg-icons";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -165,7 +164,7 @@ function App({ data }: Props) {
                 ).toBlob();
                 let current = 0;
                 setZipCurrent((i) => {
-                  current = i == 0 ? 1 : i + 1;
+                  current = i === 0 ? 1 : i + 1;
                   return current;
                 });
                 console.log(
@@ -213,18 +212,7 @@ function App({ data }: Props) {
       };
       cb();
     }
-  }, [
-    showZipModal,
-    setShowZipModal,
-    currentBct,
-    //zipTotal,
-    //setZipTotal,
-    //zipCurrent,
-    //setZipCurrent,
-    // data.waterUseByCode,
-    // favoritePlants,
-    // searchCriteria.city.region,
-  ]);
+  }, [showZipModal, setShowZipModal, currentBct]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const favoriteAsSpreadsheets = (
     data: Data,

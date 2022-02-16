@@ -43,7 +43,7 @@ const PlantDetail = ({
 
   const imageSize = "64px";
   let leadPhoto = plant.photos[0];
-  let photoUrl = !leadPhoto ? "" : leadPhoto.large.url;
+  let photoUrl = !leadPhoto ? "" : leadPhoto.small.url;
 
   const webBenchCard = (
     <>
@@ -139,9 +139,9 @@ const PlantDetail = ({
                 {plant.photos.map((p, i) => (
                   <div className="col" key={i}>
                     <div className="card mb-3" key={i}>
-                      <a href={p.full.url}>
+                      <a href={p.small.url}>
                         <img
-                          src={p.large.url}
+                          src={p.small.url}
                           className="card-img-top"
                           alt={p.caption}
                           style={{

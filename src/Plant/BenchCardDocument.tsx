@@ -153,11 +153,15 @@ const BenchCardDocument = ({
   let wu = waterUseByCode[wuCode];
   //console.log(region, wuCode, wu) //console.log(p)
   let leadPhoto = p.photos[0];
-  let photoUrl = !leadPhoto ? "" : leadPhoto.large.url;
-  console.log({ leadPhoto, photoUrl });
+  let photoUrl = (!leadPhoto ? "" : leadPhoto.small.url).replace(
+    "wucolsplants.sf.ucdavis.edu",
+    "wucols-proxy.azurewebsites.net/api/wucols-proxy"
+  );
+  //console.log({ leadPhoto, photoUrl });
   const sizeInches = benchCardTemplate.sizeInInches;
   const sizePoints = { x: sizeInches.x * 72, y: sizeInches.y * 72 };
   const logoStyle = { height: `${sizeInches.y / 5}in`, width: "auto" };
+
   return (
     <Document>
       <Page size={[sizePoints.x, sizePoints.y]} style={styles.page}>

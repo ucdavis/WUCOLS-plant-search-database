@@ -8,7 +8,7 @@ import {
   //BrowserRouter as Router,
   HashRouter as Router,
 } from "react-router-dom";
-import { Data, WaterUseClassification } from "./types";
+import { Data, WaterUseClassification, WucolsBlobLink } from "./types";
 
 import "./sass/wucols.scss";
 
@@ -17,7 +17,11 @@ declare global {
     wucols_data: Data;
   }
 }
-fetch("WUCOLS.json")
+fetch(
+  "https://wucols.blob.core.windows.net/wucols-export/meta/wucols-data.json"
+)
+  .then((r) => r.json())
+  .then((l: WucolsBlobLink) => fetch(l.cachedBlobUrl))
   .then((r) => r.json())
   .then((d: Data) => {
     window.wucols_data = d;

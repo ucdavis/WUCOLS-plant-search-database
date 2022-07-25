@@ -19,6 +19,7 @@ interface Props {
   data: Data;
   isPlantFavorite: (plant: Plant) => boolean;
   togglePlantFavorite: (plant: Plant) => void;
+  clearAllFavorites: () => void;
   searchCriteria: SearchCriteria;
 }
 
@@ -29,6 +30,7 @@ const Favorites = ({
   data,
   isPlantFavorite,
   togglePlantFavorite,
+  clearAllFavorites,
   searchCriteria,
 }: Props) => {
   const downloadButtons = (
@@ -109,12 +111,11 @@ const Favorites = ({
               <div className="my-3">
                 {favoritePlants.length === 0 ? (
                   "You don't have any favorites yet."
-                ) : favoritePlants.length === 1 ? (
-                  "You have 1 favorite so far."
                 ) : (
-                  <div>
-                    You have <strong>{favoritePlants.length}</strong> favorites
-                    so far.
+                  <div className="clearfix">
+                    You have <strong>{favoritePlants.length}</strong>
+                    {' '}favorite{favoritePlants.length > 1 ? 's' : ''} so far.
+                    <button className="btn btn-sm btn-danger float-right" onClick={clearAllFavorites}>Clear All Favorites</button>
                   </div>
                 )}
               </div>

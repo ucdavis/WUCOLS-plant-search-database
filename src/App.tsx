@@ -108,6 +108,36 @@ function App({ data }: Props) {
   const isPlantFavorite = (p: Plant) => !!isFavoriteByPlantId[p.id];
 
   const { addToast, removeToast } = useToasts();
+  const clearAllFavorites = () => {
+    let clearedDict = Object.fromEntries(favoritePlants.map(p => [p.id, false]));
+    let unclearedDict = Object.fromEntries(favoritePlants.map(p => [p.id, true]));
+    updateIsFavoriteByPlantId(clearedDict);
+
+    let thisToastId = "";
+    addToast(
+      <div>
+        Cleared favorites
+        <button
+          className="btn btn-link"
+          onClick={() => {
+            updateIsFavoriteByPlantId(unclearedDict);
+            removeToast(thisToastId);
+          }}
+        >
+          UNDO
+        </button>
+      </div>,
+      {
+        appearance: "info",
+        transitionState: "entered",
+        autoDismiss: true,
+      },
+      (toastId) => {
+        thisToastId = toastId;
+      }
+    );
+  };
+
   function togglePlantFavorite(p: Plant) {
     let isFavoriteNow = !isFavoriteByPlantId[p.id];
     updateIsFavoriteByPlantId({
@@ -550,6 +580,7 @@ function App({ data }: Props) {
               isPlantFavorite,
               togglePlantFavorite,
               searchCriteria,
+              clearAllFavorites,
               data,
             }}
           />

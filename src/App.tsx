@@ -259,6 +259,7 @@ function App({ data }: Props) {
           "Common Name",
           "Water Use",
           "Percentage of ET0",
+          "Plant Factor",
         ],
         data: favoritePlants.map(
           (p) =>
@@ -269,6 +270,7 @@ function App({ data }: Props) {
               data.waterUseByCode[p.waterUseByRegion[cityRegionIx]].name,
               data.waterUseByCode[p.waterUseByRegion[cityRegionIx]]
                 .percentageET0 + "%",
+              data.waterUseByCode[p.waterUseByRegion[cityRegionIx]].plantFactor,
             ] as ExcelCellData[]
         ),
       } as ExcelSheetData,

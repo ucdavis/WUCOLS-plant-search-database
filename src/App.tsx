@@ -72,6 +72,16 @@ function App({ data }: Props) {
     data.plantTypes
   );
 
+  const searchWasPerformed = (sc: SearchCriteria) =>
+    Object.values(sc.waterUseClassifications).some((b) => b) ||
+    Object.values(sc.plantTypes).some((b) => b) ||
+    sc.name.length > 0;
+
+  const resetSearchCriteria = () =>
+    updateSearchCriteria(
+      SearchCriteriaConverter.getDefaultSearchCriteria(data.plantTypes)
+    );
+
   const updateSearchCriteria = React.useCallback(
     (sc: SearchCriteria) => {
       let qs = SearchCriteriaConverter.toQuerystring(sc);
@@ -405,24 +415,13 @@ function App({ data }: Props) {
             })}
           </div>
 
-          {!searchCriteria.city || true ? (
-            <div className="text-light">
-              {/*Select a city to enable downloads*/}
-            </div>
-          ) : (
-            <DropdownButton
-              title="Download"
-              variant="outline-light"
-              disabled={!searchCriteria.city}
+          {searchWasPerformed(searchCriteria) && (
+            <button
+              className="btn btn-outline-light"
+              onClick={() => resetSearchCriteria()}
             >
-              {getDownloadActions(data, searchCriteria, favoritePlants).map(
-                (a, i) => (
-                  <Dropdown.Item onClick={a.method} key={i}>
-                    {a.label}
-                  </Dropdown.Item>
-                )
-              )}
-            </DropdownButton>
+              Clear Search Form (Start over)
+            </button>
           )}
 
           {/*
@@ -566,6 +565,8 @@ function App({ data }: Props) {
               isPlantFavorite={isPlantFavorite}
               togglePlantFavorite={togglePlantFavorite}
               setSearchCriteria={updateSearchCriteria}
+              searchPerformed={searchWasPerformed(searchCriteria)}
+              resetSearchCriteria={resetSearchCriteria}
               data={data}
             />
           )}

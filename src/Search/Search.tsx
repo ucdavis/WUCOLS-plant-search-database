@@ -21,10 +21,12 @@ const performancePlantLimit = 50000;
 interface Props {
   data: Data;
   searchCriteria: SearchCriteria;
+  searchPerformed: boolean;
   setSearchCriteria: (searchCriteria: SearchCriteria) => void;
   isPlantFavorite: (plant: Plant) => boolean;
   togglePlantFavorite: (plant: Plant) => void;
   queryString: string;
+  resetSearchCriteria: () => void;
 }
 
 export interface PlantsViewMode {
@@ -37,10 +39,12 @@ export interface PlantsViewMode {
 const Search = ({
   data,
   searchCriteria,
+  searchPerformed,
   setSearchCriteria,
   isPlantFavorite,
   togglePlantFavorite,
   queryString,
+  resetSearchCriteria
 }: Props) => {
   let plantsViewModes: PlantsViewMode[] = [
     {
@@ -68,16 +72,6 @@ const Search = ({
   const plantsViewMode =
     plantsViewModes.filter((vm) => vm.id === plantsViewModeId)[0] ||
     plantsViewModes[0];
-
-  const resetSearchCriteria = () =>
-    setSearchCriteria(
-      SearchCriteriaConverter.getDefaultSearchCriteria(data.plantTypes)
-    );
-
-  const searchPerformed =
-    Object.values(searchCriteria.waterUseClassifications).some((b) => b) ||
-    Object.values(searchCriteria.plantTypes).some((b) => b) ||
-    searchCriteria.name.length > 0;
 
   const matchingPlants = React.useMemo(() => {
     let noType = Object.values(searchCriteria.plantTypes).every((b) => !b);
@@ -182,15 +176,6 @@ const Search = ({
             <>
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <div>Matching Plants: {matchingPlants.length}</div>
-
-                {searchPerformed && (
-                  <button
-                    className="btn btn-link"
-                    onClick={() => resetSearchCriteria()}
-                  >
-                    Clear Search Form (Start over)
-                  </button>
-                )}
                 {/*
               <pre>{JSON.stringify({paginationModel,currentPageNumber,pageCount}, null, 2)}</pre>
             */}

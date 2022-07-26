@@ -8,6 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { Data, Plant, SearchCriteria } from "../types";
 import DownloadMenu from '../Download/DownloadMenu';
+import { getPlantPaginationProps, PlantPagination } from "../Plant/PlantPagination";
 
 interface Props {
   queryString: string;
@@ -28,6 +29,14 @@ const Favorites = ({
   clearAllFavorites,
   searchCriteria,
 }: Props) => {
+  const [currentPageNumber, setCurrentPageNumber] = React.useState(0);
+  const plantPaginationProps = getPlantPaginationProps(
+    50,
+    favoritePlants.length,
+    currentPageNumber, 
+    setCurrentPageNumber);
+
+  const actualPagination = PlantPagination({...plantPaginationProps});
   return (
     <>
       <div className="container-fluid">
@@ -90,17 +99,21 @@ const Favorites = ({
               {!searchCriteria.city ? (
                 <div>Select a city to view your favorites</div>
               ) : (
+                <>
+                {actualPagination}
                 <PlantTable
                   queryString={queryString}
                   showAvailableMedia={true}
                   isPlantFavorite={isPlantFavorite}
                   togglePlantFavorite={togglePlantFavorite}
-                  plants={favoritePlants}
+                  plants={plantPaginationProps.getCurrentItems(favoritePlants)}
                   photosByPlantName={data.photos}
                   plantTypeNameByCode={data.plantTypeNameByCode}
                   region={searchCriteria.city.region}
                   waterUseByCode={data.waterUseByCode}
                 />
+                {actualPagination}
+                </>
               )}
             </div>
           </div>

@@ -8,13 +8,12 @@ import {
   IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
 import sortPlants from "./sort-plants";
-import ultimatePagination from "ultimate-pagination";
-import { Pagination } from "react-bootstrap";
 import plantTypeCombinatorOptions from "../Plant/plant-type-combinator-options";
 import SearchForm from "./SearchForm";
 import Welcome from "./Welcome";
 import { Data, Plant, SearchCriteria } from "../types";
 import DownloadMenu from '../Download/DownloadMenu';
+import {getPlantPaginationProps, PlantPagination} from '../Plant/PlantPagination';
 
 const performancePlantLimit = 50000;
 
@@ -108,48 +107,13 @@ const Search = ({
     ).slice(0, performancePlantLimit);
   }, [data, searchCriteria]);
 
-  const pageSize = 50;
-  const pageCount = Math.max(1, Math.ceil(matchingPlants.length / pageSize));
-  const currentPage = pageCount > 0 ? searchCriteria.pageNumber : 1;
-  var paginationModel = ultimatePagination.getPaginationModel({
-    // Required
-    currentPage,
-    totalPages: pageCount,
+  const plantPaginationProps = getPlantPaginationProps(
+    50,
+    matchingPlants.length,
+    searchCriteria.pageNumber, 
+    (pn: number) => setSearchCriteria({ ...searchCriteria, pageNumber: pn }));
 
-    // Optional
-    boundaryPagesRange: 1,
-    siblingPagesRange: 1,
-    hideEllipsis: false,
-    hidePreviousAndNextPageLinks: false,
-    hideFirstAndLastPageLinks: false,
-  });
-  //console.log('pagination',paginationModel);
-
-  const setCurrentPageNumber = (pn: number) =>
-    setSearchCriteria({ ...searchCriteria, pageNumber: pn });
-  const actualPagination = pageCount > 1 && (
-    <Pagination>
-      {paginationModel
-        .map((p) => {
-          const props = {
-            key: p.key,
-            active: p.isActive,
-            onClick: () => setCurrentPageNumber(p.value),
-          };
-          switch (p.type) {
-            //case 'PREVIOUS_PAGE_LINK': return <Pagination.Prev {...props}/>
-            //case 'NEXT_PAGE_LINK'    : return <Pagination.Next {...props}/>
-            case "PAGE":
-              return <Pagination.Item {...props}>{p.value}</Pagination.Item>;
-            case "ELLIPSIS":
-              return <Pagination.Ellipsis {...props} />;
-            default:
-              return undefined;
-          }
-        })
-        .filter((f) => !!f)}
-    </Pagination>
-  );
+  const actualPagination = PlantPagination({...plantPaginationProps});
 
   return (
     <div className="container-fluid">
@@ -181,9 +145,6 @@ const Search = ({
             <>
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <div>Matching Plants: {matchingPlants.length}</div>
-                {/*
-              <pre>{JSON.stringify({paginationModel,currentPageNumber,pageCount}, null, 2)}</pre>
-            */}
               </div>
               <div className="clearfix">
                 <button
@@ -199,10 +160,7 @@ const Search = ({
                   queryString={queryString}
                   isPlantFavorite={isPlantFavorite}
                   togglePlantFavorite={togglePlantFavorite}
-                  plants={matchingPlants.slice(
-                    (searchCriteria.pageNumber - 1) * pageSize,
-                    (searchCriteria.pageNumber + 1) * pageSize
-                  )}
+                  plants={plantPaginationProps.getCurrentItems(matchingPlants)}
                   photosByPlantName={data.photos}
                   plantTypeNameByCode={data.plantTypeNameByCode}
                   region={searchCriteria.city.region}

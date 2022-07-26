@@ -12,10 +12,9 @@ import ultimatePagination from "ultimate-pagination";
 import { Pagination } from "react-bootstrap";
 import plantTypeCombinatorOptions from "../Plant/plant-type-combinator-options";
 import SearchForm from "./SearchForm";
-import SearchCriteriaConverter from "./search-criteria-converter";
 import Welcome from "./Welcome";
-import { Data, DownloadAction, Plant, SearchCriteria } from "../types";
-import DownloadActionList from '../Download/DownloadActionList';
+import { Data, Plant, SearchCriteria } from "../types";
+import DownloadMenu from '../Download/DownloadMenu';
 
 const performancePlantLimit = 50000;
 
@@ -24,7 +23,6 @@ interface Props {
   searchCriteria: SearchCriteria;
   searchPerformed: boolean;
   setSearchCriteria: (searchCriteria: SearchCriteria) => void;
-  downloadActions: DownloadAction[];
   isPlantFavorite: (plant: Plant) => boolean;
   addAllToFavorites: (plants: Plant[]) => void;
   togglePlantFavorite: (plant: Plant) => void;
@@ -42,7 +40,6 @@ export interface PlantsViewMode {
 const Search = ({
   data,
   searchCriteria,
-  downloadActions,
   searchPerformed,
   setSearchCriteria,
   isPlantFavorite,
@@ -172,7 +169,8 @@ const Search = ({
               updateSearchCriteria={setSearchCriteria}
             />
             {!searchCriteria.city &&
-              <DownloadActionList downloadActions={downloadActions} />}
+              <DownloadMenu {...{searchCriteria,data, plants:data.plants}} />
+            }
           </div>
         </nav>
 

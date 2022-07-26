@@ -6,17 +6,12 @@ import {
   faFileExcel,
   faIdCard,
 } from "@fortawesome/free-solid-svg-icons";
-import { Data, DownloadAction, Plant, SearchCriteria } from "../types";
-import DownloadActionList from '../Download/DownloadActionList';
+import { Data, Plant, SearchCriteria } from "../types";
+import DownloadMenu from '../Download/DownloadMenu';
 
 interface Props {
   queryString: string;
   favoritePlants: Plant[];
-  getDownloadActions: (
-    data: Data,
-    searchCriteria: SearchCriteria,
-    favoritePlants: Plant[]
-  ) => DownloadAction[];
   data: Data;
   isPlantFavorite: (plant: Plant) => boolean;
   togglePlantFavorite: (plant: Plant) => void;
@@ -27,14 +22,12 @@ interface Props {
 const Favorites = ({
   queryString,
   favoritePlants,
-  getDownloadActions,
   data,
   isPlantFavorite,
   togglePlantFavorite,
   clearAllFavorites,
   searchCriteria,
 }: Props) => {
-  const downloadActions = getDownloadActions(data, searchCriteria, favoritePlants);
   return (
     <>
       <div className="container-fluid">
@@ -78,7 +71,7 @@ const Favorites = ({
             <nav className="col-sm-4 col-lg-3 col-xl-2 sidebar bg-light">
               <div className="sidebar-sticky p-3">
                 {!!favoritePlants.length && 
-                  <DownloadActionList downloadActions={downloadActions} />
+                  <DownloadMenu {...{searchCriteria,data, plants:favoritePlants}} />
                 }
               </div>
             </nav>

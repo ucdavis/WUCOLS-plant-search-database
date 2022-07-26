@@ -14,7 +14,8 @@ import plantTypeCombinatorOptions from "../Plant/plant-type-combinator-options";
 import SearchForm from "./SearchForm";
 import SearchCriteriaConverter from "./search-criteria-converter";
 import Welcome from "./Welcome";
-import { Data, Plant, SearchCriteria } from "../types";
+import { Data, DownloadAction, Plant, SearchCriteria } from "../types";
+import DownloadActionList from '../Download/DownloadActionList';
 
 const performancePlantLimit = 50000;
 
@@ -23,6 +24,7 @@ interface Props {
   searchCriteria: SearchCriteria;
   searchPerformed: boolean;
   setSearchCriteria: (searchCriteria: SearchCriteria) => void;
+  downloadActions: DownloadAction[];
   isPlantFavorite: (plant: Plant) => boolean;
   addAllToFavorites: (plants: Plant[]) => void;
   togglePlantFavorite: (plant: Plant) => void;
@@ -40,6 +42,7 @@ export interface PlantsViewMode {
 const Search = ({
   data,
   searchCriteria,
+  downloadActions,
   searchPerformed,
   setSearchCriteria,
   isPlantFavorite,
@@ -168,6 +171,8 @@ const Search = ({
               searchCriteria={searchCriteria}
               updateSearchCriteria={setSearchCriteria}
             />
+            {!searchCriteria.city &&
+              <DownloadActionList downloadActions={downloadActions} />}
           </div>
         </nav>
 

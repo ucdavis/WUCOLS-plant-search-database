@@ -7,6 +7,7 @@ import {
   faIdCard,
 } from "@fortawesome/free-solid-svg-icons";
 import { Data, DownloadAction, Plant, SearchCriteria } from "../types";
+import DownloadActionList from '../Download/DownloadActionList';
 
 interface Props {
   queryString: string;
@@ -33,17 +34,7 @@ const Favorites = ({
   clearAllFavorites,
   searchCriteria,
 }: Props) => {
-  const downloadButtons = (
-    className: string,
-    searchCriteria: SearchCriteria,
-    favoritePlants: Plant[]
-  ) => {
-    return getDownloadActions(data, searchCriteria, favoritePlants).map((a) => (
-      <button className={className} onClick={a.method}>
-        {a.label}
-      </button>
-    ));
-  };
+  const downloadActions = getDownloadActions(data, searchCriteria, favoritePlants);
   return (
     <>
       <div className="container-fluid">
@@ -86,25 +77,9 @@ const Favorites = ({
           <div className="row">
             <nav className="col-sm-4 col-lg-3 col-xl-2 sidebar bg-light">
               <div className="sidebar-sticky p-3">
-                {!!favoritePlants.length && (
-                  <div className="mb-3 d-flex flex-column justify-content-around">
-                    <div className="mb-3">
-                      {downloadButtons(
-                        "btn btn-primary btn-block",
-                        searchCriteria,
-                        favoritePlants
-                      ).map((c, i) => (
-                        <div className="my-2" key={i}>
-                          {c}
-                        </div>
-                      ))}
-                    </div>
-                    <p>
-                      QR Codes and Bench Cards can be downloaded individually
-                      for each plant from that plant&apos;s detail screen.
-                    </p>
-                  </div>
-                )}
+                {!!favoritePlants.length && 
+                  <DownloadActionList downloadActions={downloadActions} />
+                }
               </div>
             </nav>
             <div className="col-sm-8 col-lg-9 col-xl-10 ml-sm-auto">

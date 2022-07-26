@@ -22,8 +22,6 @@ import { PDFViewer, pdf } from "@react-pdf/renderer";
 import Favorites from "./Favorites/Favorites";
 
 import {
-  DropdownButton,
-  Dropdown,
   Button,
   Modal,
   Col,
@@ -57,6 +55,7 @@ import {
   SearchCriteria,
 } from "./types";
 import { plantDetailQrCodeFromId } from "./Plant/PlantDetailQrCode";
+import DownloadActionList from './Download/DownloadActionList';
 
 interface Props {
   data: Data;
@@ -286,60 +285,40 @@ function App({ data }: Props) {
     }
   }, [showZipModal, setShowZipModal, currentBct]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const favoriteAsSpreadsheets = (
+  const plantsAsExcelSheet = (
     data: Data,
-    searchCriteria: SearchCriteria,
-    favoritePlants: Plant[]
-  ): [string[][], ExcelSheetData[]] => {
-    if (!searchCriteria.city) {
-      return [[], []];
-    }
-    let cityRegionIx = searchCriteria.city.region - 1;
-    const csv = [
-      [
+    plants: Plant[],
+    regionNumbers: number[]
+  ): ExcelSheetData[] => 
+  [
+    {
+      columns: [
         "Type(s)",
         "Botanical Name",
         "Common Name",
-        "Water Use",
-        "Percentage of ET0",
+        ...regionNumbers.flatMap(r => 
+          [
+            `Region ${r} Water Use`,
+            `Region ${r} ET0`,
+            `Region ${r} Plant Factor`
+          ])
       ],
-      ...favoritePlants.map((p) => [
-        p.types.map((t) => data.plantTypeNameByCode[t]).join(", "),
-        p.botanicalName,
-        p.commonName,
-        data.waterUseByCode[p.waterUseByRegion[cityRegionIx]].name,
-        data.waterUseByCode[p.waterUseByRegion[cityRegionIx]].percentageET0 +
-          "%",
-      ]),
-    ];
-
-    const xl = [
-      {
-        columns: [
-          "Type(s)",
-          "Botanical Name",
-          "Common Name",
-          "Water Use",
-          "Percentage of ET0",
-          "Plant Factor",
-        ],
-        data: favoritePlants.map(
-          (p) =>
-            [
-              p.types.map((t) => data.plantTypeNameByCode[t]).join(", "),
-              p.botanicalName,
-              p.commonName,
-              data.waterUseByCode[p.waterUseByRegion[cityRegionIx]].name,
-              data.waterUseByCode[p.waterUseByRegion[cityRegionIx]]
-                .percentageET0 + "%",
-              data.waterUseByCode[p.waterUseByRegion[cityRegionIx]].plantFactor,
-            ] as ExcelCellData[]
-        ),
-      } as ExcelSheetData,
-    ];
-
-    return [csv, xl];
-  };
+      data: plants.map(
+        (p) =>
+          [
+            p.types.map((t) => data.plantTypeNameByCode[t]).join(", "),
+            p.botanicalName,
+            p.commonName,
+            ...regionNumbers.flatMap(r => 
+              [
+                data.waterUseByCode[p.waterUseByRegion[r-1]].name,
+                data.waterUseByCode[p.waterUseByRegion[r-1]].percentageET0 + "%",
+                data.waterUseByCode[p.waterUseByRegion[r-1]].plantFactor,
+              ])
+          ] as ExcelCellData[]
+      ),
+    } as ExcelSheetData
+  ];
 
   const getDownloadActions = (
     data: Data,
@@ -348,35 +327,17 @@ function App({ data }: Props) {
   ): DownloadAction[] => {
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
-    let [, excelData] = favoriteAsSpreadsheets(
-      data,
-      searchCriteria,
-      favoritePlants
-    );
-    const sideRender = (el: any) => {
-      ReactDOM.render(el, document.getElementById("download-outlet"));
+    const sideRender = (content: any) => {
+      let container = document.getElementById("download-outlet");
+      ReactDOM.render(<></>, container, () => {
+        /* IMPORTANT!  We clear the dom first, in order to force re-render.
+        ** Without this, the user can only download an excel document ONCE until they reload the page.  */
+        ReactDOM.render(content, container);
+      });
     };
     return [
-      /*
       {
-        method: () => {
-          sideRender(
-            <CSVDownload
-              target="_blank"
-              data={csvData}
-              filename={`WUCOLS_${searchCriteria.city.name}.csv`}
-            />
-          );
-        },
-        label: 
-          <>
-            <FontAwesomeIcon icon={faFileExcel} className="mr-2"/>
-            Download in CSV format
-          </>
-      }
-      ,
-      */
-      {
+        include: !!searchCriteria.city,
         method: () => {
           Promise.all(
             favoritePlants.map((p: Plant) =>
@@ -408,6 +369,7 @@ function App({ data }: Props) {
         ),
       },
       ...data.benchCardTemplates.map((bct) => ({
+        include: !!searchCriteria.city,
         method: () => {
           if (!zipCancelled.current) {
             setCurrentBct(bct);
@@ -422,7 +384,13 @@ function App({ data }: Props) {
         ),
       })),
       {
+        include: !!searchCriteria.city,
         method: () => {
+          let excelData = plantsAsExcelSheet(
+            data,
+            favoritePlants,
+            [searchCriteria.city.region]
+          );
           sideRender(
             <ExcelFile
               filename={`WUCOLS_${searchCriteria.city.name}`}
@@ -442,7 +410,37 @@ function App({ data }: Props) {
           </>
         ),
       },
-    ];
+      {
+        include: !searchCriteria.city,
+        method: () => {
+          console.log('preparing Excel...');
+          let excelData = plantsAsExcelSheet(
+            data,
+            data.plants,
+            [1,2,3,4,5,6]
+          );
+          console.log('rendering...');
+          sideRender(
+            <ExcelFile
+              filename={`WUCOLS_all_regions`}
+              hideElement={true}
+            >
+              <ExcelSheet
+                dataSet={excelData}
+                name={`WUCOLS_all_regions`}
+              />
+            </ExcelFile>
+          );
+          console.log('rendered');
+        },
+        label: (
+          <>
+            <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+            Download WUCOLS plants for all regions
+          </>
+        ),
+      }
+    ].filter(da => da.include);
   };
 
   return (
@@ -479,7 +477,7 @@ function App({ data }: Props) {
             })}
           </div>
 
-          {searchWasPerformed(searchCriteria) && (
+          {!!searchCriteria.city && (
             <button
               className="btn btn-outline-light"
               onClick={() => resetSearchCriteria()}
@@ -631,6 +629,7 @@ function App({ data }: Props) {
               togglePlantFavorite={togglePlantFavorite}
               setSearchCriteria={updateSearchCriteria}
               searchPerformed={searchWasPerformed(searchCriteria)}
+              downloadActions={getDownloadActions(data, searchCriteria, favoritePlants)}
               resetSearchCriteria={resetSearchCriteria}
               addAllToFavorites={addAllToFavorites}
               data={data}

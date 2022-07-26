@@ -24,6 +24,7 @@ interface Props {
   searchPerformed: boolean;
   setSearchCriteria: (searchCriteria: SearchCriteria) => void;
   isPlantFavorite: (plant: Plant) => boolean;
+  addAllToFavorites: (plants: Plant[]) => void;
   togglePlantFavorite: (plant: Plant) => void;
   queryString: string;
   resetSearchCriteria: () => void;
@@ -44,7 +45,8 @@ const Search = ({
   isPlantFavorite,
   togglePlantFavorite,
   queryString,
-  resetSearchCriteria
+  resetSearchCriteria,
+  addAllToFavorites
 }: Props) => {
   let plantsViewModes: PlantsViewMode[] = [
     {
@@ -180,7 +182,13 @@ const Search = ({
               <pre>{JSON.stringify({paginationModel,currentPageNumber,pageCount}, null, 2)}</pre>
             */}
               </div>
-              {actualPagination}
+              <div className="clearfix">
+                <button
+                  className="btn btn-sm btn-primary float-right"
+                  onClick={() => addAllToFavorites(matchingPlants)}
+                >Add all matches to favorites</button>
+                {actualPagination}
+              </div>
               {!searchCriteria.city ? (
                 <div>Please select a city</div>
               ) : (

@@ -108,6 +108,38 @@ function App({ data }: Props) {
   const isPlantFavorite = (p: Plant) => !!isFavoriteByPlantId[p.id];
 
   const { addToast, removeToast } = useToasts();
+
+  const addAllToFavorites = (plants: Plant[]) => {
+    let original = Object.assign({},isFavoriteByPlantId);
+    let amended = Object.assign(Object.assign({}, original), Object.fromEntries(plants.map(p => [p.id, true])));
+    console.log(amended);
+    updateIsFavoriteByPlantId(amended);
+
+    let thisToastId = "";
+    addToast(
+      <div>
+        Added {plants.length} favorites
+        <button
+          className="btn btn-link"
+          onClick={() => {
+            updateIsFavoriteByPlantId(original);
+            removeToast(thisToastId);
+          }}
+        >
+          UNDO
+        </button>
+      </div>,
+      {
+        appearance: "info",
+        transitionState: "entered",
+        autoDismiss: true,
+      },
+      (toastId) => {
+        thisToastId = toastId;
+      }
+    );
+  };
+
   const clearAllFavorites = () => {
     let clearedDict = Object.fromEntries(favoritePlants.map(p => [p.id, false]));
     let unclearedDict = Object.fromEntries(favoritePlants.map(p => [p.id, true]));
@@ -600,6 +632,7 @@ function App({ data }: Props) {
               setSearchCriteria={updateSearchCriteria}
               searchPerformed={searchWasPerformed(searchCriteria)}
               resetSearchCriteria={resetSearchCriteria}
+              addAllToFavorites={addAllToFavorites}
               data={data}
             />
           )}

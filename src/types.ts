@@ -114,6 +114,7 @@ export interface SearchCriteria {
 
 export interface DownloadAction {
   method: () => void;
+  include: boolean;
   label: React.ReactElement;
 }
 

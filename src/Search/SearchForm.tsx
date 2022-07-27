@@ -283,7 +283,7 @@ const SearchForm = ({
           className="btn btn-link btn-sm"
           onClick={() => setMapModalVisible(true)}
         >
-          <FontAwesomeIcon icon={faMap} /> Select city from map
+          <FontAwesomeIcon icon={faMap} /> Select a city from the map
         </button>
       </div>
       {!!searchCriteria.city ? everythingElse : <></>}

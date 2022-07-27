@@ -6,42 +6,37 @@ import {
   faFileExcel,
   faIdCard,
 } from "@fortawesome/free-solid-svg-icons";
-import { Data, DownloadAction, Plant, SearchCriteria } from "../types";
+import { Data, Plant, SearchCriteria } from "../types";
+import DownloadMenu from '../Download/DownloadMenu';
+import { getPlantPaginationProps, PlantPagination } from "../Plant/PlantPagination";
 
 interface Props {
   queryString: string;
   favoritePlants: Plant[];
-  getDownloadActions: (
-    data: Data,
-    searchCriteria: SearchCriteria,
-    favoritePlants: Plant[]
-  ) => DownloadAction[];
   data: Data;
   isPlantFavorite: (plant: Plant) => boolean;
   togglePlantFavorite: (plant: Plant) => void;
+  clearAllFavorites: () => void;
   searchCriteria: SearchCriteria;
 }
 
 const Favorites = ({
   queryString,
   favoritePlants,
-  getDownloadActions,
   data,
   isPlantFavorite,
   togglePlantFavorite,
+  clearAllFavorites,
   searchCriteria,
 }: Props) => {
-  const downloadButtons = (
-    className: string,
-    searchCriteria: SearchCriteria,
-    favoritePlants: Plant[]
-  ) => {
-    return getDownloadActions(data, searchCriteria, favoritePlants).map((a) => (
-      <button className={className} onClick={a.method}>
-        {a.label}
-      </button>
-    ));
-  };
+  const [currentPageNumber, setCurrentPageNumber] = React.useState(0);
+  const plantPaginationProps = getPlantPaginationProps(
+    50,
+    favoritePlants.length,
+    currentPageNumber, 
+    setCurrentPageNumber);
+
+  const actualPagination = PlantPagination({...plantPaginationProps});
   return (
     <>
       <div className="container-fluid">
@@ -84,54 +79,41 @@ const Favorites = ({
           <div className="row">
             <nav className="col-sm-4 col-lg-3 col-xl-2 sidebar bg-light">
               <div className="sidebar-sticky p-3">
-                {!!favoritePlants.length && (
-                  <div className="mb-3 d-flex flex-column justify-content-around">
-                    <div className="mb-3">
-                      {downloadButtons(
-                        "btn btn-primary btn-block",
-                        searchCriteria,
-                        favoritePlants
-                      ).map((c, i) => (
-                        <div className="my-2" key={i}>
-                          {c}
-                        </div>
-                      ))}
-                    </div>
-                    <p>
-                      QR Codes and Bench Cards can be downloaded individually
-                      for each plant from that plant&apos;s detail screen.
-                    </p>
-                  </div>
-                )}
+                {!!favoritePlants.length && 
+                  <DownloadMenu {...{searchCriteria,data, plants:favoritePlants}} />
+                }
               </div>
             </nav>
             <div className="col-sm-8 col-lg-9 col-xl-10 ml-sm-auto">
               <div className="my-3">
                 {favoritePlants.length === 0 ? (
                   "You don't have any favorites yet."
-                ) : favoritePlants.length === 1 ? (
-                  "You have 1 favorite so far."
                 ) : (
-                  <div>
-                    You have <strong>{favoritePlants.length}</strong> favorites
-                    so far.
+                  <div className="clearfix">
+                    You have <strong>{favoritePlants.length}</strong>
+                    {' '}favorite{favoritePlants.length > 1 ? 's' : ''} so far.
+                    <button className="btn btn-sm btn-danger float-right" onClick={clearAllFavorites}>Clear All Favorites</button>
                   </div>
                 )}
               </div>
               {!searchCriteria.city ? (
                 <div>Select a city to view your favorites</div>
               ) : (
+                <>
+                {actualPagination}
                 <PlantTable
                   queryString={queryString}
                   showAvailableMedia={true}
                   isPlantFavorite={isPlantFavorite}
                   togglePlantFavorite={togglePlantFavorite}
-                  plants={favoritePlants}
+                  plants={plantPaginationProps.getCurrentItems(favoritePlants)}
                   photosByPlantName={data.photos}
                   plantTypeNameByCode={data.plantTypeNameByCode}
                   region={searchCriteria.city.region}
                   waterUseByCode={data.waterUseByCode}
                 />
+                {actualPagination}
+                </>
               )}
             </div>
           </div>

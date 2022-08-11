@@ -7,12 +7,28 @@ const Welcome = () => (
       WUCOLS{" "}
       <span className="discreet">
         Water Use Classification of Landscape Species
-      </span>{" "}
-      <br />
-      helps you create a landscape plan based on plant water use within your
-      city/region.
+      </span>
+      <br /><br />
+      <p>
+        Welcome to the “enhanced” WUCOLS Plant Searchable Database. For an
+        overview of the “new enhancements”, please click on:{" "}
+        <a href="https://ccuh.ucdavis.edu/wucols">WUCOLS</a> or visit the
+        California Center for Urban Horticulture’s{" "}
+        <a href="https://ccuh.ucdavis.edu/">website</a>
+      </p>
+      <p>
+        WUCOLS Water Use Classification of Landscape Species helps you create a
+        landscape plan based on plant water use within your city/region.
+      </p>
     </p>
-    <h2>Instructions:</h2>
+    <h2>
+      {" "}
+      Instructions (for step-by-step instructions, please click on:{" "}
+      <a href="https://ccuh.ucdavis.edu/wucols/plant-search-instructions">
+        Step by Step
+      </a>
+      ):{" "}
+    </h2>
     <hr />
     <ol className="instructionlist">
       <li>

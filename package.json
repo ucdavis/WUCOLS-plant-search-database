@@ -15,7 +15,7 @@
     "file-saver": "^2.0.5",
     "google-map-react": "^1.1.7",
     "jszip": "^3.7.1",
-    "next": "^11.1.2",
+    "next": "^12.1.0",
     "react": "^16.13.1",
     "react-bootstrap": "^1.6.1",
     "react-csv": "^2.0.3",

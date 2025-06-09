@@ -12,9 +12,7 @@ const Welcome = () => (
       <p>
         Welcome to the “enhanced” WUCOLS Plant Searchable Database. For an
         overview of the “new enhancements”, please click on:{" "}
-        <a href="https://ccuh.ucdavis.edu/wucols">WUCOLS</a> or visit the
-        California Center for Urban Horticulture’s{" "}
-        <a href="https://ccuh.ucdavis.edu/">website</a>
+        <a href="https://ccuh.ucdavis.edu/wucols">WUCOLS</a>
       </p>
       <p>
         WUCOLS Water Use Classification of Landscape Species helps you create a

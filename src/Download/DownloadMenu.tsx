@@ -1,17 +1,15 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import DownloadActionList from './DownloadActionList';
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import {  pdf } from "@react-pdf/renderer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import plantsAsExcelSheet from './plantsAsExcelSheet';
 import {
   faFileExcel,
   faQrcode,
   faIdCard,
 } from "@fortawesome/free-solid-svg-icons";
-import ReactExport from "react-export-excel";
+import { exportToExcel } from "../utils/excelExport";
 import {
   Button,
   Modal,
@@ -53,16 +51,7 @@ const DownloadMenu = ({
 		searchCriteria: SearchCriteria,
 		plants: Plant[]
 	): DownloadAction[] => {
-		const ExcelFile = ReactExport.ExcelFile;
-		const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
-		const sideRender = (content: any) => {
-			let container = document.getElementById("download-outlet");
-			ReactDOM.render(<></>, container, () => {
-				/* IMPORTANT!  We clear the dom first, in order to force re-render.
-				** Without this, the user can only download an excel document ONCE until they reload the page.  */
-				ReactDOM.render(content, container);
-			});
-		};
+		// No need for side rendering with the new approach
 		return [
 			{
 				include: !!searchCriteria.city,
@@ -114,22 +103,12 @@ const DownloadMenu = ({
 			{
 				include: !!searchCriteria.city,
 				method: () => {
-					let excelData = plantsAsExcelSheet(
-						data,
-						plants,
-						[searchCriteria.city.region]
-					);
-					sideRender(
-						<ExcelFile
-							filename={`WUCOLS_${searchCriteria.city.name}`}
-							hideElement={true}
-						>
-							<ExcelSheet
-								dataSet={excelData}
-								name={`WUCOLS_${searchCriteria.city.name}`}
-							/>
-						</ExcelFile>
-					);
+					exportToExcel({
+						filename: `WUCOLS_${searchCriteria.city.name}`,
+						data: data,
+						plants: plants,
+						regionNumbers: [searchCriteria.city.region]
+					});
 				},
 				label: (
 					<>
@@ -142,24 +121,13 @@ const DownloadMenu = ({
 				include: !searchCriteria.city,
 				method: () => {
 					console.log('preparing Excel...');
-					let excelData = plantsAsExcelSheet(
-						data,
-						data.plants,
-						[1,2,3,4,5,6]
-					);
-					console.log('rendering...');
-					sideRender(
-						<ExcelFile
-							filename={`WUCOLS_all_regions`}
-							hideElement={true}
-						>
-							<ExcelSheet
-								dataSet={excelData}
-								name={`WUCOLS_all_regions`}
-							/>
-						</ExcelFile>
-					);
-					console.log('rendered');
+					exportToExcel({
+						filename: `WUCOLS_all_regions`,
+						data: data,
+						plants: data.plants,
+						regionNumbers: [1, 2, 3, 4, 5, 6]
+					});
+					console.log('Excel download initiated');
 				},
 				label: (
 					<>

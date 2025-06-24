@@ -42,7 +42,9 @@ const CityMarker = ({ city, onClick }: CityMarkerProps) => {
     <>
       <Marker
         position={city.position}
-        ref={(ref) => (markerRef.current = ref)}
+        ref={(ref) => {
+          markerRef.current = ref;
+        }}
         onClick={() => {
           onClick(city);
           iw.close();
@@ -58,7 +60,7 @@ const CityMarker = ({ city, onClick }: CityMarkerProps) => {
   );
 };
 
-const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const libraries: ["geometry"] = ["geometry"];
 
 interface MyComponentProps {
@@ -212,7 +214,7 @@ function MyComponent({ cities, onSelect }: MyComponentProps) {
     [cities]
   );
 
-  const onUnmount = React.useCallback(function callback(map) {
+  const onUnmount = React.useCallback(function callback(map: google.maps.Map | null) {
     setMap(null);
   }, []);
 

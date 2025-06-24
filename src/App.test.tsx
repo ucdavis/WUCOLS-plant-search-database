@@ -3,7 +3,8 @@ import { render } from "@testing-library/react";
 import App from "./App";
 import { MemoryRouter } from "react-router-dom";
 import { Data } from "./types";
-import { ToastProvider } from "react-toast-notifications";
+import { test, expect } from 'vitest';
+import '@testing-library/jest-dom';
 
 const data: Data = {
   regions: [],
@@ -20,11 +21,9 @@ const data: Data = {
 
 test('renders "Welcome to WUCOLS"', () => {
   const { getByText } = render(
-    <ToastProvider>
       <MemoryRouter>
         <App data={data} />
       </MemoryRouter>
-    </ToastProvider>
   );
   const linkElement = getByText(/Welcome to WUCOLS/i);
   expect(linkElement).toBeInTheDocument();

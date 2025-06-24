@@ -3,22 +3,22 @@ import React from "react";
 const Welcome = () => (
   <div className="welcome-wrapper">
     <h1>Welcome to WUCOLS</h1>
-    <p className="lead">
+    <div className="lead">
       WUCOLS{" "}
       <span className="discreet">
         Water Use Classification of Landscape Species
       </span>
       <br /><br />
       <p>
-        Welcome to the “enhanced” WUCOLS Plant Searchable Database. For an
-        overview of the “new enhancements”, please click on:{" "}
+        Welcome to the "enhanced" WUCOLS Plant Searchable Database. For an
+        overview of the "new enhancements", please click on:{" "}
         <a href="https://ccuh.ucdavis.edu/wucols">WUCOLS</a>
       </p>
       <p>
         WUCOLS Water Use Classification of Landscape Species helps you create a
         landscape plan based on plant water use within your city/region.
       </p>
-    </p>
+    </div>
     <h2>
       {" "}
       Instructions (for step-by-step instructions, please click on:{" "}

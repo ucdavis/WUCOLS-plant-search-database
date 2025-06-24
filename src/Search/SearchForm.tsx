@@ -1,5 +1,5 @@
 import React from "react";
-import Select, { ActionMeta, ValueType } from "react-select";
+import Select, { ActionMeta, SingleValue } from "react-select";
 import Map from "./Map";
 import plantTypeCombinatorOptions from "../Plant/plant-type-combinator-options";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -221,7 +221,7 @@ const SearchForm = ({
             value={searchCriteria.plantTypeCombinator}
             onChange={
               onPlantTypeCombinatorChange as (
-                o: ValueType<PlantTypeCombinator, false>,
+                o: SingleValue<PlantTypeCombinator>,
                 _: ActionMeta<PlantTypeCombinator>
               ) => void
             }
@@ -272,7 +272,7 @@ const SearchForm = ({
           value={searchCriteria.city}
           onChange={
             onCityChange as (
-              o: ValueType<City, false>,
+              o: SingleValue<City>,
               _: ActionMeta<City>
             ) => void
           }

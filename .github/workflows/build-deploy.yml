@@ -1,4 +1,4 @@
-name: Build & deploy react-scripts app
+name: Build & deploy app
 
 on:
   push:
@@ -28,8 +28,8 @@ jobs:
     - name: Build project
       run: npm run build
       env:
-        REACT_APP_PLANT_DETAIL_URL_PATTERN: ${{ secrets.REACT_APP_PLANT_DETAIL_URL_PATTERN }}
-        REACT_APP_GOOGLE_MAPS_API_KEY: ${{ secrets.REACT_APP_GOOGLE_MAPS_API_KEY }}
+        VITE_PLANT_DETAIL_URL_PATTERN: ${{ secrets.REACT_APP_PLANT_DETAIL_URL_PATTERN }}
+        VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.REACT_APP_GOOGLE_MAPS_API_KEY }}
     
     - name: Run tests
       run: npm run test

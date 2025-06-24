@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const dropRatingByWaterUseCode: { [key: string]: JSX.Element } = (() => {
+const dropRatingByWaterUseCode: { [key: string]: React.ReactNode } = (() => {
   Font.register({
     family: "FontAwesome",
     src: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/fonts/fontawesome-webfont.ttf",
@@ -120,8 +120,9 @@ interface WaterDropRatingProps {
   waterUseCode: WaterUseCode;
 }
 
-const WaterDropRating = ({ waterUseCode }: WaterDropRatingProps) =>
-  (
+const WaterDropRating = ({ waterUseCode }: WaterDropRatingProps) => {
+  const drops = dropRatingByWaterUseCode[waterUseCode];
+  return drops ? (
     <View
       style={{
         display: "flex",
@@ -130,9 +131,12 @@ const WaterDropRating = ({ waterUseCode }: WaterDropRatingProps) =>
         margin: "0 25%",
       }}
     >
-      {dropRatingByWaterUseCode[waterUseCode]}
+      {drops}
     </View>
-  ) || <>N/A</>;
+  ) : (
+    <>N/A</>
+  );
+};
 
 interface BenchCardDocumentProps {
   plant: Plant;

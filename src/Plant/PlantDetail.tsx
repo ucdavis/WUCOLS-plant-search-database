@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import PlantTypeBadge from "./PlantTypeBadge";
 import WaterDropRating from "./WaterDropRating";
-import { SRLWrapper } from "simple-react-lightbox";
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 import PlantFavoriteButton from "./PlantFavoriteButton";
 import { PlantDetailQrCode } from "./PlantDetailQrCode";
 import { Link } from "react-router-dom";
@@ -33,6 +34,14 @@ const PlantDetail = ({
   isPlantFavorite,
   togglePlantFavorite,
 }: Props) => {
+  const [open, setOpen] = useState(false);
+  const [index, setIndex] = useState(0);
+
+  const slides = plant.photos.map((p) => ({
+    src: p.small.url,
+    alt: p.caption,
+  }));
+
   if (!plant) {
     return <div>Invalid Plant</div>;
   }
@@ -134,33 +143,45 @@ const PlantDetail = ({
         {!!plant.photos.length && (
           <div className="col-sm-12">
             <h4 className="mb-4">Photos ({plant.photos.length})</h4>
-            <SRLWrapper key="plant gallery">
-              <div className="row row-cols-1 row-cols-md-3 g-4">
-                {plant.photos.map((p, i) => (
-                  <div className="col" key={i}>
-                    <div className="card mb-3" key={i}>
-                      <a href={p.small.url}>
-                        <img
-                          src={p.small.url}
-                          className="card-img-top"
-                          alt={p.caption}
-                          style={{
-                            height: "10em",
-                            objectFit: "cover",
-                          }}
-                        />
-                      </a>
-                      <div className="card-body text-center">
-                        <p className="card-text">{p.caption}</p>
-                      </div>
+            <div className="row row-cols-1 row-cols-md-3 g-4">
+              {plant.photos.map((p, i) => (
+                <div className="col" key={i}>
+                  <div className="card mb-3" key={i}>
+                    <a
+                      href={p.small.url}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setIndex(i);
+                        setOpen(true);
+                      }}
+                    >
+                      <img
+                        src={p.small.url}
+                        className="card-img-top"
+                        alt={p.caption}
+                        style={{
+                          height: "10em",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </a>
+                    <div className="card-body text-center">
+                      <p className="card-text">{p.caption}</p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </SRLWrapper>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
+      <Lightbox
+        open={open}
+        close={() => setOpen(false)}
+        slides={slides}
+        index={index}
+        on={{ view: ({ index }) => setIndex(index) }}
+      />
     </>
   );
 

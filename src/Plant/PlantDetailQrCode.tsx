@@ -11,9 +11,9 @@ const plantDetailUrlFromId = (id: number) =>
     - https://some.website-of-yours.app/plants/:id/detail 
     - https://some.website-of-yours.app/plants?id=:id&utm_source=qr_code
   */
-  (process.env.REACT_APP_PLANT_DETAIL_URL_PATTERN || "") !== ""
+  (import.meta.env.VITE_PLANT_DETAIL_URL_PATTERN || "") !== ""
     ? new URL(
-        process.env.REACT_APP_PLANT_DETAIL_URL_PATTERN.replace(
+        import.meta.env.VITE_PLANT_DETAIL_URL_PATTERN.replace(
           ":id",
           id.toString()
         )

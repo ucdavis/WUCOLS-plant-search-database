@@ -55,15 +55,22 @@ const DownloadMenu = ({
 		return [
 			{
 				include: !!searchCriteria.city,
-				method: () => {
-					Promise.all(
-						plants.map((p: Plant) =>
-							fetch(plantDetailQrCodeFromId(p.id).image_url)
-								.then((r) => r.blob())
-								.then((b) => [p, b] as [Plant, Blob])
-						)
-					).then((plantBlobPairs) => {
-						var zip = new JSZip();
+				method: async () => {
+					try {
+						const plantBlobPairs = await Promise.all(
+							plants.map(async (p: Plant) => {
+								const qrCodeInfo = plantDetailQrCodeFromId(p.id);
+								const dataUrl = await qrCodeInfo.generate_image_url();
+								
+								// Convert data URL to blob
+								const response = await fetch(dataUrl);
+								const blob = await response.blob();
+								
+								return [p, blob] as [Plant, Blob];
+							})
+						);
+
+						const zip = new JSZip();
 						for (let [p, blob] of plantBlobPairs) {
 							zip.file(
 								p.commonName + ".png",
@@ -73,10 +80,12 @@ const DownloadMenu = ({
 								} as unknown as JSZip.JSZipFileOptions & { dir: true }
 							);
 						}
-						zip.generateAsync({ type: "blob" }).then(function (content) {
-							saveAs(content, "qr-codes.zip");
-						});
-					});
+						const content = await zip.generateAsync({ type: "blob" });
+						saveAs(content, "qr-codes.zip");
+					} catch (error) {
+						console.error('Error generating QR codes:', error);
+						alert('Failed to generate QR codes. Please try again.');
+					}
 				},
 				label: (
 					<>
@@ -152,12 +161,18 @@ const DownloadMenu = ({
 								if (zipCancelled.current) {
 									throw new Error("Download cancelled");
 								}
+								
+								// Generate QR code data URL first
+								const qrCodeInfo = plantDetailQrCodeFromId(p.id);
+								const qrCodeDataUrl = await qrCodeInfo.generate_image_url();
+								
 								b = await pdf(
 									<BenchCardDocument
 										benchCardTemplate={currentBct}
 										plant={p}
 										region={searchCriteria.city.region}
 										waterUseByCode={data.waterUseByCode}
+										qrCodeDataUrl={qrCodeDataUrl}
 									/>
 								).toBlob();
 								let current = 0;

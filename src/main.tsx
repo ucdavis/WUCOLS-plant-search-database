@@ -11,6 +11,15 @@ import { Data, WaterUseClassification, WucolsBlobLink } from "./types";
 
 import "./sass/wucols.scss";
 
+// Simple Buffer polyfill for qrcode package
+if (typeof (globalThis as any).Buffer === 'undefined') {
+  (globalThis as any).Buffer = {
+    from: () => new Uint8Array(),
+    toString: () => '',
+    isBuffer: () => false
+  };
+}
+
 console.log("🚀 Main.tsx loaded - Starting WUCOLS app...");
 
 declare global {

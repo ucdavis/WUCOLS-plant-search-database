@@ -168,7 +168,7 @@ function App({ data }: Props) {
 
   return (
     <>
-      <ToastContainer />
+      <ToastContainer position="bottom-center" />
       <div className="App">
         <nav className="navbar navbar-dark bg-dark sticky-top d-flex justify-content-between">
           <div className="btn-group">

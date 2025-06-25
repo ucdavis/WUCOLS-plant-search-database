@@ -2,29 +2,21 @@ import { useState, useRef, useEffect } from "react";
 import DownloadActionList from './DownloadActionList';
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
-import {  pdf } from "@react-pdf/renderer";
+import { pdf } from "@react-pdf/renderer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faFileExcel,
-  faQrcode,
-  faIdCard,
+	faFileExcel,
+	faQrcode,
+	faIdCard,
 } from "@fortawesome/free-solid-svg-icons";
 import { exportToExcel } from "../utils/excelExport";
-import {
-  Button,
-  Modal,
-  Col,
-  Container,
-  Row,
-  ProgressBar,
-} from "react-bootstrap";
 
 import {
-  BenchCardTemplate,
-  Data,
-  DownloadAction,
-  Plant,
-  SearchCriteria,
+	BenchCardTemplate,
+	Data,
+	DownloadAction,
+	Plant,
+	SearchCriteria,
 } from "../types";
 import { plantDetailQrCodeFromId } from "../Plant/PlantDetailQrCode";
 import BenchCardDocument from "../Plant/BenchCardDocument";
@@ -61,11 +53,16 @@ const DownloadMenu = ({
 							plants.map(async (p: Plant) => {
 								const qrCodeInfo = plantDetailQrCodeFromId(p.id);
 								const dataUrl = await qrCodeInfo.generate_image_url();
-								
+
+								// Validate the data URL before fetching
+								if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) {
+									throw new Error(`Invalid QR code data URL for plant ${p.commonName || p.id}`);
+								}
+
 								// Convert data URL to blob
 								const response = await fetch(dataUrl);
 								const blob = await response.blob();
-								
+
 								return [p, blob] as [Plant, Blob];
 							})
 						);
@@ -154,61 +151,71 @@ const DownloadMenu = ({
 			setZipCurrent(0);
 			const cb = async () => {
 				try {
-					const plantBlobPairs = await Promise.all(
-						plants.map(async (p: Plant) => {
-							let b: any;
-							try {
-								if (zipCancelled.current) {
-									throw new Error("Download cancelled");
-								}
-								
-								// Generate QR code data URL first
-								const qrCodeInfo = plantDetailQrCodeFromId(p.id);
-								const qrCodeDataUrl = await qrCodeInfo.generate_image_url();
-								
-								b = await pdf(
-									<BenchCardDocument
-										benchCardTemplate={currentBct}
-										plant={p}
-										region={searchCriteria.city.region}
-										waterUseByCode={data.waterUseByCode}
-										qrCodeDataUrl={qrCodeDataUrl}
-									/>
-								).toBlob();
-								let current = 0;
-								setZipCurrent((i) => {
-									current = i === 0 ? 1 : i + 1;
-									return current;
-								});
-								console.log(
-									`generated bench card ${current} of ${plants.length}`
-								);
-							} catch (e: any) {
-								if (e.message === "Download cancelled") {
-									console.log(e.message);
-								} else {
-									console.error(e);
-								}
+					const plantBlobPairs: [Plant, any][] = [];
+
+					// Process plants sequentially instead of in parallel
+					for (let i = 0; i < plants.length; i++) {
+						if (zipCancelled.current) {
+							throw new Error("Download cancelled");
+						}
+
+						const p = plants[i];
+						let b: any;
+
+						try {
+							// Generate QR code data URL first
+							const qrCodeInfo = plantDetailQrCodeFromId(p.id);
+							const qrCodeDataUrl = await qrCodeInfo.generate_image_url();
+
+							// Validate the data URL before using it
+							if (!qrCodeDataUrl || typeof qrCodeDataUrl !== 'string' || !qrCodeDataUrl.startsWith('data:')) {
+								throw new Error(`Invalid QR code data URL for plant ${p.commonName || p.id}`);
 							}
-							return [p, b] as [Plant, Blob];
-						})
-					);
+
+							b = await pdf(
+								<BenchCardDocument
+									benchCardTemplate={currentBct}
+									plant={p}
+									region={searchCriteria.city.region}
+									waterUseByCode={data.waterUseByCode}
+									qrCodeDataUrl={qrCodeDataUrl}
+								/>
+							).toBlob();
+
+							// Update progress after each plant
+							setZipCurrent(i + 1);
+							console.log(`generated bench card ${i + 1} of ${plants.length}`);
+						} catch (e: any) {
+							if (e.message === "Download cancelled") {
+								console.log(e.message);
+								break;
+							} else {
+								console.error(e);
+							}
+						}
+
+						plantBlobPairs.push([p, b]);
+					}
+
 					if (zipCancelled.current) {
 						throw new Error("Download cancelled");
 					}
+
 					var zip = new JSZip();
 					for (let [p, blob] of plantBlobPairs) {
-						zip.file(
-							p.commonName + ".pdf",
-							blob as unknown as null,
-							{
-								blob: true,
-							} as unknown as JSZip.JSZipFileOptions & { dir: true }
-						);
+						if (blob) { // Only add if blob was successfully created
+							zip.file(
+								p.commonName + ".pdf",
+								blob as unknown as null,
+								{
+									blob: true,
+								} as unknown as JSZip.JSZipFileOptions & { dir: true }
+							);
+						}
 					}
-					await zip.generateAsync({ type: "blob" }).then(function (content) {
-						saveAs(content, `bench-cards-${currentBct.name}.zip`);
-					});
+
+					const content = await zip.generateAsync({ type: "blob" });
+					saveAs(content, `bench-cards-${currentBct.name}.zip`);
 				} catch (e: any) {
 					if (e.message === "Download cancelled") {
 						console.log(e.message);
@@ -227,45 +234,76 @@ const DownloadMenu = ({
 		}
 	}, [showZipModal, setShowZipModal, currentBct]); // eslint-disable-line react-hooks/exhaustive-deps
 
-	const actionList = DownloadActionList({downloadActions: getDownloadActions(data, searchCriteria, plants)});
+	const actionList = <DownloadActionList downloadActions={getDownloadActions(data, searchCriteria, plants)} />;
 
-	const modal = <Modal
+	// Updated SimpleModal with Bootstrap 4 classes
+	const SimpleModal = ({ show, onHide, children }: { show: boolean, onHide: () => void, children: React.ReactNode }) => {
+		if (!show) return null;
+		return (
+			<div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+				<div className="modal-dialog modal-dialog-centered">
+					<div className="modal-content">
+						<div className="modal-header">
+							<h4 className="modal-title">Generating Zip file</h4>
+							<button
+								type="button"
+								className="close"
+								onClick={onHide}
+								aria-label="Close"
+							>
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div className="modal-body">
+							{children}
+						</div>
+						<div className="modal-footer">
+							<button
+								type="button"
+								className="btn btn-secondary"
+								onClick={onHide}
+							>
+								Cancel
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		);
+	};
+
+	const modal = <SimpleModal
 		show={showZipModal}
 		onHide={() => {
 			zipCancelled.current = true;
 			setShowZipModal(false);
 		}}
 	>
-		<Modal.Header closeButton>
-			<Modal.Title>Generating Zip file</Modal.Title>
-		</Modal.Header>
-		<Modal.Body>
-			<Container fluid>
-				<Row>
-					<Col>Please wait. It can take a few seconds per bech card.</Col>
-				</Row>
-				<Row>
-					<Col>
-						<ProgressBar
-							now={Math.round((zipCurrent / zipTotal) * 100)}
-							label={`${zipCurrent} of ${zipTotal}`}
-						/>
-					</Col>
-				</Row>
-			</Container>
-		</Modal.Body>
-		<Modal.Footer>
-			<Button
-				variant="primary"
-				onClick={() => {
-					zipCancelled.current = true;
-					setShowZipModal(false);
-				}}
-			>
-				Cancel
-			</Button>
-		</Modal.Footer>
-	</Modal>;
+		<div className="container-fluid">
+			<div className="row">
+				<div className="col">
+					Please wait. It can take a few seconds per bench card.
+				</div>
+			</div>
+			<div className="row mt-3">
+				<div className="col">
+					<div className="progress">
+						<div
+							className="progress-bar"
+							role="progressbar"
+							style={{ width: `${Math.round((zipCurrent / zipTotal) * 100)}%` }}
+							aria-valuenow={zipCurrent}
+							aria-valuemin={0}
+							aria-valuemax={zipTotal}
+						>
+							{zipCurrent} of {zipTotal}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</SimpleModal>;
+
 	return <>{modal}{actionList}</>;
 };
 

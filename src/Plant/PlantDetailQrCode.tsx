@@ -39,21 +39,11 @@ const generateQrCodeDataUrl = async (text: string): Promise<string> => {
 // Export for use in other components like DownloadMenu
 export { generateQrCodeDataUrl };
 
-// For compatibility with existing code that expects a sync image_url
-export const generateQrCodeDataUrlSync = (_text: string): string => {
-  // This will return a placeholder or empty string for now
-  // In practice, you should use the async version
-  console.warn('generateQrCodeDataUrlSync called - consider using async version');
-  return '';
-};
-
 export const plantDetailQrCodeFromId = (id: number) => {
   const url = plantDetailUrlFromId(id);
   return {
     destination_url: url,
     generate_image_url: () => generateQrCodeDataUrl(url),
-    // Legacy support - returns empty string, should be replaced with async version
-    image_url: generateQrCodeDataUrlSync(url),
   };
 };
 

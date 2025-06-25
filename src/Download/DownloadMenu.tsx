@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useRef, useEffect } from "react";
 import DownloadActionList from './DownloadActionList';
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -40,11 +40,11 @@ const DownloadMenu = ({
 	data,
 	plants
 }: DownloadMenuProps) => {
-	const [currentBct, setCurrentBct] = React.useState<BenchCardTemplate | null>(null);
-	const zipCancelled = React.useRef(false);
-	const [showZipModal, setShowZipModal] = React.useState(false);
-	const [zipCurrent, setZipCurrent] = React.useState(0);
-	const [zipTotal, setZipTotal] = React.useState(0);
+	const [currentBct, setCurrentBct] = useState<BenchCardTemplate | null>(null);
+	const zipCancelled = useRef(false);
+	const [showZipModal, setShowZipModal] = useState(false);
+	const [zipCurrent, setZipCurrent] = useState(0);
+	const [zipTotal, setZipTotal] = useState(0);
 
 	const getDownloadActions = (
 		data: Data,
@@ -148,7 +148,7 @@ const DownloadMenu = ({
 		].filter(da => da.include);
 	};
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (showZipModal && currentBct && !zipCancelled.current) {
 			setZipTotal(plants.length);
 			setZipCurrent(0);

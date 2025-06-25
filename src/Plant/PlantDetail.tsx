@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import PlantTypeBadge from "./PlantTypeBadge";
 import WaterDropRating from "./WaterDropRating";
 import Lightbox from "yet-another-react-lightbox";

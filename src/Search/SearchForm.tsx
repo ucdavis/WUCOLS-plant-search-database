@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import Select, { ActionMeta, SingleValue } from "react-select";
 import Map from "./Map";
 import plantTypeCombinatorOptions from "../Plant/plant-type-combinator-options";
@@ -86,7 +86,7 @@ const SearchForm = ({
   waterUseClassifications,
   updateSearchCriteria,
 }: SearchFormProps) => {
-  const [mapModalVisible, setMapModalVisible] = React.useState(false);
+  const [mapModalVisible, setMapModalVisible] = useState(false);
   const setPlantType = (code: string, checked: boolean) =>
     updateSearchCriteria({
       ...searchCriteria,

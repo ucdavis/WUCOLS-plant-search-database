@@ -1,5 +1,3 @@
-import React from "react";
-
 const Welcome = () => (
   <div className="welcome-wrapper">
     <h1>Welcome to WUCOLS</h1>

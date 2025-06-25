@@ -1,4 +1,4 @@
-import React from "react";
+import { ReactElement } from "react";
 
 // these type aliases are just to make it more clear what sort of data is being passed around
 export type NumericString = string;
@@ -115,7 +115,7 @@ export interface SearchCriteria {
 export interface DownloadAction {
   method: () => void;
   include: boolean;
-  label: React.ReactElement;
+  label: ReactElement;
 }
 
 export interface WucolsBlobLink {

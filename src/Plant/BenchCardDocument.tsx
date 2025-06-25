@@ -1,4 +1,4 @@
-import React from "react";
+import { ReactNode } from "react";
 import {
   Document,
   Page,
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const dropRatingByWaterUseCode: { [key: string]: React.ReactNode } = (() => {
+const dropRatingByWaterUseCode: { [key: string]: ReactNode } = (() => {
   Font.register({
     family: "FontAwesome",
     src: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/fonts/fontawesome-webfont.ttf",

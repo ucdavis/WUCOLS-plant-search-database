@@ -1,4 +1,3 @@
-import React from "react";
 import { DownloadAction } from "../types";
 
 interface Props {

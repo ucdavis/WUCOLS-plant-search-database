@@ -1,4 +1,4 @@
-import React from "react";
+import { useCallback } from "react";
 import "./App.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -62,7 +62,7 @@ function App({ data }: Props) {
       SearchCriteriaConverter.getDefaultSearchCriteria(data.plantTypes)
     );
 
-  const updateSearchCriteria = React.useCallback(
+  const updateSearchCriteria = useCallback(
     (sc: SearchCriteria) => {
       let qs = SearchCriteriaConverter.toQuerystring(sc);
       //console.log('search altered',qs);

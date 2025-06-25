@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useMemo } from "react";
 import PlantList from "../Plant/PlantList";
 import PlantTable from "../Plant/PlantTable";
 import {
@@ -69,12 +69,12 @@ const Search = ({
       icon: faTh,
     },
   ];
-  const [plantsViewModeId] = React.useState(plantsViewModes[0].id);
+  const [plantsViewModeId] = useState(plantsViewModes[0].id);
   const plantsViewMode =
     plantsViewModes.filter((vm) => vm.id === plantsViewModeId)[0] ||
     plantsViewModes[0];
 
-  const matchingPlants = React.useMemo(() => {
+  const matchingPlants = useMemo(() => {
     let noType = Object.values(searchCriteria.plantTypes).every((b) => !b);
     let noWu = Object.values(searchCriteria.waterUseClassifications).every(
       (b) => !b

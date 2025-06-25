@@ -26,7 +26,6 @@ interface Props {
   addAllToFavorites: (plants: Plant[]) => void;
   togglePlantFavorite: (plant: Plant) => void;
   queryString: string;
-  resetSearchCriteria: () => void;
 }
 
 export interface PlantsViewMode {
@@ -44,7 +43,6 @@ const Search = ({
   isPlantFavorite,
   togglePlantFavorite,
   queryString,
-  resetSearchCriteria,
   addAllToFavorites
 }: Props) => {
   let plantsViewModes: PlantsViewMode[] = [
@@ -80,8 +78,8 @@ const Search = ({
       (b) => !b
     );
     let types = Object.entries(searchCriteria.plantTypes)
-      .filter(([k, v]) => !!v)
-      .map(([k, v]) => k);
+      .filter(([_, v]) => !!v)
+      .map(([k, _]) => k);
     let typeFn =
       searchCriteria.plantTypeCombinator ===
       plantTypeCombinatorOptions.byId["ANY"]

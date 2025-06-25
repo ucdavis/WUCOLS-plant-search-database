@@ -14,7 +14,6 @@ import {
   faSearch,
   faStar,
 } from "@fortawesome/free-solid-svg-icons";
-import { PDFViewer } from "@react-pdf/renderer";
 
 import Favorites from "./Favorites/Favorites";
 
@@ -28,7 +27,6 @@ import {
 import { Navigate } from "react-router-dom";
 
 import SearchCriteriaConverter from "./Search/search-criteria-converter";
-import BenchCardDocument from "./Plant/BenchCardDocument";
 
 import {
   BoolDict,
@@ -292,7 +290,6 @@ function App({ data }: Props) {
                 data={data}
                 searchPerformed={searchWasPerformed(searchCriteria)}
                 addAllToFavorites={addAllToFavorites}
-                resetSearchCriteria={resetSearchCriteria}
               />
             }
           />

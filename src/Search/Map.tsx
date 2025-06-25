@@ -214,7 +214,7 @@ function MyComponent({ cities, onSelect }: MyComponentProps) {
     [cities]
   );
 
-  const onUnmount = useCallback(function callback(map: google.maps.Map | null) {
+  const onUnmount = useCallback(function callback(_: google.maps.Map | null) {
     setMap(null);
   }, []);
 

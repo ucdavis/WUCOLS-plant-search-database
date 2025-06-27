@@ -1,4 +1,3 @@
-import React from "react";
 import ultimatePagination from "ultimate-pagination";
 import { Pagination } from "react-bootstrap";
 
@@ -58,17 +57,16 @@ const PlantPagination = ({pageCount, currentPageNumber, setCurrentPageNumber}: P
 		{paginationModel
 			.map((p) => {
 				const props = {
-					key: p.key,
 					active: p.isActive,
 					onClick: () => setCurrentPageNumber(p.value),
 				};
 				switch (p.type) {
-					//case 'PREVIOUS_PAGE_LINK': return <Pagination.Prev {...props}/>
-					//case 'NEXT_PAGE_LINK'    : return <Pagination.Next {...props}/>
+					//case 'PREVIOUS_PAGE_LINK': return <Pagination.Prev key={p.key} {...props}/>
+					//case 'NEXT_PAGE_LINK'    : return <Pagination.Next key={p.key} {...props}/>
 					case "PAGE":
-						return <Pagination.Item {...props}>{p.value}</Pagination.Item>;
+						return <Pagination.Item key={p.key} {...props}>{p.value}</Pagination.Item>;
 					case "ELLIPSIS":
-						return <Pagination.Ellipsis {...props} />;
+						return <Pagination.Ellipsis key={p.key} {...props} />;
 					default:
 						return undefined;
 				}

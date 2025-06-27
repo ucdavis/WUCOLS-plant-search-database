@@ -1,30 +1,49 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import QRCode from "qrcode";
 import { Plant } from "../types";
 
-const googleQrCodeUrl = (destination_url: string) =>
-  `https://chart.googleapis.com/chart?chs=500x500&cht=qr&choe=UTF-8&chl=${encodeURIComponent(
-    destination_url
-  )}`;
+const plantDetailUrlFromId = (id: number) => {
+  const pattern = import.meta.env.VITE_PLANT_DETAIL_URL_PATTERN || "";
+  
+  if (pattern === "") {
+    // Fallback for development - use current origin
+    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '';
+    return `${currentOrigin}/plant/${id}`;
+  }
+  
+  return new URL(pattern.replace(":id", id.toString())).toString();
+};
 
-const plantDetailUrlFromId = (id: number) =>
-  /* example expected patterns:
-    - https://some.website-of-yours.app/plants/:id/detail 
-    - https://some.website-of-yours.app/plants?id=:id&utm_source=qr_code
-  */
-  (process.env.REACT_APP_PLANT_DETAIL_URL_PATTERN || "") !== ""
-    ? new URL(
-        process.env.REACT_APP_PLANT_DETAIL_URL_PATTERN.replace(
-          ":id",
-          id.toString()
-        )
-      ).toString()
-    : "";
+const generateQrCodeDataUrl = async (text: string): Promise<string> => {
+  try {
+    // Ensure we use browser-compatible methods only
+    const options = {
+      type: 'image/png' as const,
+      width: 200,
+      margin: 1,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+      },
+      errorCorrectionLevel: 'M' as const
+    };
+    
+    // Use toDataURL which is browser-compatible and doesn't require Buffer
+    return await QRCode.toDataURL(text, options);
+  } catch (error) {
+    console.error('Error generating QR code:', error);
+    return '';
+  }
+};
+
+// Export for use in other components like DownloadMenu
+export { generateQrCodeDataUrl };
 
 export const plantDetailQrCodeFromId = (id: number) => {
-  let url = plantDetailUrlFromId(id);
+  const url = plantDetailUrlFromId(id);
   return {
     destination_url: url,
-    image_url: googleQrCodeUrl(url),
+    generate_image_url: () => generateQrCodeDataUrl(url),
   };
 };
 
@@ -34,11 +53,80 @@ interface Props {
 }
 
 export const PlantDetailQrCode = ({ plant, style }: Props) => {
-  let { destination_url, image_url } = plantDetailQrCodeFromId(plant.id);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
+  const destination_url = plantDetailUrlFromId(plant.id);
+
+  useEffect(() => {
+    const generateQrCode = async () => {
+      if (!destination_url) {
+        setError('No destination URL configured');
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError('');
+      
+      try {
+        console.log('Generating QR code for:', destination_url);
+        const dataUrl = await generateQrCodeDataUrl(destination_url);
+        setQrCodeDataUrl(dataUrl);
+      } catch (error) {
+        console.error('Failed to generate QR code:', error);
+        setError('Failed to generate QR code');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    generateQrCode();
+  }, [destination_url, plant.id]);
+
+  if (loading) {
+    return (
+      <div 
+        style={{ 
+          width: "64px", 
+          height: "64px", 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center",
+          border: "1px dashed #ccc",
+          fontSize: "10px",
+          ...style 
+        }}
+      >
+        QR...
+      </div>
+    );
+  }
+
+  if (error || !qrCodeDataUrl) {
+    return (
+      <div 
+        style={{ 
+          width: "64px", 
+          height: "64px", 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center",
+          border: "1px dashed #ccc",
+          fontSize: "10px",
+          color: "#999",
+          ...style 
+        }}
+      >
+        No QR
+      </div>
+    );
+  }
+
   return (
     <a href={destination_url} target="_blank" rel="noreferrer">
       <img
-        src={image_url}
+        src={qrCodeDataUrl}
         alt={"QR Code for " + plant.botanicalName}
         className="img-responsive"
         style={{ width: "64px", ...(style || {}) }}

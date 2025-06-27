@@ -3,8 +3,8 @@ declare global {
     interface ProcessEnv {
       PUBLIC_URL: string;
       NODE_ENV: "development" | "production";
-      REACT_APP_GOOGLE_MAPS_API_KEY: string;
-      REACT_APP_PLANT_DETAIL_URL_PATTERN: string;
+      VITE_GOOGLE_MAPS_API_KEY: string;
+      VITE_PLANT_DETAIL_URL_PATTERN: string;
     }
   }
 }

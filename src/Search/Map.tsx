@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useRef, useCallback, memo } from "react";
 import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
 import { City } from "../types";
 
@@ -21,7 +21,7 @@ interface CityMarkerProps {
 }
 
 const CityMarker = ({ city, onClick }: CityMarkerProps) => {
-  const markerRef = React.useRef<Marker | null>(null);
+  const markerRef = useRef<Marker | null>(null);
   let iw = new window.google.maps.InfoWindow({
     content: `<div>${city.name}</div>`,
   });
@@ -42,7 +42,9 @@ const CityMarker = ({ city, onClick }: CityMarkerProps) => {
     <>
       <Marker
         position={city.position}
-        ref={(ref) => (markerRef.current = ref)}
+        ref={(ref) => {
+          markerRef.current = ref;
+        }}
         onClick={() => {
           onClick(city);
           iw.close();
@@ -58,7 +60,7 @@ const CityMarker = ({ city, onClick }: CityMarkerProps) => {
   );
 };
 
-const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const libraries: ["geometry"] = ["geometry"];
 
 interface MyComponentProps {
@@ -79,7 +81,7 @@ function MyComponent({ cities, onSelect }: MyComponentProps) {
     googleMapsApiKey: apiKey,
   });
 
-  const [, setMap] = React.useState<google.maps.Map | null>(null);
+  const [, setMap] = useState<google.maps.Map | null>(null);
 
   const fitPositions = (
     map: google.maps.Map,
@@ -92,7 +94,7 @@ function MyComponent({ cities, onSelect }: MyComponentProps) {
     map.fitBounds(bounds);
   };
 
-  const onLoad = React.useCallback(
+  const onLoad = useCallback(
     function callback(map: google.maps.Map) {
       const cityPositions = cities.map(
         (c) => new google.maps.LatLng(c.position)
@@ -212,7 +214,7 @@ function MyComponent({ cities, onSelect }: MyComponentProps) {
     [cities]
   );
 
-  const onUnmount = React.useCallback(function callback(map) {
+  const onUnmount = useCallback(function callback(_: google.maps.Map | null) {
     setMap(null);
   }, []);
 
@@ -232,4 +234,4 @@ function MyComponent({ cities, onSelect }: MyComponentProps) {
   );
 }
 
-export default React.memo(MyComponent);
+export default memo(MyComponent);

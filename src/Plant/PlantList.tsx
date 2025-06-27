@@ -1,4 +1,3 @@
-import React from "react";
 import PlantTypeBadge from "./PlantTypeBadge";
 import WaterDropRating from "./WaterDropRating";
 import PlantFavoriteButton from "./PlantFavoriteButton";

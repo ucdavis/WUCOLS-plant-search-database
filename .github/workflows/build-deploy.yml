@@ -1,4 +1,4 @@
-name: Build & deploy react-scripts app
+name: Build & deploy app
 
 on:
   push:
@@ -15,12 +15,12 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     
     - name: Install Node.js
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v4
       with:
-        node-version: 14.x
+        node-version: 20.x
     
     - name: Install NPM packages
       run: npm ci
@@ -28,17 +28,17 @@ jobs:
     - name: Build project
       run: npm run build
       env:
-        REACT_APP_PLANT_DETAIL_URL_PATTERN: ${{ secrets.REACT_APP_PLANT_DETAIL_URL_PATTERN }}
-        REACT_APP_GOOGLE_MAPS_API_KEY: ${{ secrets.REACT_APP_GOOGLE_MAPS_API_KEY }}
+        VITE_PLANT_DETAIL_URL_PATTERN: ${{ secrets.REACT_APP_PLANT_DETAIL_URL_PATTERN }}
+        VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.REACT_APP_GOOGLE_MAPS_API_KEY }}
     
     - name: Run tests
       run: npm run test
 
     - name: Upload production-ready build files
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: production-files
-        path: ./build
+        path: ./dist
   
   deploy:
     name: Deploy
@@ -48,13 +48,13 @@ jobs:
     
     steps:
     - name: Download artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: production-files
-        path: ./build
+        path: ./dist
 
     - name: Deploy to gh-pages
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./build
+        publish_dir: ./dist

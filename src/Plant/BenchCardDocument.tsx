@@ -1,4 +1,4 @@
-import React from "react";
+import { ReactNode } from "react";
 import {
   Document,
   Page,
@@ -8,7 +8,6 @@ import {
   Font,
   Image,
 } from "@react-pdf/renderer";
-import { plantDetailQrCodeFromId } from "./PlantDetailQrCode";
 import {
   BenchCardTemplate,
   Plant,
@@ -39,7 +38,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const dropRatingByWaterUseCode: { [key: string]: JSX.Element } = (() => {
+const dropRatingByWaterUseCode: { [key: string]: ReactNode } = (() => {
   Font.register({
     family: "FontAwesome",
     src: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/fonts/fontawesome-webfont.ttf",
@@ -120,8 +119,9 @@ interface WaterDropRatingProps {
   waterUseCode: WaterUseCode;
 }
 
-const WaterDropRating = ({ waterUseCode }: WaterDropRatingProps) =>
-  (
+const WaterDropRating = ({ waterUseCode }: WaterDropRatingProps) => {
+  const drops = dropRatingByWaterUseCode[waterUseCode];
+  return drops ? (
     <View
       style={{
         display: "flex",
@@ -130,15 +130,19 @@ const WaterDropRating = ({ waterUseCode }: WaterDropRatingProps) =>
         margin: "0 25%",
       }}
     >
-      {dropRatingByWaterUseCode[waterUseCode]}
+      {drops}
     </View>
-  ) || <>N/A</>;
+  ) : (
+    <Text>N/A</Text>
+  );
+};
 
 interface BenchCardDocumentProps {
   plant: Plant;
   region: number;
   waterUseByCode: { [key: string]: WaterUseClassification };
   benchCardTemplate: BenchCardTemplate;
+  qrCodeDataUrl?: string;
 }
 
 const BenchCardDocument = ({
@@ -146,9 +150,22 @@ const BenchCardDocument = ({
   region,
   waterUseByCode,
   benchCardTemplate,
+  qrCodeDataUrl,
 }: BenchCardDocumentProps) => {
   const p = plant;
-  const qrCodeUrl = plantDetailQrCodeFromId(plant.id).image_url;
+  // Only use the provided QR code data URL - don't fall back to sync method
+  const qrCodeUrl = qrCodeDataUrl || '';
+  
+  // Debug QR code
+  if (debug) {
+    console.log('BenchCardDocument QR code debug:', {
+      qrCodeDataUrl,
+      qrCodeUrl,
+      hasQrCode: !!qrCodeUrl,
+      qrCodeLength: qrCodeUrl?.length
+    });
+  }
+  
   let wuCode = p.waterUseByRegion[region - 1];
   let wu = waterUseByCode[wuCode];
   //console.log(region, wuCode, wu) //console.log(p)
@@ -205,7 +222,7 @@ const BenchCardDocument = ({
             }}
           >
             {!!photoUrl && (
-              <Image debug={debug} src={photoUrl} style={{ width: "45%" }} />
+              <Image debug={debug} src={photoUrl} style={{ width: "30%" }} />
             )}
 
             <View
@@ -214,6 +231,9 @@ const BenchCardDocument = ({
                 styles.waterUseClassificationBox,
                 {
                   fontSize: `${sizeInches.x / 11 / 4}in`,
+                  width: "50%",
+                  minHeight: "100pt",
+                  maxHeight: "150pt",
                 },
               ]}
             >
@@ -221,6 +241,7 @@ const BenchCardDocument = ({
                 style={{
                   color: "white",
                   paddingBottom: `${sizeInches.x / 11 / 8}in`,
+                  fontSize: `${sizeInches.x / 11 / 6}in`,
                 }}
               >
                 Water Use Classification
@@ -232,19 +253,49 @@ const BenchCardDocument = ({
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-evenly",
+                  padding: "3pt",
                 }}
               >
-                <Text>{wu.name}</Text>
-                <View style={{ fontSize: `${sizeInches.x / 11 / 2}in` }}>
+                <Text style={{ fontSize: `${sizeInches.x / 11 / 4}in`, fontWeight: "bold" }}>{wu.name}</Text>
+                <View style={{ fontSize: `${sizeInches.x / 11 / 2.2}in`, paddingVertical: "1pt" }}>
                   <WaterDropRating waterUseCode={wu.code} />
                 </View>
-                <View>
-                  <Text>Central Valley</Text>
-                  <Text>(WUCOLS Region 2)</Text>
+                <View style={{ paddingVertical: "1pt" }}>
+                  <Text style={{ fontSize: `${sizeInches.x / 11 / 4.5}in` }}>Central Valley</Text>
+                  <Text style={{ fontSize: `${sizeInches.x / 11 / 5}in` }}>(WUCOLS Region 2)</Text>
                 </View>
-                <Text>(Source: WUCOLS IV)</Text>
+                <Text style={{ fontSize: `${sizeInches.x / 11 / 6}in` }}>(Source: WUCOLS IV)</Text>
               </View>
             </View>
+            
+            {/* Add QR code only if available - larger size for better scanning */}
+            {qrCodeUrl && qrCodeUrl.length > 0 && (
+              <View
+                debug={debug}
+                style={{
+                  width: "20%",
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "flex-start",
+                  alignItems: "center",
+                  paddingTop: "8pt",
+                }}
+              >
+                <Text style={{ fontSize: "10pt", marginBottom: "4pt", fontWeight: "bold" }}>
+                  Scan for Details
+                </Text>
+                <Image 
+                  debug={debug} 
+                  src={qrCodeUrl} 
+                  style={{ 
+                    width: "90px",
+                    height: "90px",
+                    objectFit: 'contain'
+                  }} 
+                />
+              </View>
+            )}
           </View>
           <View
             debug={debug}
@@ -253,14 +304,13 @@ const BenchCardDocument = ({
               flexDirection: "row",
               justifyContent: "space-evenly",
               alignItems: "center",
-              padding: "2em",
-              margin: "5em",
+              padding: "12pt",
+              margin: "30pt",
             }}
           >
             <Image debug={debug} src="/logo-dwr.png" style={logoStyle} />
             <Image debug={debug} src="/logo-ucd-ccuh.png" style={logoStyle} />
             <Image debug={debug} src="/logo-ucanr.png" style={logoStyle} />
-            <Image debug={debug} src={qrCodeUrl} style={logoStyle} />
           </View>
         </View>
       </Page>

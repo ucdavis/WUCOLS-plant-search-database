@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useMemo } from "react";
 import PlantList from "../Plant/PlantList";
 import PlantTable from "../Plant/PlantTable";
 import {
@@ -26,7 +26,6 @@ interface Props {
   addAllToFavorites: (plants: Plant[]) => void;
   togglePlantFavorite: (plant: Plant) => void;
   queryString: string;
-  resetSearchCriteria: () => void;
 }
 
 export interface PlantsViewMode {
@@ -44,7 +43,6 @@ const Search = ({
   isPlantFavorite,
   togglePlantFavorite,
   queryString,
-  resetSearchCriteria,
   addAllToFavorites
 }: Props) => {
   let plantsViewModes: PlantsViewMode[] = [
@@ -69,19 +67,19 @@ const Search = ({
       icon: faTh,
     },
   ];
-  const [plantsViewModeId] = React.useState(plantsViewModes[0].id);
+  const [plantsViewModeId] = useState(plantsViewModes[0].id);
   const plantsViewMode =
     plantsViewModes.filter((vm) => vm.id === plantsViewModeId)[0] ||
     plantsViewModes[0];
 
-  const matchingPlants = React.useMemo(() => {
+  const matchingPlants = useMemo(() => {
     let noType = Object.values(searchCriteria.plantTypes).every((b) => !b);
     let noWu = Object.values(searchCriteria.waterUseClassifications).every(
       (b) => !b
     );
     let types = Object.entries(searchCriteria.plantTypes)
-      .filter(([k, v]) => !!v)
-      .map(([k, v]) => k);
+      .filter(([_, v]) => !!v)
+      .map(([k, _]) => k);
     let typeFn =
       searchCriteria.plantTypeCombinator ===
       plantTypeCombinatorOptions.byId["ANY"]

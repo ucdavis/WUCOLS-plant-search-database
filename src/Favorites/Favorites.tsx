@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import PlantTable from "../Plant/PlantTable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -29,7 +29,7 @@ const Favorites = ({
   clearAllFavorites,
   searchCriteria,
 }: Props) => {
-  const [currentPageNumber, setCurrentPageNumber] = React.useState(0);
+  const [currentPageNumber, setCurrentPageNumber] = useState(0);
   const plantPaginationProps = getPlantPaginationProps(
     50,
     favoritePlants.length,

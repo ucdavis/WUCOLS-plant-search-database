@@ -172,7 +172,7 @@ const BenchCardDocument = ({
   let leadPhoto = p.photos[0];
   let photoUrl = (!leadPhoto ? "" : leadPhoto.small.url).replace(
     "wucolsplants.sf.ucdavis.edu",
-    "wucols-proxy.azurewebsites.net/api/wucols-proxy"
+    "wucols-proxy.azurewebsites.net"
   );
   //console.log({ leadPhoto, photoUrl });
   const sizeInches = benchCardTemplate.sizeInInches;

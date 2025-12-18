@@ -171,7 +171,7 @@ const BenchCardDocument = ({
   //console.log(region, wuCode, wu) //console.log(p)
   let leadPhoto = p.photos[0];
   let photoUrl = (!leadPhoto ? "" : leadPhoto.small.url).replace(
-    "wucolsplants.sf.ucdavis.edu",
+    "wucolsplants.ucdavis.edu",
     "wucols-proxy.azurewebsites.net"
   );
   //console.log({ leadPhoto, photoUrl });

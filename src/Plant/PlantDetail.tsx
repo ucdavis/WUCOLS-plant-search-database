@@ -10,8 +10,10 @@ import {
   BenchCardTemplate,
   Plant,
   Region,
+  SearchCriteria,
   WaterUseClassification,
 } from "../types";
+import SearchCriteriaConverter from "../Search/search-criteria-converter";
 
 interface Props {
   plant: Plant;
@@ -22,6 +24,7 @@ interface Props {
   benchCardTemplates: BenchCardTemplate[];
   isPlantFavorite: (plant: Plant) => boolean;
   togglePlantFavorite: (plant: Plant) => void;
+  searchCriteria: SearchCriteria;
 }
 
 const PlantDetail = ({
@@ -33,6 +36,7 @@ const PlantDetail = ({
   benchCardTemplates,
   isPlantFavorite,
   togglePlantFavorite,
+  searchCriteria,
 }: Props) => {
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
@@ -53,6 +57,8 @@ const PlantDetail = ({
   const imageSize = "64px";
   let leadPhoto = plant.photos[0];
   let photoUrl = !leadPhoto ? "" : leadPhoto.small.url;
+  const qs = SearchCriteriaConverter.toQuerystring(searchCriteria);
+
 
   const webBenchCard = (
     <>
@@ -200,7 +206,7 @@ const PlantDetail = ({
                     <h4>{bct.name} Bench Card</h4>
                     <Link
                       key={bct.id}
-                      to={`/plant/${plant.id}/benchcard/${bct.id}`}
+                      to={`/plant/${plant.id}/benchcard/${bct.id}?${qs}`}
                       className="mt-3 btn btn-primary"
                       target="_blank"
                     >

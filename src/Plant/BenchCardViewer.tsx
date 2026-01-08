@@ -3,13 +3,14 @@ import { useParams } from "react-router-dom";
 import { PDFViewer } from "@react-pdf/renderer";
 import BenchCardDocument from "./BenchCardDocument";
 import { generateQrCodeDataUrl } from "./PlantDetailQrCode";
-import { Data } from "../types";
+import { Data, SearchCriteria } from "../types";
 
 interface BenchCardViewerProps {
   data: Data;
+  searchCriteria: SearchCriteria;
 }
 
-const BenchCardViewer = ({ data }: BenchCardViewerProps) => {
+const BenchCardViewer = ({ data, searchCriteria }: BenchCardViewerProps) => {
   const { plantId, templateId } = useParams();
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -94,10 +95,11 @@ const BenchCardViewer = ({ data }: BenchCardViewerProps) => {
       <PDFViewer style={{ width: "100%", height: "100%" }}>
         <BenchCardDocument
           plant={plant}
-          region={2} // Default to Central Valley region
+          region={searchCriteria.city ? searchCriteria.city.region : 2} // Default to Central Valley region
           waterUseByCode={data.waterUseByCode}
           benchCardTemplate={template}
           qrCodeDataUrl={qrCodeDataUrl}
+          regions={data.regions}
         />
       </PDFViewer>
     </div>

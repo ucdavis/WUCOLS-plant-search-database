@@ -180,6 +180,7 @@ const DownloadMenu = ({
 									region={searchCriteria.city.region}
 									waterUseByCode={data.waterUseByCode}
 									qrCodeDataUrl={qrCodeDataUrl}
+									regions={data.regions}
 								/>
 							).toBlob();
 

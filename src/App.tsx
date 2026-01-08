@@ -249,7 +249,7 @@ function App({ data }: Props) {
           <Route
             path="/plant/:plantId/benchcard/:templateId"
             element={
-              <BenchCardViewer data={data} />
+              <BenchCardViewer data={data} searchCriteria={searchCriteria} />
             }
           />
           <Route
@@ -333,6 +333,7 @@ const PlantDetailWrapper = ({
         togglePlantFavorite={togglePlantFavorite}
         isPlantFavorite={isPlantFavorite}
         regions={data.regions}
+        searchCriteria={searchCriteria}
       />
     </div>
   );

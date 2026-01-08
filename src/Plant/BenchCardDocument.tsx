@@ -11,6 +11,7 @@ import {
 import {
   BenchCardTemplate,
   Plant,
+  Region,
   WaterUseClassification,
   WaterUseCode,
 } from "../types";
@@ -143,6 +144,7 @@ interface BenchCardDocumentProps {
   waterUseByCode: { [key: string]: WaterUseClassification };
   benchCardTemplate: BenchCardTemplate;
   qrCodeDataUrl?: string;
+  regions: Region[];
 }
 
 const BenchCardDocument = ({
@@ -151,6 +153,7 @@ const BenchCardDocument = ({
   waterUseByCode,
   benchCardTemplate,
   qrCodeDataUrl,
+  regions
 }: BenchCardDocumentProps) => {
   const p = plant;
   // Only use the provided QR code data URL - don't fall back to sync method
@@ -178,6 +181,7 @@ const BenchCardDocument = ({
   const sizeInches = benchCardTemplate.sizeInInches;
   const sizePoints = { x: sizeInches.x * 72, y: sizeInches.y * 72 };
   const logoStyle = { height: `${sizeInches.y / 5}in`, width: "auto" };
+  const regionName = regions.find(r => r.id == region)?.name || 'Unknown'; // loose match because region.id is actually a string
 
   return (
     <Document>
@@ -261,8 +265,8 @@ const BenchCardDocument = ({
                   <WaterDropRating waterUseCode={wu.code} />
                 </View>
                 <View style={{ paddingVertical: "1pt" }}>
-                  <Text style={{ fontSize: `${sizeInches.x / 11 / 4.5}in` }}>Central Valley</Text>
-                  <Text style={{ fontSize: `${sizeInches.x / 11 / 5}in` }}>(WUCOLS Region 2)</Text>
+                  <Text style={{ fontSize: `${sizeInches.x / 11 / 4.5}in` }}>{regionName}</Text>
+                  <Text style={{ fontSize: `${sizeInches.x / 11 / 5}in` }}>(WUCOLS Region {region})</Text>
                 </View>
                 <Text style={{ fontSize: `${sizeInches.x / 11 / 6}in` }}>(Source: WUCOLS IV)</Text>
               </View>
